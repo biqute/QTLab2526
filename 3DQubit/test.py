@@ -66,8 +66,8 @@ data_to_save = np.column_stack((x_values, y_values))
 np.savetxt('dati_s11.txt', data_to_save, header='Frequenza (Hz)\tS11 (dB)', fmt='%.6e', delimiter='\t')
 
 fig, ax = plt.subplots()
-ax.set_xlabel("Frequency (GHz)")
-ax.set_ylabel("S11 Power in dB)")
+ax.set_xlabel(r"$f$(GHz)")
+ax.set_ylabel(r"$S11$ Power in dB)")
 ax.plot(x_values,y_values)
 plt.show()  
     
