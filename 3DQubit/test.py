@@ -2,6 +2,11 @@ import pyvisa
 import numpy as np
 import matplotlib.pyplot as plt
 
+# This makes your plot look like latex. Great for writing papers!
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
 
 VNA_IP = "193.206.156.99"
 
