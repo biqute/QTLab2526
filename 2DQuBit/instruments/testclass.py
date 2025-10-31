@@ -1,7 +1,6 @@
 import numpy as np
 import pyvisa
-from SDG import SDG
+from class_vna import VNA
 
-test_frequenza = SDG(ip_address ='192.168.40.15') #pass the ip as a string
-a = test_frequenza.get_value(1, 'peri')
-print(a)
+my_class = VNA(ip_address ='193.206.156.99') #pass the ip as a string
+print(my_class.set_points(1000))
