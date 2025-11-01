@@ -25,16 +25,14 @@ vna.write("SENS:FREQ:START 1e9")  # Frequenza di inizio: 1 GHz
 vna.write("SENS:FREQ:STOP 2e9")   # Frequenza di fine: 2 GHz
 vna.write("SENS:SWE:POIN 10")     # Numero di punti di sweep: 10
 
-# ============================
 # Misura S11
-# ============================
 vna.write("CALC:PAR:DEF 'S11',S11")  # Impostazione di S11
 vna.write("CALC:PAR:SEL 'S11'")      # Selezione di S11
 vna.write("CALC:FORM REAL,IMAG")    # Re + Im
-vna.write("INIT:IMM")                # Inizia la misura di S11
-vna.query("*OPC?")                   # Attende la fine della misura S11
+vna.write("INIT:IMM")
+vna.query("*OPC?")  # blocca finché sweep finito
 
-# Leggi i dati S11
+# Leggi i dati S11: primi 10 punti
 data_s11 = vna.query_ascii_values("CALC:DATA:SDAT?")
 print("Raw S11 data returned:", data_s11)
 
@@ -45,16 +43,14 @@ for i in range(10):
     phase = np.angle(s11_point, deg=True)       # Calcolo della fase in gradi
     print(f"S11 Punto {i+1}: {s11_point} | Amp: {amplitude:.2f} dB | Phase: {phase:.2f}°")
 
-# ============================
 # Misura S21
-# ============================
 vna.write("CALC:PAR:DEF 'S21',S21")  # Impostazione di S21
 vna.write("CALC:PAR:SEL 'S21'")      # Selezione di S21
 vna.write("CALC:FORM REAL,IMAG")     # Re + Im
-vna.write("INIT:IMM")                # Inizia la misura di S21
-vna.query("*OPC?")                   # Attende la fine della misura S21
+vna.write("INIT:IMM")
+vna.query("*OPC?")  # blocca finché sweep finito
 
-# Leggi i dati S21
+# Leggi i dati S21: primi 10 punti
 data_s21 = vna.query_ascii_values("CALC:DATA:SDAT?")
 print("Raw S21 data returned:", data_s21)
 

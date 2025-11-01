@@ -1,0 +1,26 @@
+*IDN? → restituisce l’identificazione dello strumento (produttore, modello, numero di serie, versione firmware) 
+int.siglent.com
++1
+
+*OPC? → restituisce “1” quando l’operazione precedente è completata. 
+int.siglent.com
+
+SYSTem:COMMunicate:LAN:IP? → (esempio) legge l’indirizzo IP della porta LAN. (Il manuale indica comandi di rete)
+
+SOURce<CH>:WAVeform? → legge quale forma d’onda è selezionata sul canale <CH> (esempio CH1 o CH2)
+
+SOURce<CH>:FREQuency? → legge la frequenza impostata sul canale <CH>
+
+SOURce<CH>:VOLTage? → legge l’ampiezza impostata sul canale <CH>
+
+SOURce<CH>:OFFSet? → legge l’offset di tensione impostato sul canale <CH>
+
+OUTPut<CH>:STATe? → legge se l’uscita del canale <CH> è attiva o meno
+
+MEMory:WAVeform:COUNT? → (esempio) query sul numero di forme d’onda definite nella memoria (dipende se il modello supporta)
+
+TRIGger:COUNt? → legge il numero di trigger impostato (se applicabile in burst/sweep)
+
+HARMonic:STATe? → legge se la funzione armonica è attiva o meno
+
+SWEEP:TIME? → legge il tempo di sweep configurato
