@@ -19,8 +19,11 @@ frequencies = data['0']['freq']
 signal = np.abs(data['0']['signal'])
 phase = np.unwrap(data['0']['phase'])
 
-real_S21 = signal * np.cos(-phase)
-imag_S21 = signal * np.sin(-phase)
+phase = np.deg2rad(phase)
+print("min =", np.min(phase), "max =", np.max(phase))
+
+real_S21 = signal * np.cos(phase)
+imag_S21 = signal * np.sin(phase)
 
 x, y = real_S21, imag_S21
 z = x*x + y*y  # z = x^2 + y^2
