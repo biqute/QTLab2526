@@ -18,9 +18,9 @@ data = np.load("data.npz")
 frequencies = data['0']['freq']
 signal = np.abs(data['0']['signal'])
 phase = np.unwrap(data['0']['phase'])
+  
 
-phase = np.deg2rad(phase)
-print("min =", np.min(phase), "max =", np.max(phase))
+#print("min =", np.min(phase), "max =", np.max(phase)) used to check if deg or rad
 
 real_S21 = signal * np.cos(phase)
 imag_S21 = signal * np.sin(phase)
