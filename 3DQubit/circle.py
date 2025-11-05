@@ -64,14 +64,14 @@ print("Found smallest eigenvalue:", eta0)
 
 #--Finding corresponding eigenvector--
 D = M - eta0 * B
-A = null_space(D)         # columns span the null space
-a = A[:, 0]               # take one eigenvector
+A = null_space(D)         #Returns the whole eigenspace of eta0
+a = A[:, 0]               #By construction there is only one, safety check passed
 a = a  
 
 alpha = a @ B @ a
 
 if alpha ==0 :
-    raise ZeroDivisionError("Sorry fam can't normalize it")
+    raise ZeroDivisionError(" A^T B A = 0 -> Can't normalize")
 
 a /= np.sqrt(alpha) # normalize it respct to B
 
@@ -79,7 +79,7 @@ a /= np.sqrt(alpha) # normalize it respct to B
 
 A0, B0, C0, D0 = a
 if A0 == 0:
-    raise ZeroDivisionError("Sorry fam a[0] = 0")
+    raise ZeroDivisionError("A = 0 -> r_0 can't be computed")
 
 x_c = -0.5 * B0 / A0
 y_c = -0.5 * C0 / A0
@@ -116,7 +116,7 @@ ax_iq.set_aspect('equal', 'box')
 ax_iq.set_xlabel(r"$\Re\{S_{21}\}$")          
 ax_iq.set_ylabel(r"$\Im\{S_{21}\}$")          
 ax_iq.legend(loc='best')
-ax_iq.set_title(r"I–Q Plot")
+ax_iq.set_title(r"I-Q Plot")
 
 ax_mag.plot(frequencies/1e9, signal, '-', lw=1)
 ax_mag.set_xlabel(r"$f[GHz]$")
