@@ -1,5 +1,3 @@
-# circle_fit.py
-
 import numpy as np
 from scipy import optimize
 from scipy.linalg import null_space
@@ -95,3 +93,21 @@ class CircleFitter:
 
     def fit_from_complex(self, s):
         return self.fit(s.real, s.imag)
+
+    def residuals_tau(self, freqs: np.ndarray, S_raw: np.ndarray, tau_guess: float) -> np.ndarray:
+        """
+        Return residual vector r_i = [(x_i-xc)^2+(y_i-yc)^2] - r^2
+        to pass to LSM
+        """
+        # remove delay using initial tau_guess 
+        S_calibrated = S_raw * np.exp(+1j * 2*np.pi * tau_guess * freqs)
+
+        # fit circle on corrected data
+        x_c, y_c, r = self.fit_from_complex(S_calibrated)
+
+        # radial-squared per point minus r^2
+        x, y = S_calibrated.real, S_calibrated.imag
+        d2 = (x - x_c)**2 + (y - y_c)**2
+        
+        return r**2 - d2
+
