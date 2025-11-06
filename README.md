@@ -50,21 +50,21 @@ $ git clone https://github.com/biqute/QTLab2526.git
     </tr>
     <tr>
         <td>Riccardo</td>
-        <td>Marega</td>
-        <td><a href="mailto:r.marega@campus.unimib.it">r.marega@campus.unimib.it</a></td>
+        <td>Moro</td>
+        <td><a href="mailto:r.marega@campus.unimib.it">r.moro4@campus.unimib.it</a></td>
     </tr>
     <tr>
-        <td>Edoardo Emil</td>
-        <td>Riva</td>
-        <td><a href="mailto:e.riva59@campus.unimib.it">e.riva59@campus.unimib.it</a></td>
+        <td>Gabriele</td>
+        <td>Montalti</td>
+        <td><a href="mailto:e.riva59@campus.unimib.it">g.montalti@campus.unimib.it</a></td>
     </tr>
     <tr>
-        <td>Davide</td>
-        <td>Zanin</td>
-        <td><a href="mailto:d.zanin2@campus.unimib.it">d.zanin2@campus.unimib.it</a></td>
+        <td>Alessandro</td>
+        <td>Malfasi</td>
+        <td><a href="mailto:d.zanin2@campus.unimib.it">a.malfasi@campus.unimib.it</a></td>
     </tr>
     <tr>
-    <td colspan="3"><b>IRdetection</b></td>
+    <td colspan="3"><b>2Dqubit</b></td>
     </tr>
     <tr>
         <td><b>Nome</b></td>
@@ -72,24 +72,24 @@ $ git clone https://github.com/biqute/QTLab2526.git
         <td><b>Mail</b></td>
     </tr>
     <tr>
-        <td>Domenico</td>
-        <td>Volpe</td>
-        <td><a href="d.volpe2@campus.unimib.it">d.volpe2@campus.unimib.it</a></td>
+        <td>Giulio</td>
+        <td>Bertagnoli</td>
+        <td><a href="d.volpe2@campus.unimib.it">g.bertagnoli@campus.unimib.it</a></td>
     </tr>
     <tr>
-        <td>Davide</td>
-        <td>Ferioli</td>
-        <td><a href="d.ferioli2@campus.unimib.it">d.ferioli2@campus.unimib.it</a></td>
-    </tr>
-    <tr>
-        <td>Giovanni</td>
-        <td>Laganà</td>        
-        <td><a href="g.lagana2@campus.unimib.it">g.lagana2@campus.unimib.it</a></td>
+        <td>Gaia</td>
+        <td>Colombo</td>
+        <td><a href="d.ferioli2@campus.unimib.it">g.colombo175@campus.unimib.it</a></td>
     </tr>
     <tr>
         <td>Alessandro</td>
-        <td>Rocchi</td>
-        <td><a href="a.rocchi12@campus.unimib.it">a.rocchi12@campus.unimib.it</a></td>
+        <td>Varsi</td>        
+        <td><a href="g.lagana2@campus.unimib.it">a.varsi1@campus.unimib.it</a></td>
+    </tr>
+    <tr>
+        <td>Gioele</td>
+        <td>Contiero</td>
+        <td><a href="a.rocchi12@campus.unimib.it">g.contiero@campus.unimib.it</a></td>
         <td></td>
     </tr>
 </table>
