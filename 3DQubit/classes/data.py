@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from iminuit import Minuit
-from iminuit.cost import LeastSquares
+#from iminuit import Minuit
+#from iminuit.cost import LeastSquares  #Perchè???
 import os
 
 class Data :
