@@ -1,6 +1,6 @@
 import numpy as np
 import pyvisa as pyvisa
-import matplotlib.pyplot as plt  # <-- IMPORTAZIONE AGGIUNTA
+import matplotlib.pyplot as plt 
 import os
 from data import Data
 
@@ -24,6 +24,8 @@ class VNA():
         self._VNA.write("CALC:PAR:DEF 'Trc1', 'S21'")
         self._VNA.write("DISP:WIND:TRAC1:FEED 'Trc1'")
         print("VNA inizializzato e configurato per S21 su Traccia 1.")
+        
+        self.average = 1
 
     def get_IDN(self):
         a = self._VNA.query("*IDN?")
@@ -75,6 +77,14 @@ class VNA():
     def get_dbm(self) :
         Pow = self.get_power()
         return np.array(10*np.log10(Pow))
+    
+    def set_average(self, n) :
+        """Set the number of averages (1 = no averages)"""
+        self._VNA.write(f"AVER:COUN {n}")
+        self.average = n
+
+        if int(self._VNA.query("AVER:COUN?")) != n: 
+            raise Exception(f"Could not set 'avg_count' to {n}.")
     
     def get_freq(self) :
         # Comando SCPI più standard per l'asse X (frequenza)
