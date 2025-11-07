@@ -15,7 +15,6 @@ $ git clone https://github.com/biqute/QTLab2526.git
 
 ### Students
 
-
 <table style="width:100%">
     <tr>
         <td colspan="3"><b>Single_Photon</b></td>
