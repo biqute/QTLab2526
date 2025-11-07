@@ -3,7 +3,8 @@ from VNA import VNA
 import matplotlib.pyplot as plt
 import numpy as np
     
-ip = "192.168.1.100"
+ip = "193.206.156.99"
+
 f_min = 4e9
 f_max = 4.19e9
 npoints = 401
