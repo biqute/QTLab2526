@@ -6,7 +6,7 @@ import os
 
 # ==============================
 # Funzione S21 con notch
-# ==============================
+# ============================== 
 def s21_notch(f, a, alpha, tau, Ql, Qc, phi, fr):
     """
     Parametri:
