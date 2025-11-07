@@ -61,12 +61,12 @@ $ git clone https://github.com/biqute/QTLab2526.git
     <tr>
         <td>Gioele</td>
         <td>Contiero</td>
-        <td><a href="mailto:g.contiero@campus.unimib.it">a.malfasi@campus.unimib.it</a></td>
+        <td><a href="mailto:g.contiero@campus.unimib.it">g.contiero@campus.unimib.it</a></td>
     </tr>
         <tr>
         <td>Cecilia Katharina</td>
         <td>Krach</td>
-        <td><a href="mailto:c.krach@campus.unimib.it">a.malfasi@campus.unimib.it</a></td>
+        <td><a href="mailto:c.krach@campus.unimib.it">c.krach@campus.unimib.it</a></td>
     </tr>
     <tr>
     <td colspan="3"><b>3Dqubit</b></td>
@@ -94,7 +94,7 @@ $ git clone https://github.com/biqute/QTLab2526.git
     <tr>
         <td>Alessandro</td>
         <td>Malfasi</td>
-        <td><a href="a.malfasi@campus.unimib.it">g.contiero@campus.unimib.it</a></td>
+        <td><a href="a.malfasi@campus.unimib.it">a.malfasi@campus.unimib.it</a></td>
         <td></td>
     </tr>
 </table>
