@@ -3,14 +3,13 @@ import pyvisa
 import re
 
 
-# ----------------------------- WAVEFORM GENERATOR ---------------------------------
-
-class SDG() :
+class SDG_new() :
     def __init__(self, ip_address) :
         
         rm = pyvisa.ResourceManager ()
         self._SDG = rm.open_resource("TCPIP0::"+ip_address+"::inst0::INSTR")
         print('for all function the parameter order is ch, f, amp, phase, off')
+
     def set_freq(self, ch, f) :
 
         self._SDG.write(f'C{ch}'+f":BSWV FRQ,{f}")
@@ -37,7 +36,7 @@ class SDG() :
     
     def set_all(self, ch, f, amp, phase, off) :
 
-        self._SDG.write(f'C{ch}'+f":BSWV FREQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
+        self._SDG.write(f'C{ch}'+f":BSWV FRQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
 
     def get_IDN(self) :
 
@@ -78,63 +77,25 @@ class SDG() :
                 print("Risposta ricevuta:", response)
             return None
         
-# ----------------------------- VECTOR NETWORK ANALYSER ---------------------------------
-
-class VNA():
-    def __init__(self, ip_address) :
-        
-        rm = pv.ResourceManager ()
-        self._VNA = rm.open_resource("TCPIP0::"+ip_address+"::inst0::INSTR")
-        self._VNA.write("*CLS")
-        VNA =self._VNA.query("INST:SEL 'NA'; *OPC?")
-        if VNA[0] != '1': raise Exception("Failed to select NA mode")
-
-
-    def get_IDN(self):
-        a = self._VNA.query("*IDN?") 
-        print(a)
     
-    def set_freq_minmax (self, min, max) :
-        self._VNA.write(f'FREQ:STAR {min}')
-        self._VNA.write(f'FREQ:STOP {max}')
-
-        return self._VNA.query("*OPC?")
-
-    def set_freq_center (self, center, span) :
-        self._VNA.write(f'FREQ:CENT {center}')
-        self._VNA.write(f'FREQ:SPAN {span}')
-
-        return self._VNA.query("*OPC?")
-
-    def set_points (self, num):
-        if num<10000 :
-            self._VNA.write(f'SWE:POIN {num}')
-        else :
-            raise ValueError("The number of points must be lower than 10000")
+    def modulation(self, value):
+        """Turn ON and OFF the modulation"""
+        # AM = amplitude modulation, MDSP = modulation wave shape, ARB = arbitrary
+        if value == 'on':
+            self._SDG.write(f"C1:MDWV STATE,ON")
+            self._SDG.write(f"C1:MDWV AM")
+            self._SDG.write(f"C1:MDWV AM,SRC,INT")
+            self._SDG.write(f"C1:MDWV MDSP,ARB,INDEX,19")
+            print(self._SDG.query(f"*OPC?"))
+        elif value == 'off':
+            self._SDG.write(f"C1:MDWV STATE,OFF,AM,MDSP,ARB")
+        else:
+            raise ValueError("'value' parameter must be 'on' or 'off'")
         
-        return self._VNA.query("*OPC?")
+    def set_mod_all(self, ch, f, amp, phase, off) :
 
-    
-    def set_average (self, aver):
-        if aver<10000 :
-            self._VNA.write(f'AVER:COUN {aver}')
-        else :
-            raise ValueError("The average must be lower than 10000")
+        self._SDG.write(f'C{ch}'+f":BSWV FREQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
+
         
-        return self._VNA.query("*OPC?")
-        
-    def set_power (self, pow):
-        if pow<=3 :
-            self._VNA.write(f'SOUR:POW {pow}')
-        else :
-            raise ValueError("The source power must be lower than 3")
-        
-        return self._VNA.query("*OPC?")
-    
-    def set_sweep_time (self, time):
-        if time<=4 :
-            self._VNA.write(f'SWE:TIME {time}')
-        else :
-            raise ValueError("The sweep time must be lower than 4")
-        
-        return self._VNA.query("*OPC?")
+
+
