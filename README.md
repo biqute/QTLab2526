@@ -39,7 +39,6 @@ $ git clone https://github.com/biqute/QTLab2526.git
         <td>Orsi</td>
         <td><a href="mailto:s.orsi6@campus.unimib.it">s.orsi6@campus.unimib.it</a></td>
     </tr>
-
     <tr>
         <td colspan="3"><b>2Dqubit</b></td>
     </tr>
@@ -68,7 +67,6 @@ $ git clone https://github.com/biqute/QTLab2526.git
         <td>Moro</td>
         <td><a href="mailto:r.moro4@campus.unimib.it">r.moro4@campus.unimib.it</a></td>
     </tr>
-
     <tr>
         <td colspan="3"><b>3Dqubit</b></td>
     </tr>
