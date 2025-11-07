@@ -56,7 +56,7 @@ phase = phase[idx-1000:idx + 3000]
 frequencies = frequencies[idx-1000:idx+3000]
 
 
-S21 = signal * np.exp(1j * phase)*np.exp(-1j*2*np.pi*frequencies*TAU)
+S21 = signal * np.exp(1j * phase)
 
 # ---------------- Circle fit via CircleFitter ----------------
 

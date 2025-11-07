@@ -100,7 +100,7 @@ class CircleFitter:
         to pass to LSM
         """
         # remove delay using initial tau_guess 
-        S_calibrated = S_raw * np.exp(+1j * 2*np.pi * tau_guess * freqs)
+        S_calibrated = S_raw * np.exp(-1j * 2*np.pi * tau_guess * freqs)
 
         # fit circle on corrected data
         x_c, y_c, r = self.fit_from_complex(S_calibrated)
@@ -108,6 +108,6 @@ class CircleFitter:
         # radial-squared per point minus r^2
         x, y = S_calibrated.real, S_calibrated.imag
         d2 = (x - x_c)**2 + (y - y_c)**2
-        
+
         return r**2 - d2
 
