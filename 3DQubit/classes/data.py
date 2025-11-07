@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from iminuit import Minuit
-from iminuit.cost import LeastSquares
+#from iminuit import Minuit
+#from iminuit.cost import LeastSquares  #Perchè???
 import os
 
 class Data :
@@ -48,22 +48,43 @@ class Data :
             return False
         
 
-    def plot (self, x= None, y= None, Title="Spectrum", Nome_x="Frequency [Hz]", Nome_y="Amplitude [dBm]") :
+    def plot(self, file=None, x=None, y=None, 
+             Title="Spectrum", Nome_x="Frequency [Hz]", Nome_y="Amplitude [dBm]",
+             save_as=None):
+
+        if file is not None:
+            risultato = Data.read_txt(file)
+            if risultato is None:
+                print("Errore nella lettura del file, impossibile plottare.")
+                return
+            # unpack in base a quante colonne
+            x, y, *z = risultato  # z è una lista vuota se non c'è la terza colonna
 
         if x is None:
             x = self.x
-
         if y is None:
             y = self.y
 
-        fig, ax = plt.subplots ( nrows=1, ncols=1)
-        plt.title(f"{Title}")
-        plt.xlabel(f"{Nome_x}")
-        plt.ylabel(f"{Nome_y}")
-        plt.plot(x, y)
+        if len(x) == 0 or len(y) == 0:
+            print("Nessun dato disponibile per il plot.")
+            return
+
+        # Disegno
+        fig, ax = plt.subplots()
+        ax.plot(x, y)
+        ax.set_title(Title)
+        ax.set_xlabel(Nome_x)
+        ax.set_ylabel(Nome_y)
+        
+        if save_as is not None:
+        # Se non viene specificata un’estensione, usa PDF di default
+            if not os.path.splitext(save_as)[1]:
+                save_as += ".pdf"
+            fig.savefig(f"../data0_plots/{save_as}", bbox_inches="tight")
+            print(f"Grafico salvato in ../data/{save_as}")
+        
         plt.show()
-    
-    
+
     @staticmethod
     def read_txt (nome) :
         try:

@@ -3,6 +3,7 @@ import pyvisa
 import csv
 from VNA_class import VNA
 
+#193.206.156.99
 # Crea un'istanza del VNA con l'indirizzo IP del dispositivo
 test_frequenza = VNA(ip_address_string='193.206.156.99')
 
