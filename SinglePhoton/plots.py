@@ -22,7 +22,7 @@ def leggi_sij_dati(sij):
     s_data = test_frequenza.read_data(sij)
     s_real = s_data["real"]
     s_imag = s_data["imag"]
-    s_magnitude = np.sqrt(np.array(s_real)**2 + np.array(s_imag)**2)
+    s_magnitude = 10*np.log(np.sqrt(np.array(s_real)**2 + np.array(s_imag)**2))
     s_phase = np.arctan2(np.array(s_imag), np.array(s_real))
     s_phase_unwrapped = np.unwrap(s_phase)
     return s_real, s_imag, s_magnitude, s_phase_unwrapped,

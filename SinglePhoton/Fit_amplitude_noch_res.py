@@ -58,9 +58,9 @@ else:
     # ==============================
     a_init = np.max(ampiezze)
     alpha_init = 0.0
-    tau_init = 0.0
-    Ql_init = 1000.0
-    Qc_init = 1000.0
+    tau_init = 5e-9
+    Ql_init = 400.0
+    Qc_init = 5000.0
     phi_init = 0.0
     fr_init = frequenze[np.argmax(ampiezze)]
 
@@ -70,7 +70,19 @@ else:
     # Fit S21 notch
     # ==============================
     try:
-        params, covariance = curve_fit(s21_notch, frequenze, ampiezze, p0=p0, maxfev=10000)
+        
+        bounds_lower = [0, -np.inf, 0,     0,     0,    -np.pi, np.min(frequenze)]  # tau >= 0
+        bounds_upper = [np.inf, np.inf, np.inf, np.inf, np.inf, np.pi, np.max(frequenze)]
+
+        params, covariance = curve_fit(
+        s21_notch,
+        frequenze,
+        ampiezze,
+        p0=p0,
+        bounds=(bounds_lower, bounds_upper),
+        maxfev=10000
+)
+        
         a_opt, alpha_opt, tau_opt, Ql_opt, Qc_opt, phi_opt, fr_opt = params
         perr = np.sqrt(np.diag(covariance))
 
@@ -110,7 +122,12 @@ else:
 
         plt.xlabel('Frequenza (Hz)')
         plt.ylabel('Ampiezza')
-        plt.title('Fit S21 Notch dei Dati')
+        plt.title(
+            r"$S_{21}(f) = a e^{i\alpha} e^{-2 \pi i f \tau}$"
+            r"$\left(\frac{1 - (Q_l / |Q_c|) e^{i \phi}}{1 + 2 i Q_l \left(\frac{f}{f_r} - 1\right)}\right)$"
+            "\n",
+            fontsize=13
+        )
         plt.legend()
         plt.grid(True)
         plt.show()
