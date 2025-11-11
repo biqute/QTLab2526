@@ -35,13 +35,15 @@ class VNA(EthernetDevice):
         
         # Impostazioni iniziali
         self.timeout = 10e3
-        self.min_freq = 4.84e9
+        self.min_freq = 4e9
         self.max_freq = 6.4e9
         self.point_count = 1000
         self.bandwidth = 1000  # Hz
         self.avg_count = 50
         self.power = -1  # dBm
 
+        #self.min_freq = 4.84e9  PER VEDERE BENE RISONANZA
+        #self.max_freq = 6.4e9
     
     # MIN_FREQ
 
@@ -147,13 +149,18 @@ class VNA(EthernetDevice):
         self.write_expect("INIT:CONT 0")
         self.write_expect(f"CALC:PAR:DEF {Sij}") # Chose which data to read
 
-        for _ in range(self.avg_count): self.write_expect("INIT:IMMediate") # Trigger now
+        for i in range(self.avg_count):
+        # Stampa solo ogni 10 medie
+            if (i + 1) % 10 == 0 or i == 0 or i == self.avg_count - 1:
+                print(f"[INIT:IMMediate] 1  ← media {i+1}/{self.avg_count}")
+        self.write_expect("INIT:IMMediate")  # disattiva stampa interna se possibile
+
         
         data = np.array(list(map(float, self.query_expect("CALC:DATA:SDATA?", "Data readout failed.").split(","))))
         data_real = data[0::2] # all even entries 0,2,4,6,8
         data_imag = data[1::2] # all odd entries 1,3,5,7,9
 
-        self.write_expect("INIT:CONT 1")
+        self.write_expect("INIT:IMMediate")
 
         return {"real": data_real, "imag": data_imag}
     

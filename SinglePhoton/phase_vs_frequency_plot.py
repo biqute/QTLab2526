@@ -30,6 +30,9 @@ print(f"Selezionato: {sij}")
 # ==============================
 # Lettura dei dati Sij
 # ==============================
+tau = 15e-9
+q = -609
+
 s_data = test_frequenza.read_data(sij)
 s_real = np.array(s_data["real"])
 s_imag = np.array(s_data["imag"])
@@ -37,12 +40,14 @@ s_magnitude = np.sqrt(s_real**2 + s_imag**2)
 s_phase = np.arctan2(s_imag, s_real)
 s_phase_unwrapped = np.unwrap(s_phase)
 
+param = tau*frequenze + q
+
 # ==============================
 # Grafico: fase in funzione dell'ampiezza
 # ==============================
 # Traccia la fase del parametro scelto
 plt.figure(figsize=(10, 6))
-plt.plot(frequenze, s_phase_unwrapped, label=f"Fase {selezione}", color='orange')
+plt.plot(frequenze, s_phase_unwrapped/param, label=f"Fase {selezione}", color='orange')
 plt.xlabel('Frequenza (Hz)')
 plt.ylabel(f'Fase (radianti)')
 plt.title(f'Fase di S21 in funzione della frequenza')
