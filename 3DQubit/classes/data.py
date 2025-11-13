@@ -48,12 +48,12 @@ class Data :
             return False
         
 
-    def plot(self, file=None, x=None, y=None, 
+    def plot(self, input_file=None, x=None, y=None, 
              Title="Spectrum", Nome_x="Frequency [Hz]", Nome_y="Amplitude [dBm]",
              save_as=None):
 
         if file is not None:
-            risultato = Data.read_txt(file)
+            risultato = Data.read_txt(input_file)
             if risultato is None:
                 print("Errore nella lettura del file, impossibile plottare.")
                 return
