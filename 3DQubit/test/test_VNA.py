@@ -6,15 +6,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvisa
     
-ip = "193.206.156.99"
+ip = '193.206.156.99'
 
 f_min = 4.025e9
 f_max = 4.1e9
-npoints = 1001
-n = 10
+f_central = 4.05e9
+f_span = 0.05e9
+n_points = 801
+n_means = 10
+power = -15
+ifband = 1000
 data_file = "misura_S21"
 output_file = "risonanza_test"
-power = 0
+
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -26,17 +30,19 @@ try:
     vna.get_IDN()
 
     # 2. Configurazione della Misura
-    vna.set_freq_limits(min_freq=f_min, max_freq=f_max)
-    vna.set_power(power_dbm=power)
-    vna.set_sweep_points(num=npoints)
-    vna.set_average(n)
+    vna.set_freq_span(f_central, f_span)
+    vna.set_sweep_points(n_points)
+    vna.set_n_means(n_means)
+    vna.set_ifband(1000)
+    vna.set_power(power)
     
-    vna.save_data(Sij="S21", filename=data_file)
-    print("Misura completata.")
-    
-    d = Data()
-    d.plot(file=data_file, save_as=output_file+".pdf")  # legge ../data/misura_001.txt e lo plott
-    d.plot()
+    phi = vna.get_phase()
+    freq = vna.get_freq()
+    powe = vna.get_dbm()
+    I, Q = vna.get_S_parameters("S21")
+    data = Data()
+    data.plot(freq, powe)
+    data.plot(freq, phi)
 
 except pyvisa.errors.VisaIOError:
     print(f"\nERRORE: Impossibile connettersi al VNA ({ip}).")
