@@ -95,11 +95,11 @@ class VNA():
         if self.wait_for_opc():
             print(f"Numero di medie impostato correttamente a {n_means}.")
     
-    #def get_IDN(self):
-    #    a = self.__VNA.query("*IDN?")
-    #    print(a)
+    def get_IDN(self):
+        a = self.__VNA.query("*IDN?")
+        print(a)
         
-    def get_S_parameters(self, Sij):
+    def get_S_parameters(self, Sij="S21"):
         
         self.__VNA.write(f"CALC:PAR:DEF {Sij}")
         
@@ -128,24 +128,5 @@ class VNA():
         freq_str = self.__VNA.query("FREQ:DATA?")
         return list(map(float, freq_str.split(",")))
 
-    """def get_spectrum(self) :
-        print("Inizio acquisizione dati...")
-        fig, ax = plt.subplots()
-        
-        # Trigger singolo e attesa di completamento
-        self.__VNA.write("INIT:IMM; *WAI")
-        
-        freq = self.get_freq()
-        Pow = self.get_dbm()
-        print("Dati ricevuti. Plotting...")
-
-        plt.title("Spettro S21")
-        plt.xlabel("Frequenza [Hz]")
-        plt.ylabel("Ampiezza [dBm]")
-        ax.plot(freq, Pow)
-        plt.grid(True)
-        plt.show()
-
-        return self.__VNA.query("*OPC?") """
     
     
