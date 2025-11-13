@@ -35,11 +35,11 @@ class Data :
             self.vect = np.column_stack((self.x, self.y))
 
 
-    def save_txt (self, nome, commento="colonne x e y") :
+    def save_txt (self, file_to_save, commento="colonne x e y") :
         
         try :
 
-            np.savetxt(f"../data/{nome}.txt", self.vect, fmt="%.18g", newline="\n", delimiter="\t", header=commento)
+            np.savetxt(f"../data/{file_to_save}.txt", self.vect, fmt="%.18g", newline="\n", delimiter="\t", header=commento)
             return True
         
         except Exception as e :
@@ -48,20 +48,14 @@ class Data :
             return False
         
 
-    def plot(self, input_file=None, x=None, y=None, 
-             Title="Spectrum", Nome_x="Frequency [Hz]", Nome_y="Amplitude [dBm]",
-             save_as=None):
-
-        if file is not None:
-            risultato = Data.read_txt(input_file)
-            if risultato is None:
-                print("Errore nella lettura del file, impossibile plottare.")
-                return
-            # unpack in base a quante colonne
-            x, y, *z = risultato  # z è una lista vuota se non c'è la terza colonna
+    def fast_plot(self, x=None, y=None, 
+                Title="Title", 
+                x_title="x Title [x_units]", 
+                y_title="y Title [y_units]"):
 
         if x is None:
             x = self.x
+
         if y is None:
             y = self.y
 
@@ -71,29 +65,17 @@ class Data :
 
         # Disegno
         fig, ax = plt.subplots()
-        ax.plot(x, y)
         ax.set_title(Title)
-        ax.set_xlabel(Nome_x)
-        ax.set_ylabel(Nome_y)
-        
-        if save_as is not None:
-        # Se non viene specificata un’estensione, usa PDF di default
-            if not os.path.splitext(save_as)[1]:
-                save_as += ".pdf"
-            fig.savefig(f"../data0_plots/{save_as}", bbox_inches="tight")
-            print(f"Grafico salvato in ../data/{save_as}")
+        ax.set_xlabel(x_title)
+        ax.set_ylabel(y_title)
+        ax.plot(x, y)
         
         plt.show()
 
     @staticmethod
-    def read_txt (nome) :
+    def read_txt (file_to_read) :
         try:
-            data = np.loadtxt(f"../data/{nome}.txt", delimiter="\t")
-            
-            # Controlla quante colonne ci sono
-            if data.ndim == 1: # Caso sfortunato di una sola riga
-                data = data.reshape(1, -1)
-                
+            data = np.loadtxt(f"../data/{file_to_read}.txt", delimiter="\t")
             num_cols = data.shape[1]
             
             x = data[:, 0]
@@ -101,13 +83,23 @@ class Data :
             
             if num_cols >= 3:
                 z = data[:, 2]
-                print(f"Lette 3 colonne (x, y, z) da ../data/{nome}.txt")
+                print(f"Lette 3 colonne (x, y, z) da ../data/{file_to_read}.txt")
                 return x, y, z
             else:
-                print(f"Lette 2 colonne (x, y) da ../data/{nome}.txt")
+                print(f"Lette 2 colonne (x, y) da ../data/{file_to_read}.txt")
                 return x, y
 
         except Exception as e :
             print(f"Errore durante la lettura: {e}")
             return None, None, None # Restituisci tuple per il unpacking sicuro
+        
+    #def big_plot(file_to_read)
+    #    
+    #    data = read_txt(file_to_read)
+    #    f = data[:, 0]              # Frequenza
+    #    real = data[:, 1]
+    #    imag = data[:, 2]
+    #    phase = np.atan(imag/real)
+
+        
         
