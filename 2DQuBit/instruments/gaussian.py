@@ -85,7 +85,7 @@ class SDG_new() :
             self._SDG.write(f"C1:MDWV STATE,ON")
             self._SDG.write(f"C1:MDWV AM")
             self._SDG.write(f"C1:MDWV AM,SRC,INT")
-            self._SDG.write(f"C1:MDWV MDSP,ARB,INDEX,19")
+            self._SDG.write("C1:MDWV MDSP,SINE")
             print(self._SDG.query(f"*OPC?"))
         elif value == 'off':
             self._SDG.write(f"C1:MDWV STATE,OFF,AM,MDSP,ARB")
