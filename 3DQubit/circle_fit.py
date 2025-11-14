@@ -1,6 +1,7 @@
 import numpy as np
-from scipy import optimize
+from scipy import optimize 
 from scipy.linalg import null_space
+from scipy import stats
 
 class CircleFitter:
     """
@@ -68,7 +69,7 @@ class CircleFitter:
             raise ZeroDivisionError("A0 = 0 → r can't be computed")
         x_c = -0.5 * B0 / A0
         y_c = -0.5 * C0 / A0
-        r   = 0.5 / abs(A0)
+        r   = 0.5 *np.sqrt(B0*B0 + C0*C0 - 4.0*A0*D0) / abs(A0)
         return x_c, y_c, r
 
     def fit(self, x, y):
@@ -94,20 +95,63 @@ class CircleFitter:
     def fit_from_complex(self, s):
         return self.fit(s.real, s.imag)
 
-    def residuals_tau(self, freqs: np.ndarray, S_raw: np.ndarray, tau_guess: float) -> np.ndarray:
+
+
+    def residuals_tau(self, freqs: np.ndarray, S_raw: np.ndarray, circ: np.ndarray, tau_guess: float) -> np.ndarray:
         """
         Return residual vector r_i = [(x_i-xc)^2+(y_i-yc)^2] - r^2
         to pass to LSM
         """
         # remove delay using initial tau_guess 
-        S_calibrated = S_raw * np.exp(-1j * 2*np.pi * tau_guess * freqs)
+        S_calibrated = S_raw * np.exp(+1j * 2*np.pi * tau_guess * freqs)
 
-        # fit circle on corrected data
-        x_c, y_c, r = self.fit_from_complex(S_calibrated)
+        
+        x_c, y_c, r = circ
 
         # radial-squared per point minus r^2
         x, y = S_calibrated.real, S_calibrated.imag
         d2 = (x - x_c)**2 + (y - y_c)**2
 
-        return r**2 - d2
+        return np.sqrt(d2)-r
+
+    def guess_delay(self,f_data,z_data):
+        phase2 = np.unwrap(np.angle(z_data))
+        gradient, intercept, r_value, p_value, std_err = stats.linregress(f_data,phase2)
+        return gradient*(-1.)/(np.pi*2.)
+
+
+    def remove_cable_delay(self,f_data,z_data, delay):
+        return z_data*np.exp(+2j*np.pi*f_data*delay)
+
+    def fit_delay(self,f_data,z_data,delay=0.,maxiter=0):
+        def residuals(p,x,y):
+            phasedelay = p
+            z_data_temp = y*np.exp(1j*(2.*np.pi*phasedelay*x))
+            xc,yc,r0 = self.fit_from_complex(z_data_temp)
+            err = np.sqrt((z_data_temp.real-xc)**2+(z_data_temp.imag-yc)**2)-r0
+            return err
+        p_final = optimize.leastsq(residuals,delay,args=(f_data,z_data),maxfev=maxiter,ftol=1e-12,xtol=1e-12)
+        return p_final[0][0]
+
+
+    def canonize(self, f_data, z_data, scaling, rotation, delay):
+        z_data = 1/scaling * np.exp(-1j * rotation)*self.remove_cable_delay(f_data,z_data, delay)
+        return z_data
+
+    #def residuals_tau(self, freqs: np.ndarray, S_raw: np.ndarray, tau_guess: float) -> np.ndarray:
+        """
+        Return residual vector r_i = [(x_i-xc)^2+(y_i-yc)^2] - r^2
+        to pass to LSM
+        """
+        # remove delay using initial tau_guess 
+     #   S_calibrated = S_raw * np.exp(-1j * 2*np.pi * tau_guess * freqs)
+
+        # fit circle on corrected data
+     #   x_c, y_c, r = self.fit_from_complex(S_calibrated)
+
+        # radial-squared per point minus r^2
+     #   x, y = S_calibrated.real, S_calibrated.imag
+     #   d2 = (x - x_c)**2 + (y - y_c)**2
+
+      #  return np.sqrt(d2)-r
 

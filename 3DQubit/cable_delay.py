@@ -1,32 +1,42 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import stats
 
-TAU = 4.009328078880438e-05
+TAU =89.29e-09 + 400 * 1.0001000100010001e-07
 # This makes your plot look like latex. Great for writing papers!
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "Helvetica"
 })
 
+
+def guess_delay(f_data,z_data):
+        phase2 = np.unwrap(np.angle(z_data))
+        gradient, intercept, r_value, p_value, std_err = stats.linregress(f_data,phase2)
+        return gradient*(-1.)/(np.pi*2.)
 #N = 15000;
 
 # Carica i dati dal file
 data = np.load("data_2.npz")
 frequencies = data['0']['freq']
 signal = np.abs(data['0']['signal'])
-phase = np.unwrap(data['0']['phase'])
+phase = (data['0']['phase'])
 
-S21 = signal * np.exp(1j * phase)*np.exp(-1j* 2*np.pi * TAU* frequencies)
-phase = np.atan(S21.imag/S21.real)
+
+S21 = signal * np.exp(+1j * phase) 
+phase = np.unwrap(np.angle(S21)) 
 # Sintassi: np.polyfit(dati_x, dati_y, grado_del_polinomio)
 # L'output è un array di coefficienti [m, b]
-#coefficients = np.polyfit(frequencies, phase, 1)
+coefficients = np.polyfit(frequencies , phase, 1)
 
-#tau = coefficients[0]/(2*np.pi)/1e9
-#b_intercept = coefficients[1]
+tau = guess_delay(frequencies, S21)
+print("tau_guess:", tau)
+b_intercept = coefficients[1]
+T_B = 1/(frequencies.max()-frequencies.min())
+tau_true = tau 
 
-print("Fit Lineare (y = 2pi * tau x + b):")
-#print("tau :", tau)
+print("T_B:", T_B)
+print("tau :", tau)
 
 # --- 3. Creare la retta di fit per il grafico ---
 # np.poly1d è una comoda funzione che trasforma
@@ -38,7 +48,7 @@ print("Fit Lineare (y = 2pi * tau x + b):")
 
 # --- Grafico: Fase vs Frequenza ---
 plt.figure(figsize=(10, 5))
-plt.plot(frequencies, phase,
+plt.plot(S21.real, S21.imag,
          color='red',
          marker='.',         # Usa il 'punto' come marcatore
          linestyle='None',   # Non disegnare la linea che collega i punti
