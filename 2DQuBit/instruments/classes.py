@@ -1,5 +1,6 @@
 import numpy as np
 import pyvisa
+import re
 
 
 # ----------------------------- WAVEFORM GENERATOR ---------------------------------
@@ -64,8 +65,14 @@ class SDG() :
             parts = response.split(',')
             try:
                 value_index = parts.index(str) + 1
-                value = parts[value_index]
-                return value
+                value_um = parts[value_index]
+                match = re.match(r"([\d\.]+)\s*([a-zA-Zµμ]+)", value_um)
+
+                if match:
+                    value = float(match.group(1))
+                    unit = match.group(2)
+                    lista = [value, unit]
+                return lista
             except ValueError:
                 print("Parametro non ricevuto, verificare che sia tutto maiuscolo")
                 print("Risposta ricevuta:", response)
@@ -76,7 +83,7 @@ class SDG() :
 class VNA():
     def __init__(self, ip_address) :
         
-        rm = pv.ResourceManager ()
+        rm = pyvisa.ResourceManager ()
         self._VNA = rm.open_resource("TCPIP0::"+ip_address+"::inst0::INSTR")
         self._VNA.write("*CLS")
         VNA =self._VNA.query("INST:SEL 'NA'; *OPC?")
@@ -131,3 +138,59 @@ class VNA():
             raise ValueError("The sweep time must be lower than 4")
         
         return self._VNA.query("*OPC?")
+    
+
+# - - - - - - - - - - - - - - - - - OSCILLOSCOPE - - - - - - - - - - - - - 
+
+class TDS() :
+    def __init__(self, address) :
+        
+        rm = pyvisa.ResourceManager()
+        self._TDS = rm.open_resource("GPIB0::"+address+"::INSTR")  
+        self._TDS.write("*CLS")
+
+    def get_IDN(self):
+        return self._TDS.query("*IDN?")
+
+    def turn_on(self):
+        self._TDS.write("ALIAS:STATE ON")
+ 
+    def turn_off(self):
+        self._TDS.write(":CHAN1:DISP OFF")
+
+    def read_par (self, ch):
+        a = self._TDS.query(f'CH{ch}?')
+        return a
+    
+    def scale (self, ch, scale):
+        self._TDS.write(f'CH{ch}:SCAle {scale}')
+    
+    def res(self, ch, res):
+        if res == 50 or res == 1e6:
+            self._TDS.write(f'CH{ch}:TER {res}')
+        else: raise ValueError('The resistence must be 50  o 1M')
+    
+
+    def acquisition(self, ch, start, stop):
+        sc = self._TDS.query("HOR:SCA?")
+        sr = self._TDS.query("HORizontal:MAIn:SAMPLERate?")
+        #self._TDS.write('ACQuire:NUMSAMples 12000')
+        self._TDS.write(f'DAT:SOU CH{ch}')
+        self._TDS.write(f'DAT:ENC ASCI')
+        self._TDS.write(f'DAT:STAR {start}')
+        self._TDS.write(f'DAT:STOP {stop}')
+        data = self._TDS.query('CURV?')
+        parts = data.split(',')
+        data_array = np.array([float(parts[i]) for i in range (len(parts))])
+        return data_array, float(sr), float(sc)
+
+
+    #C:\Users\oper\labQT\Lab2025\2DQubit\QTLab2526\2DQuBit\instruments\speranza.txt'
+    
+    def set_acquire_state(self, state):
+    
+        if isinstance(state, str):
+            state = state.upper()
+        if state not in ['OFF','ON','RUN','STOP']:
+            raise ValueError("State must be 'OFF', 'ON', 'RUN', or 'STOP'")
+        self._TDS.write(f"ACQ:STATE {state}")
