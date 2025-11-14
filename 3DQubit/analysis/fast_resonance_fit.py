@@ -14,8 +14,10 @@ def lorentzian_power_tilt(f, A, f0, gamma, y0, m):
     return y0 + m*(f - f0) + A / (1 + 4*(f - f0)**2 / gamma**2)
 
 # === Lettura dati ===
-data_file = "misura_S21"
-save_as = "fast_resonance_plot"
+n_misura = "5"
+
+data_file = "misura_S21_" + n_misura
+save_as = "fast_resonance_plot_" + n_misura
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
 data = np.loadtxt("../data/"+data_file + ".txt", delimiter="\t")
@@ -48,10 +50,11 @@ perr = np.sqrt(np.diag(pcov)) # errors
 
 # conversione in GHz
 f0_fit_G = f0_fit/1e9 
+f0_err = perr[0]/1e9
 gamma_fit_G = gamma_fit/1e9
 quality_factor = f0_fit_G/gamma_fit_G
 
-print(f"f0 (centro) = {f0_fit_G:.5g} GHz")
+print(f"f0 (centro) = {f0_fit_G:.5g} +- {f0_err:.6g}GHz")
 print(f"Gamma (FWHM) = {gamma_fit_G:.5g} GHz")
 print(f"Quality factor = {quality_factor:.1g} GHz")
 
