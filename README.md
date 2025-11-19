@@ -21,6 +21,7 @@ echo NAME:
 git config user.name
 echo EMAIL:
 git config user.email
+```
 
 ### Git Login
 ```
