@@ -14,22 +14,23 @@ $ git clone https://github.com/biqute/QTLab2526.git
 ```
 
 ### Git Logout
-
+'''
 git config user.email "" --replace-all
 git config user.name "" --replace-all
 echo NAME:
 git config user.name
 echo EMAIL:
 git config user.email
-
+'''
 ### Git Login
-
+'''
 git config user.email "youremail" --replace-all
 git config user.name "yourusername" --replace-all
 echo NAME:
 git config user.name
 echo EMAIL:
 git config user.email
+'''
 
 ### Students
 
