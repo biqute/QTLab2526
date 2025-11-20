@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_phase_vs_frequency(filename):
+def plot_amp_vs_frequency(filename):
     # Prova prima con virgola, se fallisce usa qualunque separatore
     try:
         data = np.genfromtxt(filename, delimiter=",", skip_header=1)
@@ -11,17 +11,16 @@ def plot_phase_vs_frequency(filename):
         data = np.genfromtxt(filename, skip_header=1)  # auto-separa (spazi o tab)
 
     freq = data[:, 0]   # frequenze
-    phase = data[:, 4]  # fase
+    amp = data[:, 3]  # ampiezza
 
     plt.figure(figsize=(8,5))
-    plt.plot(freq, phase, '-', linewidth=1)
-    plt.xlabel("Frequenza (Hz)")
-    plt.ylabel("Fase (rad o deg)")
-    plt.title("Phase vs Frequency")
+    plt.plot(freq, amp, '-', linewidth=1)
+    plt.xlabel("Freq (Hz)")
+    plt.ylabel("Amplitude")
+    plt.title("Amp vs Frequency")
     plt.grid(True)
     plt.tight_layout()
     plt.show()
 
 if __name__ == "__main__":
-    plot_phase_vs_frequency("/Users/angelobassi/Desktop/QTLab2526/S21_data_50medie_hunger_corretto")  # <-- metti il tuo file
-
+    plot_amp_vs_frequency("/Users/angelobassi/Desktop/QTLab2526/S21_data_50medie_hunger_corretto") 
