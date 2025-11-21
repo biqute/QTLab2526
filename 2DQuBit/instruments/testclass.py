@@ -6,24 +6,26 @@ import matplotlib.pyplot as plt
 
 
 #my_vna = VNA(ip_address ='193.206.156.99') #pass the ip as a string
-'''
-my_sdg = SDG_new(ip_address ='193.206.156.10')
-my_sdg.set_formwave(1,'GAUS')
-my_sdg.modulation('on')
-my_sdg.set_all(1,10,5,0,0)
-print(my_sdg.get_value(1,'all'))'''
+
+my_sdg = SDG(ip_address ='193.206.156.10')
+#my_sdg.set_formwave(1,'SINE')
+#my_sdg.set_all(1, 4E3, 15, 0, 0)
+#my_sdg.set_mod_freq(1, 100)
+#my_sdg.modulation('on', 100)
+my_sdg.gaussian_pulse(1, 1000, 6, 0, 0, 100)
 
 tds = TDS('3')
 print(tds.get_IDN())
-tds.scale(ch = 1, scale = 2)
-tds.res(ch = 1, res = 1e6)
+
+
+
 sta = 0
 sto = 5000
-data_array, a, b= tds.acquisition(ch = 1, start = sta , stop = sto)
-print(a*b*10)
-print(data_array)
-print(data_array, a)
-x = np.linspace(0, (sto-sta)/a, len(data_array))
+X = tds.acquisition(ch = 1, start = sta , stop = sto)
+print(max(X['data']), min(X['data']))
+x = np.linspace(0, (sto-sta)/X['sample_rate'], len(X['data']))
+y = np.zeros(len(x))
 fig, ax = plt.subplots(figsize=(10,5))
-plt.plot(x, data_array)
+plt.plot(x, X['data'])
+plt.plot(x, y)
 plt.show()
