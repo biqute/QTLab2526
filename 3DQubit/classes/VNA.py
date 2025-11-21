@@ -14,7 +14,7 @@ class VNA():
         self.__VNA.write("*CLS") # Reset internal status and clear the error queue 
 
         VNA_mode = self.__VNA.write("INST:SEL 'NA'")
-        if VNA_mode[0] != '1': raise Exception("Failed to select NA mode")
+        #if VNA_mode[0] != '1': raise Exception("Failed to select NA mode")
         
         self.__VNA.write("AVER:MODE POINT") # Average mode set to sweep
         self.__VNA.write("DISP:WIND:TRAC1:Y:AUTO") # Turn on autoscaling on the y axis
@@ -103,6 +103,7 @@ class VNA():
         
         self.__VNA.write(f"CALC:PAR:DEF {Sij}")
         
+        #self.__VNA.wait
         # Dati formattati (Reale, Immaginario)
         data_str = self.__VNA.query("CALC:DATA:SDATA?")
         data = np.array(list(map(float, data_str.split(","))))

@@ -35,11 +35,15 @@ class Data :
             self.vect = np.column_stack((self.x, self.y))
 
 
-    def save_txt (self, file_to_save, commento="colonne x e y") :
+    def save_txt (self, file_to_save
+                  #, commento="colonne x e y"
+                  ) :
         
         try :
 
-            np.savetxt(f"../data/{file_to_save}.txt", self.vect, fmt="%.18g", newline="\n", delimiter="\t", header=commento)
+            np.savetxt(f"../data/{file_to_save}.txt", self.vect, fmt="%.18g", newline="\n", delimiter="\t"
+                       #, header=commento
+                       )
             return True
         
         except Exception as e :
