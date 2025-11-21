@@ -7,8 +7,8 @@ from data import Data
 
 SETTINGS = {
     "points": 400,
-    "min_freq": 4.6e9, # Hz
-    "max_freq": 5.6e9, # Hz
+    "min_freq": 4.9e9, # Hz
+    "max_freq": 5.2e9, # Hz
     "timeout": 10e3, # ms
 }
 
