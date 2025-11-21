@@ -78,23 +78,21 @@ class SDG_new() :
             return None
         
     
-    def modulation(self, value):
+    def modulation(self,f_m):
         """Turn ON and OFF the modulation"""
         # AM = amplitude modulation, MDSP = modulation wave shape, ARB = arbitrary
-        if value == 'on':
-            self._SDG.write(f"C1:MDWV STATE,ON")
-            self._SDG.write(f"C1:MDWV AM")
-            self._SDG.write(f"C1:MDWV AM,SRC,INT")
-            self._SDG.write("C1:MDWV MDSP,SINE")
-            print(self._SDG.query(f"*OPC?"))
-        elif value == 'off':
-            self._SDG.write(f"C1:MDWV STATE,OFF,AM,MDSP,ARB")
-        else:
-            raise ValueError("'value' parameter must be 'on' or 'off'")
-        
-    def set_mod_all(self, ch, f, amp, phase, off) :
+        self._SDG.write(f"C1:MDWV STATE,ON")
+        self._SDG.write(f"C1:MDWV AM")
+        self._SDG.write(f"C1:MDWV AM,SRC,INT")
+        self._SDG.write(f"C1:MDWV AM,FRQ,{f_m}")
+        self._SDG.write(f"C1:MDWV MDSP,ARB,INDEX,19")
+        print(self._SDG.query(f"*OPC?"))
+    
 
-        self._SDG.write(f'C{ch}'+f":BSWV FREQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
+    def gaussian_pulse(self, ch, f, amp, phase, off, f_m) :
+        SDG_new.set_all(self, ch, f, amp, phase, off)
+        SDG_new.set_formwave(self, ch, 'SINE')
+        SDG_new.modulation(self, f_m)
 
         
 

@@ -13,6 +13,7 @@ SETTINGS = {
 }
 
 ip = '193.206.156.99'
+file_to_save = "SynthData_data"
 
 myPSA = PSA(ip)
 
@@ -25,7 +26,7 @@ datay = myPSA.read_data()
 datax = np.linspace(SETTINGS["min_freq"],SETTINGS["max_freq"],SETTINGS["points"])
 
 d = Data(datax, datay)
-
+d.save_txt(file_to_save)
 
 d.fast_plot(datax, datay, 
                 Title="PSA data", 

@@ -37,7 +37,7 @@ class SDG() :
     
     def set_all(self, ch, f, amp, phase, off) :
 
-        self._SDG.write(f'C{ch}'+f":BSWV FREQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
+        self._SDG.write(f'C{ch}'+f":BSWV FRQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
 
     def get_IDN(self) :
 
@@ -77,7 +77,38 @@ class SDG() :
                 print("Parametro non ricevuto, verificare che sia tutto maiuscolo")
                 print("Risposta ricevuta:", response)
             return None
+    def turn_mod_off(self):
+        self._SDG.write(f"C1:MDWV STATE,OFF")
+
+    def burst(self):
+        self._SDG.write("C1:BTWV STATE,ON")
+        self._SDG.write("C1:BTWV GATE_NCYC,NCYC")
+        self._SDG.write("C1:BTWV TIME,1000")
+        self._SDG.write("C1:BTWV TRSR,MAN")
+        self._SDG.write(f'C1:BTWV MTRIG')
+        print(self._SDG.query(f"*OPC?"))
+
+
+
+    def modulation(self,f_m):
+        """Turn ON and OFF the modulation"""
+        # AM = amplitude modulation, MDSP = modulation wave shape, ARB = arbitrary
+        self._SDG.write(f"C1:MDWV STATE,ON")
+        self._SDG.write(f"C1:MDWV AM")
+        self._SDG.write(f"C1:MDWV AM,SRC,INT")
+        self._SDG.write(f"C1:MDWV AM,FRQ,{f_m}")
+        self._SDG.write(f"C1:MDWV MDSP,ARB,INDEX,19")
+        print(self._SDG.query(f"*OPC?"))
+    
+
+    def gaussian_pulse(self, ch, f, amp, phase, off, f_m) :
+        SDG.set_all(self, ch, f, amp, phase, off)
+        SDG.set_formwave(self, ch, 'SINE')
+        SDG.modulation(self, f_m)
+       # SDG.burst(self)
+       
         
+    
 # ----------------------------- VECTOR NETWORK ANALYSER ---------------------------------
 
 class VNA():
@@ -164,17 +195,25 @@ class TDS() :
     
     def scale (self, ch, scale):
         self._TDS.write(f'CH{ch}:SCAle {scale}')
+
+    def get_scale (self, ch):
+        return float(self._TDS.query(f'CH{ch}:SCAle?'))
     
     def res(self, ch, res):
         if res == 50 or res == 1e6:
             self._TDS.write(f'CH{ch}:TER {res}')
         else: raise ValueError('The resistence must be 50  o 1M')
     
+    def get_sample_rate(self):
+        return self._TDS.query('HORizontal:MAIn:SAMPLERate?')
+
+    def set_sample_rate(self, num):
+        self._TDS.write(f'HORizontal:MAIn:SAMPLERate {num}')
 
     def acquisition(self, ch, start, stop):
-        sc = self._TDS.query("HOR:SCA?")
-        sr = self._TDS.query("HORizontal:MAIn:SAMPLERate?")
-        #self._TDS.write('ACQuire:NUMSAMples 12000')
+        h_sc = self._TDS.query("HOR:SCA?")
+        Sr = self._TDS.query("HORizontal:MAIn:SAMPLERate?")
+        v_sc = float(self._TDS.query(f'CH{ch}:SCAle?'))
         self._TDS.write(f'DAT:SOU CH{ch}')
         self._TDS.write(f'DAT:ENC ASCI')
         self._TDS.write(f'DAT:STAR {start}')
@@ -182,7 +221,12 @@ class TDS() :
         data = self._TDS.query('CURV?')
         parts = data.split(',')
         data_array = np.array([float(parts[i]) for i in range (len(parts))])
-        return data_array, float(sr), float(sc)
+        rescaled_data = data_array*4*v_sc/100
+        result = dict(H_scale=float(h_sc), sample_rate = float(Sr), V_scale = float(v_sc), raw_data = data_array, data = rescaled_data)
+        return result
+    
+        
+
 
 
     #C:\Users\oper\labQT\Lab2025\2DQubit\QTLab2526\2DQuBit\instruments\speranza.txt'

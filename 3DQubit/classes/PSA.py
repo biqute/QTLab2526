@@ -16,6 +16,7 @@ class PSA:
         if res[0] != '1': raise Exception("Failed to select SA mode.")
         
         self.set_timeout(10e3)
+        self.__res.write("DISP:WIND:TRAC1:Y:AUTO")
 
     def set_timeout(self, millis):
         """
