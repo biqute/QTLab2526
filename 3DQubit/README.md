@@ -1,3 +1,5 @@
+## Ricordarsi di fare `git pull` ogni volta che accendiamo il pc
+
 # TO DO
 
 ## Cavity modes
