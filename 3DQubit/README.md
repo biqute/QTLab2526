@@ -13,3 +13,9 @@ Fare test al variare della shape. AWG può formare il segnale in modo rettangola
 2. Studiare attenuazione del segnale + leggere sul manuale del "Mini Circuits Splitter" come funziona la sua attenuazione
 3. Fare classe per oscilloscopio digitale (PicoScope)
 4. Infine, usare il mixer per vedere la down conversion tramite il digitalizer
+
+
+## Circle fit
+1. Aggiungere funzioni di fit a circle_fit
+2. Ottimizzare classe
+ 

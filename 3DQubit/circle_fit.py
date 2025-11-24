@@ -96,24 +96,6 @@ class CircleFitter:
         return self.fit(s.real, s.imag)
 
 
-
-    def residuals_tau(self, freqs: np.ndarray, S_raw: np.ndarray, circ: np.ndarray, tau_guess: float) -> np.ndarray:
-        """
-        Return residual vector r_i = [(x_i-xc)^2+(y_i-yc)^2] - r^2
-        to pass to LSM
-        """
-        # remove delay using initial tau_guess 
-        S_calibrated = S_raw * np.exp(+1j * 2*np.pi * tau_guess * freqs)
-
-        
-        x_c, y_c, r = circ
-
-        # radial-squared per point minus r^2
-        x, y = S_calibrated.real, S_calibrated.imag
-        d2 = (x - x_c)**2 + (y - y_c)**2
-
-        return np.sqrt(d2)-r
-
     def guess_delay(self,f_data,z_data):
         phase2 = np.unwrap(np.angle(z_data))
         gradient, intercept, r_value, p_value, std_err = stats.linregress(f_data,phase2)
@@ -130,7 +112,7 @@ class CircleFitter:
             xc,yc,r0 = self.fit_from_complex(z_data_temp)
             err = np.sqrt((z_data_temp.real-xc)**2+(z_data_temp.imag-yc)**2)-r0
             return err
-        p_final = optimize.leastsq(residuals,delay,args=(f_data,z_data),maxfev=maxiter,ftol=1e-12,xtol=1e-12)
+        p_final = optimize.leastsq(residuals,delay,args=(f_data,z_data),maxfev=10000,ftol=1e-15,xtol=1e-15)
         return p_final[0][0]
 
 

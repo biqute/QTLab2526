@@ -60,42 +60,17 @@ S21 = signal * np.exp(1j * phase)
 
 TAU = fitter.guess_delay(frequencies, S21)
 
+print("initial TAU guess:", TAU)
+
 S21_calibrated = fitter.remove_cable_delay(frequencies, S21, TAU)
 
 # ---------------- Circle fit via CircleFitter ----------------
-
-#circ = fitter.fit_from_complex(S21_calibrated)
-
-#res_circ = least_squares(
-  #  lambda t: fitter.residuals_tau(frequencies, S21, circ, t[0]),
- #   x0=[TAU],  method='trf',
- #   x_scale='jac',              # helps with the huge 2π f scale
-#    ftol=1e-12, xtol=1e-12, gtol=1e-12
-   # bounds=(1e-2*TAU, 1e2*TAU)
-#)
 
 tau_true = fitter.fit_delay(frequencies, S21_calibrated)
 
 print("true tau:", tau_true)
 
 S21_calibrated = fitter.remove_cable_delay(frequencies, S21_calibrated, tau_true)
-
-
-#---Checks---
-
-#print("x0:", TAU)
-#print("x*:", res_circ.x)            # fitted tau
-#print("nfev:", res_circ.nfev)       # number of residual evaluations
-#print("cost:", res_circ.cost)       # 0.5 * sum(residuals**2)
-#print("status:", res_circ.status)
-#print("message:", res_circ.message)
-#r = res_circ.fun
-#J = res_circ.jac
-#g = J.T @ r
-#print("||grad||_inf:", np.linalg.norm(g, ord=np.inf))  # small is good
-#print("reported optimality:", res_circ.optimality)
-
-
 
 #------Ideal circle-----
 x_c, y_c, r_0 = fitter.fit_from_complex(S21_calibrated)
@@ -192,6 +167,8 @@ Q_i_rev = 1/Q_r - Q_c_rev.real
 Q_i = 1/Q_i_rev
 
 print("Internal Quality Factor Q_i =", Q_i)
+print("absolute value |Qc|", abs(Q_c))
+print("phase of Qc (rad)", np.angle(Q_c))
 
 
 #---Performing complex fit now-----
@@ -203,13 +180,13 @@ abs_Qc = abs(Q_c)
 phase_Qc = np.angle(Q_c)
 
 
-p0 = [Q_r , abs_Qc, phase_Qc, f_r, a_scaling, alpha, tau_true] #params from circle fit
+p0 = [Q_r , abs_Qc, phase_Qc, f_r, a_scaling, alpha, TAU + tau_true] #params from circle fit
 
 # Bounds 
 lower = [1,   1e1,   -np.pi, frequencies.min() , 1e-2, -np.pi, -1e7]
 upper = [1e8 ,  1e8,   np.pi, frequencies.max(),  1e2,  np.pi,  1e7 ]
 
-popt, pcov = curve_fit(S21_notch_real, frequencies, ydata, p0=p0, bounds=(lower, upper))
+popt, pcov = curve_fit(S21_notch_real, frequencies, ydata, p0=p0, bounds=(lower, upper), maxfev = 10000)
 
 Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit = popt
 
@@ -226,8 +203,26 @@ print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", p
 print("cov matrix:", pcov)
 
 
-S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, TAU+tau_true) #/a_fit * np.exp(-1j* 2*np.pi*tau_fit*frequencies)*np.exp(-1j*alpha_fit)
+S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit) #/a_fit * np.exp(+1j* 2*np.pi*(TAU+tau_fit)*frequencies)*np.exp(-1j*alpha_fit)
 S_canonized = fitter.canonize(frequencies, S, a_fit, alpha_fit, TAU+tau_fit)
+
+
+#------Residuals-------
+
+residuals_mag = abs(S) - abs(S_fit)
+residuals_phase = np.unwrap(np.angle(S)) - np.unwrap(np.angle(S_fit))
+
+residuals = S - S_fit
+
+x = residuals.real
+y = residuals.imag
+data = np.column_stack([x, y])  # shape (N, 2)
+
+mean = data.mean(axis=0)        # [mean_x, mean_y]
+cov = np.cov(data, rowvar=False)  # 2x2 covariance matrix
+
+print ("res mean =", mean)
+print("res cov =", cov)
 
 #---Plot section----
 
@@ -264,16 +259,16 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(frequencies[::150]/1e9, signal[::150],marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
-ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
+ax_mag.plot(residuals.real[::50], residuals.imag[::50],marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+#ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
 ax_mag.set_xlabel(r"$f[GHz]$")
 ax_mag.set_ylabel(r"$|S_{21}|$")
 ax_mag.grid(True, alpha=0.3)
 ax_mag.set_title("Magnitude")
 
 #----Phase plot-------
-ax_phase.plot(frequencies[::200]/1e9, phase[::200], marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
-ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='arg(S_{21})')
+ax_phase.plot(frequencies[::200]/1e9, residuals_phase[::200], marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+#ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='arg(S_{21})')
 ax_phase.set_xlabel(r"$f [GHz]$")
 ax_phase.set_ylabel(r"$\phi [rad]$")
 ax_phase.grid(True, alpha=0.3)
