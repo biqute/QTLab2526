@@ -18,4 +18,10 @@ Fare test al variare della shape. AWG può formare il segnale in modo rettangola
 ## Circle fit
 1. Aggiungere funzioni di fit a circle_fit
 2. Ottimizzare classe
+
+## Caratterizzazione strumenti
+
+1. Caratterizzare cavi tramite VNA --> serve fittare il VNA per capire l'attenuazione dei diversi cavi in funzione della frequenza
+2. Caratterizzare gli attenuatori
+
  
