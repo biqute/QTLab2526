@@ -8,8 +8,8 @@ from scipy.optimize import curve_fit
 # --------------------------------------------------------
 data = pd.read_csv("synthetic_S21.csv")
 
-mask = (data["frequency"] <= 5.004e9) & (data["frequency"] >= 4.995e9)
-data = data[mask]
+#mask = (data["frequency"] <= 5.004e9) & (data["frequency"] >= 4.995e9)
+#data = data[mask]
 
 freq = data["frequency"].values
 S21_raw = data["Re(S21)"].values + 1j * data["Im(S21)"].values
@@ -49,12 +49,24 @@ def S21_probst(f, a, alpha, Ql, Qc_mag, phi, fr, tau):
 # Initial guesses (rough but sufficient)
 # --------------------------------------------------------
 a0      = 0.1
-alpha0  = 2.0
-Ql0     = 887
-Qc_mag0 = 0.5*Ql0/0.045
-phi0    = 0.067657
+alpha0  = 2.18
+Ql0     = 903
+Qc_mag0 = 9974
+phi0    = 0.3
 fr0     = 5e9
-tau0    = 2.83e-9   # 20 ns (rough guess)
+tau0    = 5.03e-9  
+
+
+#Parameters fitted
+# tau = 5.0295 ns
+# a = 0.1
+# alpha = 2.18 rad, 125 degrees
+
+# f_r = 5 GHz
+# Q_loaded = 903
+# Q_C = 9974
+# Q_internal = 991
+# phi = 17.15° or φ = 0.299 rad
 
 p0 = [a0, alpha0, Ql0, Qc_mag0, phi0, fr0, tau0]
 

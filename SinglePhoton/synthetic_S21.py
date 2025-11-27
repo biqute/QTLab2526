@@ -8,10 +8,10 @@ import pandas as pd
 Qc_mag = 1e3
 Qi = 1e4
 fr = 5e9                     # 5 GHz
-phi = 0.03 * np.pi           # phase of complex Qc
+phi = 0.0                  # phase of complex Qc 0.1 * np.pi
 tau = 5e-9                  # 50 ns
-a = 0.1                      # amplitude scaling
-alpha = 0.4 * np.pi          # overall phase shift (global)
+a = 1.0                      # amplitude scaling
+alpha = 0.0 * np.pi         # overall phase shift (global) 0.4 * np.pi 
 
 # Frequency sweep
 N = 2001
@@ -20,7 +20,9 @@ freqs = np.linspace(fr - span, fr + span, N)
 
 # Linear fit to determine slope of phase vs frequence requires off resonant data
 #freqs_delay = np.linspace(4.993e9, 5.01e9, N)
-freqs_delay = np.linspace(4.940e9, 5.10e9, N)
+
+freqs_delay = np.linspace(4.950e9, 5.14e9, N)
+#freqs_delay = np.linspace(4.90e9, 5.10e9, N)
 
 # -------------------------------------------------------
 # Compute Q_l and complex Q_c*
@@ -72,7 +74,7 @@ print("Saved synthetic data to synthetic_s21.csv")
 # -------------------------------------------------------
 plt.figure(figsize=(6,6))
 plt.plot(S21_noisy.real, S21_noisy.imag, '.', ms=2, label='Noisy')
-plt.plot(S21_clean.real, S21_clean.imag, '-', label='Clean')
+#plt.plot(S21_clean.real, S21_clean.imag, '-', label='Clean')
 plt.title("Synthetic Notch-Type S21 (Complex Plane)")
 plt.xlabel("Re(S21)")
 plt.ylabel("Im(S21)")
@@ -98,3 +100,16 @@ plt.grid(True)
 
 plt.tight_layout()
 plt.show()
+
+
+
+#PARAMETERS USED TO ILLUSTRATE BEST DOMAIN FOR CABLE FIT (ASYMMETRY CAUSED BY PHI)
+#Qc_mag = 1e3
+#Qi = 1e4
+#fr = 5e9                     # 5 GHz
+#phi = 0.1 * np.pi           # phase of complex Qc
+#tau = 5e-9                  # 50 ns
+#a = 0.1                      # amplitude scaling
+#alpha = 0.4 * np.pi          # overall phase shift (global)
+
+#freqs_delay = np.linspace(4.80e9, 5.20e9, N)

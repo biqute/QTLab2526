@@ -11,8 +11,8 @@ from scipy.optimize import curve_fit
 data = pd.read_csv("S21_no_delay.csv")
 
 # Keep only rows with frequency ≤ 5.005 GHz
-mask = data["frequency"] <= 5.004e9
-data = data[mask]
+#mask = data["frequency"] <= 5.004e9
+#data = data[mask]
 
 # Now extract frequency and S21
 freq = data["frequency"].values
@@ -22,9 +22,13 @@ theta = np.angle(S21)
 
 # If circle parameters are known already, define them here
 # (otherwise load from file or pass them explicitly)
-x_c = -0.01968961978867892
-y_c = 0.051204593472016384
-r0  = 0.04519242025029214
+x_c = -0.021780511582819996
+y_c = 0.05455076885607019
+r_0 = 0.04527254564185787
+
+a = 0.1
+P_angle = 2.18
+S21_scaled = S21/a
 
 # -------------------------------------------------------
 # Shift S21 so circle is centered at origin
@@ -40,8 +44,8 @@ theta_shifted = np.angle(S21_shifted)
 # Plot results
 # -------------------------------------------------------
 plt.figure(figsize=(6,6))
-plt.plot(S21.real, S21.imag, '.', ms=2, label='original')
-plt.plot(S21_shifted.real, S21_shifted.imag, '.', label='shifted')
+plt.plot(S21_scaled.real, S21_scaled.imag, '.', ms=2, label='scaled')
+plt.plot(S21.real, S21.imag, '.', label='original')
 plt.title("S21 shifted to the center (Complex Plane)")
 plt.xlabel("Re(S21)")
 plt.ylabel("Im(S21)")

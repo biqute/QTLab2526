@@ -105,3 +105,8 @@ plt.legend(loc="upper right")
 plt.tight_layout()
 plt.show()
 
+#Recently fitted parameters
+#x_c = -0.021780511582819996
+#y_c = 0.05455076885607019
+#r_0 = 0.04527254564185787
+#Estimated cable delay tau = 5.0295 ns

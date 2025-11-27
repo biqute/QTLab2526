@@ -40,8 +40,8 @@ def fit_circle_taubin(x, y):
 # ---------------------------------------------------------
 data = pd.read_csv("S21_no_delay.csv")
 
-mask = data["frequency"] <= 5.004e9
-data = data[mask]
+#mask = data["frequency"] <= 5.004e9
+#data = data[mask]
 
 S21 = data["Re(S21)"].values + 1j * data["Im(S21)"].values
 freq = data["frequency"].values
@@ -53,7 +53,7 @@ freq = data["frequency"].values
 #alpha = float(input("Enter global phase shift α (radians): "))
 
 a = 0.1
-alpha = 2.0
+alpha = 2.18
 
 S21_norm = S21 / (a * np.exp(1j * alpha))
 
@@ -73,8 +73,8 @@ print(f"r_0 = {r0}")
 
 # Compute φ
 phi = -np.arcsin(yc / r0)
-print(f"\nEstimated φ = {phi} radians")
-print(f"φ (in degrees) = {phi * 180/np.pi}°")
+print(f"\nEstimated φ = {phi} radians as compared to {0.1 * np.pi} radians")
+print(f"φ (in degrees) = {phi * 180/np.pi}° as compared to {18}°")
 
 # ---------------------------------------------------------
 # Prepare circle for plotting
@@ -108,3 +108,16 @@ plt.grid(True)
 plt.legend(loc="upper right")
 plt.tight_layout()
 plt.show()
+
+
+
+#Parameters fitted
+# tau = 5.0295 ns
+# a = 0.1
+# alpha = 2.18 rad, 125 degrees
+
+# f_r = 5 GHz
+# Q_loaded = 903
+# Q_C = 9974
+# Q_internal = 991
+# phi = 17.15° or φ = 0.299 rad
