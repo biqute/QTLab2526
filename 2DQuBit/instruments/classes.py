@@ -31,13 +31,16 @@ class SDG() :
 
         self._SDG.write(f'C{ch}'+f":BSWV OFST,{off}")
         
-    def set_formwave(self, ch, wtp) : #probably pass wtp as string
-
-        self._SDG.write(f'C{ch}'+":BSWV WVTP,"+wtp)
+    def set_formwave(self, ch, wtp, index = 0) : #probably pass wtp as string
+        if wtp == 'arb' or wtp == 'ARB':
+            self._SDG.write(f'C{ch}'+":BSWV WVTP,ARB")
+            self._SDG.write(f'C{ch}:ARbWaVe INDEX,{index}')
+        else: 
+            self._SDG.write(f'C{ch}'+":BSWV WVTP,"+wtp)
     
     def set_all(self, ch, f, amp, phase, off) :
 
-        self._SDG.write(f'C{ch}'+f":BSWV FRQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}')
+        self._SDG.write(f'C{ch}'+f":BSWV FRQ,{f},"+f'AMP,{amp},'+f'PHSE,{phase},'+f'OFST,{off}' )
 
     def get_IDN(self) :
 
@@ -77,23 +80,36 @@ class SDG() :
                 print("Parametro non ricevuto, verificare che sia tutto maiuscolo")
                 print("Risposta ricevuta:", response)
             return None
-    def turn_mod_off(self):
-        self._SDG.write(f"C1:MDWV STATE,OFF")
+        
+    def turn_mod_off(self, ch):
+        self._SDG.write(f"C{ch}:MDWV STATE,OFF")
 
-    def burst(self):
-        self._SDG.write("C1:BTWV STATE,ON")
-        self._SDG.write("C1:BTWV GATE_NCYC,NCYC")
-        self._SDG.write("C1:BTWV TIME,1000")
-        self._SDG.write("C1:BTWV TRSR,MAN")
-        self._SDG.write(f'C1:BTWV MTRIG')
+    def turn_mod_on(self, ch):
+        self._SDG.write(f"C{ch}:MDWV STATE,ON")
+
+    def set_burst(self, ch):
+        self._SDG.write(f"C{ch}:BTWV CARR,WVTP,SINE")
         print(self._SDG.query(f"*OPC?"))
 
+    def burst_on(self):
+        self._SDG.write(f"C1:BTWV STATE,OFF")
+        print(self._SDG.query(f"*OPC?"))
+        self._SDG.write(f"C1:BTWV TRSR,MAN")
+        self._SDG.write(f"C1:BTWV GATE_NCYC,NCYC")
+        self._SDG.write(f"C1:BTWV TIME,1")
+        self._SDG.write(f"C1:BTWV PRD,1000S")
+        self._SDG.write(f"C1:BTWV COUNT,1")
+        self._SDG.write(f"C1:BTWV TRMD,OFF")    #....
+        self._SDG.write(f"C1:BTWV DLAY,0S")
+        self._SDG.write(f"C1:BTWV STATE,ON")
+        print(f"Modalità Burst PARAMETERS: {self._SDG.query('C1:BTWV?')}")
+        self._SDG.write(f"C1:BTWV MTRIG")
+        print(self._SDG.query(f"*OPC?"))
 
-
-    def modulation(self,f_m):
+    def modulation(self,ch, f_m):
         """Turn ON and OFF the modulation"""
         # AM = amplitude modulation, MDSP = modulation wave shape, ARB = arbitrary
-        self._SDG.write(f"C1:MDWV STATE,ON")
+        SDG.turn_mod_on(self, ch)
         self._SDG.write(f"C1:MDWV AM")
         self._SDG.write(f"C1:MDWV AM,SRC,INT")
         self._SDG.write(f"C1:MDWV AM,FRQ,{f_m}")
@@ -104,10 +120,21 @@ class SDG() :
     def gaussian_pulse(self, ch, f, amp, phase, off, f_m) :
         SDG.set_all(self, ch, f, amp, phase, off)
         SDG.set_formwave(self, ch, 'SINE')
-        SDG.modulation(self, f_m)
-       # SDG.burst(self)
+        SDG.modulation(self, ch, f_m)
        
+    def singleshot(self, ch, f, amp, phase, off, f_m ):
+        SDG.gaussian_pulse(self, ch, f, amp, phase, off, f_m)
+        a =self._SDG.query(f'C{ch}:MDWV?')
+        parts = a.split(',')
+        if parts[1] != 'OFF': SDG.turn_mod_off(self, ch)
+        SDG.set_burst(self, ch)
+        SDG.burst_on(self)
+
+
+
+    
         
+
     
 # ----------------------------- VECTOR NETWORK ANALYSER ---------------------------------
 
@@ -227,10 +254,58 @@ class TDS() :
     
         
 
-
+    def set_trigger(self, source_channel=2, coupling='DC'):
+        ch_name = f'CH{source_channel}'
+        self._TDS.write(f'TRIGger:A:TYPe PULSE')
+        self._TDS.write(f'TRIGger:A:PULse:SOUrce {ch_name}')
+        self._TDS.write(f'TRIGger:A:EDGE:COUPling {coupling.upper()}')
+        self._TDS.write(f'TRIGger:A:MODe NORMal')
 
     #C:\Users\oper\labQT\Lab2025\2DQubit\QTLab2526\2DQuBit\instruments\speranza.txt'
     
+    def set_trigger_pulse_stable(self, source_channel=2, pulse_level_V=0.5, pulse_width_s=20e-6, pulse_condition='LESS', coupling='DC'):
+        """
+        Imposta il Canale specificato (CH2) come trigger stabile di tipo PULSE (Impulso).
+        
+        :param source_channel: Canale sorgente (es. 2).
+        :param pulse_level_V: Livello di tensione (in Volt) a cui scatta il trigger.
+        :param pulse_width_s: La larghezza di riferimento dell'impulso che stiamo cercando.
+        :param pulse_condition: Condizione temporale per il trigger ('LESS', 'MORE', 'EQUAL', 'UNEQUAL').
+        :param coupling: Accoppiamento del trigger ('DC', 'AC').
+        """
+        ch_name = f'CH{source_channel}'
+        
+        # 1. Imposta il Tipo di Trigger su PULSE
+        self._TDS.write(f'TRIGger:A:TYPe PULSE')
+        
+        # 2. Imposta la Sorgente del Trigger
+        self._TDS.write(f'TRIGger:A:PULse:SOUrce {ch_name}')
+        
+        # 3. Imposta il Livello di Tensione (CRUCIALE)
+        # Il trigger scatta solo quando l'impulso supera questo livello.
+        # Sintassi SCPI: TRIGger:A:LEVel <livello>
+        self._TDS.write(f'TRIGger:A:LEVel {pulse_level_V}')
+        
+        # 4. Imposta l'Accoppiamento (Coupling)
+        # Sintassi SCPI: TRIGger:A:PULse:COUPling DC (Nota il cambio di sottosistema da EDGE a PULSE)
+        self._TDS.write(f'TRIGger:A:PULse:COUPling {coupling.upper()}')
+        
+        # 5. Definisci la Condizione di Durata dell'Impulso (CRUCIALE per PULSE)
+        # Un trigger di impulso richiede una condizione temporale (es. impulso più largo di X ns)
+        # Sintassi SCPI: TRIGger:A:PULse:WIDth:CONDition LESS
+        self._TDS.write(f'TRIGger:A:PULse:WIDth:CONDition {pulse_condition.upper()}')
+        
+        # 6. Definisci la Larghezza di Riferimento dell'Impulso
+        # Se stiamo cercando un impulso di 20 us, impostiamo quel valore.
+        # Sintassi SCPI: TRIGger:A:PULse:WIDth:TIME <tempo>
+        self._TDS.write(f'TRIGger:A:PULse:WIDth:TIME {pulse_width_s}')
+        
+        # 7. Modalità Normale (attende un trigger valido)
+        self._TDS.write(f'TRIGger:A:MODe NORMal')
+        
+        print(f"Trigger PULSE impostato su {ch_name}. Livello: {pulse_level_V}V, Condizione: {pulse_condition.upper()} {pulse_width_s}s.")
+
+
     def set_acquire_state(self, state):
     
         if isinstance(state, str):
