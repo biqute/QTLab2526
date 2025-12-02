@@ -1,6 +1,6 @@
 import sys
 import time
-from VNA_class import VNA  # Assumendo che la classe sia definita in un file chiamato 'vna.py'
+from VNA.VNA_class import VNA  # Assumendo che la classe sia definita in un file chiamato 'vna.py'
 
 # Indirizzo IP del VNA
 vna_ip_address = "193.206.156.99"  # Sostituisci con l'indirizzo IP del tuo VNA

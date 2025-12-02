@@ -25,4 +25,4 @@ def plot_circle(filename):
 
 
 if __name__ == "__main__":
-    plot_circle("/Users/angelobassi/Desktop/QTLab2526/S21_data_50medie_hunger_corretto") 
+    plot_circle(r"C:\Users\kid\labQT\Lab2025\Single photon\QTLab2526\SinglePhoton\S21_hanger100medie_corretto_peak2") 

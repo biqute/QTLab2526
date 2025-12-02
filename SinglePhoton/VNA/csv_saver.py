@@ -1,7 +1,7 @@
 import numpy as np
 import pyvisa
 import csv
-from VNA_class import VNA
+from VNA.VNA_class import VNA
 
 #193.206.156.99
 # Crea un'istanza del VNA con l'indirizzo IP del dispositivo

@@ -4,18 +4,18 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 # Leggi dati dal CSV
-df = pd.read_csv("dati_diodo.csv")
+df = pd.read_csv("dati_fit.csv")
 
-VDC = df['VDC'].values
-VFD = df['VFD'].values
-err = df['devstd_VFD'].values
+VDC = df['VDC (mV)'].values
+VFD = df[' VFD (mV)(5000 points)'].values
+err = df[' devstd_VFD (mV)    (8 ns )'].values
 
 # Definisci modello esponenziale
 def exp_model(x, A, B, C):
     return A * np.exp(B * x) + C
 
 # Fit dei dati con barre di errore
-popt, pcov = curve_fit(exp_model, VDC, VFD, sigma=err, absolute_sigma=True, p0=[1, 0.01, 0])
+popt, pcov = curve_fit(exp_model, VDC, VFD, sigma=err, absolute_sigma=True, p0=[-3500, 0.005, 1], maxfev = 10000)
 A, B, C = popt
 perr = np.sqrt(np.diag(pcov))  # errore sui parametri
 

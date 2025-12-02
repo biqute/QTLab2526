@@ -10,6 +10,9 @@ def plot_amp_vs_frequency(filename):
     except:
         data = np.genfromtxt(filename, skip_header=1)  # auto-separa (spazi o tab)
 
+    
+    mask = (data[:, 0] <= 5.59e9) & (data[:, 0] >= 5.55e9)
+    data = data[mask]
     freq = data[:, 0]   # frequenze
     amp = data[:, 3]  # ampiezza
 
@@ -23,4 +26,4 @@ def plot_amp_vs_frequency(filename):
     plt.show()
 
 if __name__ == "__main__":
-    plot_amp_vs_frequency("/Users/angelobassi/Desktop/QTLab2526/S21_data_50medie_hunger_corretto") 
+    plot_amp_vs_frequency(r"C:\Users\kid\labQT\Lab2025\Single photon\QTLab2526\SinglePhoton\S21_hanger100medie_corretto_peak2") 

@@ -1,7 +1,7 @@
 import numpy as np
 import pyvisa
 import matplotlib.pyplot as plt
-from VNA_class import VNA
+from VNA.VNA_class import VNA
 
 # Crea un'istanza del VNA con l'indirizzo IP del dispositivo
 test_frequenza = VNA(ip_address_string='193.206.156.99')
