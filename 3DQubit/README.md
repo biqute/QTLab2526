@@ -15,13 +15,4 @@ Fare test al variare della shape. AWG può formare il segnale in modo rettangola
 4. Infine, usare il mixer per vedere la down conversion tramite il digitalizer
 
 
-## Circle fit
-1. Aggiungere funzioni di fit a circle_fit
-2. Ottimizzare classe
-
-## Caratterizzazione strumenti
-
-1. Caratterizzare cavi tramite VNA --> serve fittare il VNA per capire l'attenuazione dei diversi cavi in funzione della frequenza
-2. Caratterizzare gli attenuatori
-
  
