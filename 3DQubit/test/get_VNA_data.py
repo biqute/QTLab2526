@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvisa
     
-ip = '193.206.156.99'
+ip = '193.206.156.25'
 
 f_min = 1e9
 f_max = 9e9
@@ -17,11 +17,12 @@ n_means = 30
 power = 0 #dBm
 ifband = 10000
 
-n_misura = "short_2"
-data_file = "data_cable_" + n_misura
-save_as = "cable_att_" + n_misura
+n_misura = "45dBm"
+data_file = "data_manual_att_" + n_misura
+save_as = "manual_att_" + n_misura
 
 Sij = "S21"
+
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -40,7 +41,7 @@ try:
     vna.set_ifband(ifband)
     vna.set_power(power)
 
-    freq = np.array(vna.get_freq())/1e9
+    freq = np.array(vna.get_freq())
     powe = vna.get_dbm()
     I, Q = np.array(vna.get_S_parameters())
     amp = 10*np.log10(I**2+Q**2)

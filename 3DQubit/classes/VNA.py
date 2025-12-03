@@ -130,4 +130,3 @@ class VNA():
         return list(map(float, freq_str.split(",")))
 
     
-    

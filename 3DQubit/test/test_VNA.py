@@ -17,6 +17,7 @@ n_means = 20
 power = 0
 ifband = 10000
 
+
 n_misura = "5"
 data_file = "misura_S21_" + n_misura
 output_file = "risonanza_test_plot_" +  n_misura
