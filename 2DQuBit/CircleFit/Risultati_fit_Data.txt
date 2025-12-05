@@ -1,0 +1,22 @@
+Loaded 10000 points from data.npz
+Initial delay guess (tau_guess) = -4.009328e-05 s
+Refined delay (tau_refined) = 5.685246e-09 s
+Circle center: (-7.607033e+00, 7.849741e+00), radius = 4.758921e+00
+Phase fit results: fr=7.416789e+09 Hz, Qr=5435.496, theta0=-1.931
+Canonicalization: amp=1.366e+01, alpha=2.020 rad
+Canonical circle: center=(7.596e-01,2.523e-01), r=3.485e-01
+Estimates from circle: Qr=5435.496, |Qc|=7798.786, arg(Qc)=-0.810
+
+Notch fit results:
+ Ql = 5435.496
+ |Qc| = 7798.786, phase(Qc) = -0.810 rad
+ fr = 7.416789e+09 Hz
+ amp = 1.366e+01, alpha = 2.020 rad, tau = -4.009e-05 s
+
+Residuals summary:
+ mean (Re,Im) = (3.603e-04,9.204e-04)
+ covariance matrix (Re,Im):
+[[ 6.07526952e-03 -4.74996475e-05]
+ [-4.74996475e-05  6.09273196e-03]]
+Shapiro real: (nan, nan), Shapiro imag: (nan, nan)
+Done. Results returned in dictionary.
