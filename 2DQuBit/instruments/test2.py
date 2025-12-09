@@ -3,7 +3,7 @@ import pyvisa
 from classes import SDG, TDS, VNA
 import matplotlib.pyplot as plt
 
-my_sdg = SDG(ip_address ='193.206.156.10')
+'''my_sdg = SDG(ip_address ='193.206.156.10')
 my_sdg.get_IDN()
 my_sdg.singleshot(1, 1000, 6, 0, 0, 60)
 tds = TDS('3')
@@ -17,5 +17,6 @@ y = np.zeros(len(x))
 fig, ax = plt.subplots(figsize=(10,5))
 plt.plot(x, X['data'])
 plt.plot(x, y)
-plt.show()
+plt.show()'''
 
+print(10e-3*10/200e-6 )

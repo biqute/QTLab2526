@@ -1,11 +1,12 @@
 import numpy as np
 import pyvisa
-from classes import SDG, TDS
+from classes import SDG, TDS, VNA
 from gaussian import SDG_new
 import matplotlib.pyplot as plt
 
 
-my_vna = VNA(ip_address ='193.206.156.99') #pass the ip as a string
+my_vna = VNA(ip_address ='193.206.156.25') #pass the ip as a string 
+my_vna.get_IDN()
 
 '''my_sdg = SDG(ip_address ='193.206.156.10')
 #my_sdg.set_formwave(1,'SINE')

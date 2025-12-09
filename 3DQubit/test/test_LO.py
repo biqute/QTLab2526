@@ -1,12 +1,13 @@
-import sys; sys.path.append("../classes")
+import sys 
+sys.path.append("../classes")
 from LO import LO
 import time
 
 myLO1 = LO("COM11")
 myLO2 = LO("COM12")
-
-myLO1.freq = 5e9
-myLO2.freq = 5.1e9
+delta = 10
+myLO1.freq = 5.00e9 + delta
+myLO2.freq = 5.00e9
 
 print(myLO1.freq)
 print(myLO2.freq)
