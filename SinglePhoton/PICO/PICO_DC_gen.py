@@ -15,14 +15,14 @@ dll_path = os.path.abspath(os.path.dirname(__file__))
 os.add_dll_directory(dll_path)
 
 # ================== PARAMETRI DC ============================
-TARGET_VOLTAGE_V = -0.5        # Tensione DC desiderata (-500 mV)
+TARGET_VOLTAGE_V = 0        # Tensione DC desiderata (-500 mV)
 WAVEFORM_SAMPLES = 4096        # Dimensione buffer (arbitraria per DC)
 # ============================================================
 
 def main():
     status = {}
     chandle = ctypes.c_int16()
-    resolution = ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_8BIT"]
+    resolution = ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_16BIT"]
 
     # 1) Apertura PicoScope
     status["openunit"] = ps.ps5000aOpenUnit(ctypes.byref(chandle), None, resolution)
@@ -127,7 +127,7 @@ def main():
             maxSamples,     # postTrigger
             timebase,
             0,              # oversample
-            None,           # timeIndisposedMs
+            0,           # timeIndisposedMs
             0,              # segmentIndex
             None,           # lpReady
         )

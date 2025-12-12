@@ -209,7 +209,7 @@ def main():
         maxSamples = preTriggerSamples + postTriggerSamples
 
         # Timebase
-        timebase = 0  # come nel tuo script; puoi cambiare se vuoi
+        timebase = 3  # come nel tuo script; puoi cambiare se vuoi
         timeIntervalns = ctypes.c_float()
         returnedMaxSamples = ctypes.c_int32()
 
@@ -230,7 +230,7 @@ def main():
             preTriggerSamples,
             postTriggerSamples,
             timebase,
-            None,
+            ctypes.byref(ctypes.c_int32(0)),
             0,
             None,
             None,
