@@ -67,7 +67,7 @@ def main():
     stds = [r[2] for r in records]
 
     # Solo punti con barre di errore (niente linea: fmt='o')
-    plt.errorbar(xs, means, yerr=stds, fmt='o', capsize=4)
+    plt.errorbar(xs, means, yerr=stds, xerr=1, fmt='o', capsize=4)
     plt.xlabel("V_DC (mV)")
     plt.ylabel("V_FD (V)")
     plt.title("V_FD vs V_DC")

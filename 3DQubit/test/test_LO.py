@@ -11,7 +11,7 @@ myLO2.freq = 5.00e9
 
 print(myLO1.freq)
 print(myLO2.freq)
-
+git 
 #myLO1.turn_off()
 time.sleep(2)
 myLO1.turn_on()
