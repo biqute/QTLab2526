@@ -15,13 +15,29 @@ os.add_dll_directory(dll_path)
 print("DLL loaded from:", dll_path)
 
 # ================== PARAMETRI AWG ===========================
-FREQUENCY_HZ      = 1500.0       # 1.5 kHz (Periodo ~666 µs)
-DUTY_CYCLE_TARGET = 0.9998       # 99.98 %    
-AMPLITUDE_VPP_V   = 1.39         # Volt picco-picco
+FREQUENCY_HZ      = 8200.0       # 1.5 kHz (Periodo ~666 µs)   #8200Hz
+DUTY_CYCLE_TARGET = 0.9991       # 99.98 %                     #99.91%  
+AMPLITUDE_VPP_V   = 1.43         # Volt picco-picco            #1.44  
 # Offset per avere segnale tra 0V (High) e -1.39V (Low)
 OFFSET_V          = -AMPLITUDE_VPP_V / 2
-WAVEFORM_SAMPLES  = 30000         # punti tabella AWG
+WAVEFORM_SAMPLES  = 31000         # punti tabella AWG
 # ============================================================
+
+# Funzione per calcolare la FWHM (larghezza a metà altezza) per un picco in discesa
+def calculate_fwhm(time_axis, data_mV):
+    # Trova il minimo del segnale (picco in giù)
+    min_value = np.min(data_mV)
+    half_max = min_value + (0 - min_value) / 2.0  # Mezzo dell'intervallo dal minimo a 0V
+
+    # Trova i punti in cui il segnale è uguale a metà della profondità del picco
+    below_half_max = np.where(data_mV <= half_max)[0]
+
+    # Calcolare la larghezza a metà altezza
+    fwhm_start = time_axis[below_half_max[0]]
+    fwhm_end = time_axis[below_half_max[-1]]
+
+    fwhm = fwhm_end - fwhm_start
+    return fwhm
 
 def main():
     status = {}
@@ -30,7 +46,7 @@ def main():
     # --------------------------------------------------------
     # 2) Apri PicoScope in modalità 16-BIT
     # --------------------------------------------------------
-    resolution = ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_16BIT"]
+    resolution = ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_8BIT"]
     status["openunit"] = ps.ps5000aOpenUnit(ctypes.byref(chandle), None, resolution)
 
     try:
@@ -124,7 +140,6 @@ def main():
         ps.ps5000aMaximumValue(chandle, ctypes.byref(maxADC))
 
         # TRIGGER MODIFICATO: Falling edge, soglia negativa (-200mV)
-        # Perché il segnale è a 0V e scende a -1.4V
         threshold_adc = int(mV2adc(-200, chRange, maxADC))
         direction = 3 # PS5000A_FALLING
        
@@ -136,11 +151,9 @@ def main():
         # ----------------------------------------------------
         # 5) Timebase e Acquisizione
         # ----------------------------------------------------
-        # Timebase 127 a 16-bit corrisponde a circa 1000ns (1µs) per campione.
-        # Con 5000 campioni => 5ms totali (vedrai ~7 cicli da 0.66ms l'uno)
-        timebase = 4
-        preTriggerSamples = 5
-        postTriggerSamples = 15
+        timebase = 2
+        preTriggerSamples = 10
+        postTriggerSamples = 50
         totalSamples = preTriggerSamples + postTriggerSamples
        
         timeIntervalns = ctypes.c_float()
@@ -152,7 +165,6 @@ def main():
         )
         assert_pico_ok(status["getTimebase"])
         print(f"Timebase: {timebase} (dt = {timeIntervalns.value} ns)")
-        print(f"Durata acquisizione: {(timeIntervalns.value * totalSamples)/1e6:.2f} ms")
 
         status["runBlock"] = ps.ps5000aRunBlock(
             chandle, preTriggerSamples, postTriggerSamples,
@@ -182,22 +194,30 @@ def main():
             chandle, 0, ctypes.byref(cmaxSamples), 0, 0, 0, ctypes.byref(overflow)
         )
         assert_pico_ok(status["getValues"])
-        
 
         # ----------------------------------------------------
-        # 6) Plot
+        # 6) Calcolo FWHM
         # ----------------------------------------------------
         data_mV = adc2mV(bufferMax, chRange, maxADC)
         time_axis = np.linspace(
             0, (cmaxSamples.value - 1) * timeIntervalns.value, cmaxSamples.value
         )
 
-        plt.figure(figsize=(10, 6))
-        plt.plot(time_axis / 1000.0, data_mV) # x in µs
+        fwhm = calculate_fwhm(time_axis, data_mV)
+        print(f"Larghezza a metà altezza (FWHM): {fwhm:.4f} ns")
+
+        # ----------------------------------------------------
+        # 7) Plot
+        # ----------------------------------------------------
+        plt.figure(figsize=(12, 6))
+        plt.plot(time_axis / 1000.0, data_mV)  # x in µs
         plt.xlabel("Tempo (µs)")
         plt.ylabel("Tensione (mV)")
         plt.title(f"Acquisizione AWG (16-bit) - {FREQUENCY_HZ} Hz")
         plt.grid(True)
+        
+        plt.tight_layout()
+        
         plt.show()
 
         status["stop"] = ps.ps5000aStop(chandle)

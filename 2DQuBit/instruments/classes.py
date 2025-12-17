@@ -30,6 +30,9 @@ class SDG() :
     def set_offset(self, ch, off) :
 
         self._SDG.write(f'C{ch}'+f":BSWV OFST,{off}")
+
+    def manual_trig(self):
+        self._SDG.write("C1:BTWV MTRIG")
         
     def set_formwave(self, ch, wtp, index = 0) : #probably pass wtp as string
         if wtp == 'arb' or wtp == 'ARB':
