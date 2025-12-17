@@ -7,7 +7,7 @@ import time
 import sys
 import os
 
-sys.path.append(r"C:\Users\kid\labQT\Lab2025\3D Qubit")
+sys.path.append(r"C:\Users\kid\labQT\Lab2025\3DQubit")
 
 #from QTLab2526.SinglePhoton.PICO.instruments import Instrument
 import threading
