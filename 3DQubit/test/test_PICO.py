@@ -1,212 +1,173 @@
 #
-# Copyright (C) 2018-2019 Pico Technology Ltd. See LICENSE file for terms.
+# BLOCK MODE con acquisizione 100 MHz + FFT + salvataggio file
 #
-# PS5000 Series (A API) STREAMING MODE EXAMPLE
-# This example demonstrates how to call the ps5000a driver API functions in order to open a device, setup 2 channels and collects streamed data (1 buffer).
-# This data is then plotted as mV against time in ns.
 
 import ctypes
 import numpy as np
 from picosdk.ps5000a import ps5000a as ps
 import matplotlib.pyplot as plt
-from picosdk.functions import adc2mV, assert_pico_ok
-import time
+from picosdk.functions import adc2mV, assert_pico_ok, mV2adc
 
-# Create chandle and status ready for use
+# ---------------------------------------------------------
+#            APERTURA STRUMENTO
+# ---------------------------------------------------------
 chandle = ctypes.c_int16()
 status = {}
 
-# Open PicoScope 5000 Series device
-# Resolution set to 12 Bit
-resolution =ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_8BIT"]
-# Returns handle to chandle for use in future API functions
-status["openunit"] = ps.ps5000aOpenUnit(ctypes.byref(chandle), None, resolution) #handle: generated id of scope, serial: serial of the scope to connect to, resolution: resolution of the scope
+resolution = ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_12BIT"]
+status["openunit"] = ps.ps5000aOpenUnit(ctypes.byref(chandle), None, resolution)
 
 try:
     assert_pico_ok(status["openunit"])
-except: # PicoNotOkError:
-
+except:
     powerStatus = status["openunit"]
-
-    if powerStatus == 286:
+    if powerStatus in (286, 282):
         status["changePowerSource"] = ps.ps5000aChangePowerSource(chandle, powerStatus)
-    elif powerStatus == 282:
-        status["changePowerSource"] = ps.ps5000aChangePowerSource(chandle, powerStatus)
+        assert_pico_ok(status["changePowerSource"])
     else:
         raise
 
-    assert_pico_ok(status["changePowerSource"])
+# ---------------------------------------------------------
+#            CONFIGURAZIONE CANALI
+# ---------------------------------------------------------
+channelA = ps.PS5000A_CHANNEL["PS5000A_CHANNEL_A"]
+coupling = ps.PS5000A_COUPLING["PS5000A_DC"]
+chRange = ps.PS5000A_RANGE["PS5000A_2V"]
 
-
-enabled = 1
-disabled = 0
-analogue_offset = 0.0
-
-# Set up channel A
-# handle = chandle
-# channel = PS5000A_CHANNEL_A = 0
-# enabled = 1
-# coupling type = PS5000A_DC = 1
-# range = PS5000A_2V = 7
-# analogue offset = 0 V
-channel_range = ps.PS5000A_RANGE['PS5000A_2V']
-status["setChA"] = ps.ps5000aSetChannel(chandle,
-                                        ps.PS5000A_CHANNEL['PS5000A_CHANNEL_A'],
-                                        enabled,
-                                        ps.PS5000A_COUPLING['PS5000A_DC'],
-                                        channel_range,
-                                        analogue_offset)
+status["setChA"] = ps.ps5000aSetChannel(chandle, channelA, 1, coupling, chRange, 0)
 assert_pico_ok(status["setChA"])
 
-# Set up channel B
-# handle = chandle
-# channel = PS5000A_CHANNEL_B = 1
-# enabled = 1
-# coupling type = PS5000A_DC = 1
-# range = PS5000A_2V = 7
-# analogue offset = 0 V
-status["setChB"] = ps.ps5000aSetChannel(chandle,
-                                        ps.PS5000A_CHANNEL['PS5000A_CHANNEL_B'],
-                                        enabled,
-                                        ps.PS5000A_COUPLING['PS5000A_DC'],
-                                        channel_range,
-                                        analogue_offset)
-assert_pico_ok(status["setChB"])
+# Disattiva B, C, D
+for ch in ["PS5000A_CHANNEL_B", "PS5000A_CHANNEL_C", "PS5000A_CHANNEL_D"]:
+    ps.ps5000aSetChannel(chandle, ps.PS5000A_CHANNEL[ch], 0, coupling, chRange, 0)
 
-# Size of capture
-sizeOfOneBuffer = 500 #500
-numBuffersToCapture = 1 #10
-
-totalSamples = sizeOfOneBuffer * numBuffersToCapture
-
-# Create buffers ready for assigning pointers for data collection
-bufferAMax = np.zeros(shape=sizeOfOneBuffer, dtype=np.int16)
-bufferBMax = np.zeros(shape=sizeOfOneBuffer, dtype=np.int16)
-
-memory_segment = 0
-
-# Set data buffer location for data collection from channel A
-# handle = chandle
-# source = PS5000A_CHANNEL_A = 0
-# pointer to buffer max = ctypes.byref(bufferAMax)
-# pointer to buffer min = ctypes.byref(bufferAMin)
-# buffer length = maxSamples
-# segment index = 0
-# ratio mode = PS5000A_RATIO_MODE_NONE = 0
-status["setDataBuffersA"] = ps.ps5000aSetDataBuffers(chandle,
-                                                     ps.PS5000A_CHANNEL['PS5000A_CHANNEL_A'],
-                                                     bufferAMax.ctypes.data_as(ctypes.POINTER(ctypes.c_int16)),
-                                                     None,
-                                                     sizeOfOneBuffer,
-                                                     memory_segment,
-                                                     ps.PS5000A_RATIO_MODE['PS5000A_RATIO_MODE_NONE'])
-assert_pico_ok(status["setDataBuffersA"])
-
-# Set data buffer location for data collection from channel B
-# handle = chandle
-# source = PS5000A_CHANNEL_B = 1
-# pointer to buffer max = ctypes.byref(bufferBMax)
-# pointer to buffer min = ctypes.byref(bufferBMin)
-# buffer length = maxSamples
-# segment index = 0
-# ratio mode = PS5000A_RATIO_MODE_NONE = 0
-status["setDataBuffersB"] = ps.ps5000aSetDataBuffers(chandle,
-                                                     ps.PS5000A_CHANNEL['PS5000A_CHANNEL_B'],
-                                                     bufferBMax.ctypes.data_as(ctypes.POINTER(ctypes.c_int16)),
-                                                     None,
-                                                     sizeOfOneBuffer,
-                                                     memory_segment,
-                                                     ps.PS5000A_RATIO_MODE['PS5000A_RATIO_MODE_NONE'])
-assert_pico_ok(status["setDataBuffersB"])
-
-# Begin streaming mode:
-sampleInterval = ctypes.c_int32(250)
-sampleUnits = ps.PS5000A_TIME_UNITS['PS5000A_US']
-# We are not triggering:
-maxPreTriggerSamples = 0
-autoStopOn = 1
-# No downsampling:
-downsampleRatio = 1
-status["runStreaming"] = ps.ps5000aRunStreaming(chandle,
-                                                ctypes.byref(sampleInterval),
-                                                sampleUnits,
-                                                maxPreTriggerSamples,
-                                                totalSamples,
-                                                autoStopOn,
-                                                downsampleRatio,
-                                                ps.PS5000A_RATIO_MODE['PS5000A_RATIO_MODE_NONE'],
-                                                sizeOfOneBuffer)
-assert_pico_ok(status["runStreaming"])
-
-actualSampleInterval = sampleInterval.value
-actualSampleIntervalNs = actualSampleInterval * 1000
-
-print("Capturing at sample interval %s ns" % actualSampleIntervalNs)
-
-# We need a big buffer, not registered with the driver, to keep our complete capture in.
-bufferCompleteA = np.zeros(shape=totalSamples, dtype=np.int16)
-bufferCompleteB = np.zeros(shape=totalSamples, dtype=np.int16)
-nextSample = 0
-autoStopOuter = False
-wasCalledBack = False
-
-
-def streaming_callback(handle, noOfSamples, startIndex, overflow, triggerAt, triggered, autoStop, param):
-    global nextSample, autoStopOuter, wasCalledBack
-    wasCalledBack = True
-    destEnd = nextSample + noOfSamples
-    sourceEnd = startIndex + noOfSamples
-    bufferCompleteA[nextSample:destEnd] = bufferAMax[startIndex:sourceEnd]
-    bufferCompleteB[nextSample:destEnd] = bufferBMax[startIndex:sourceEnd]
-    nextSample += noOfSamples
-    if autoStop:
-        autoStopOuter = True
-
-
-# Convert the python function into a C function pointer.
-cFuncPtr = ps.StreamingReadyType(streaming_callback)
-
-# Fetch data from the driver in a loop, copying it out of the registered buffers and into our complete one.
-while nextSample < totalSamples and not autoStopOuter:
-    wasCalledBack = False
-    status["getStreamingLastestValues"] = ps.ps5000aGetStreamingLatestValues(chandle, cFuncPtr, None)
-    if not wasCalledBack:
-        # If we weren't called back by the driver, this means no data is ready. Sleep for a short while before trying
-        # again.
-        time.sleep(0.01)
-
-print("Done grabbing values.")
-
-# Find maximum ADC count value
-# handle = chandle
-# pointer to value = ctypes.byref(maxADC)
+# ---------------------------------------------------------
+#            VALORE ADC MASSIMO
+# ---------------------------------------------------------
 maxADC = ctypes.c_int16()
 status["maximumValue"] = ps.ps5000aMaximumValue(chandle, ctypes.byref(maxADC))
 assert_pico_ok(status["maximumValue"])
 
-# Convert ADC counts data to mV
-adc2mVChAMax = adc2mV(bufferCompleteA, channel_range, maxADC)
-#adc2mVChBMax = adc2mV(bufferCompleteB, channel_range, maxADC)
+# ---------------------------------------------------------
+#            TRIGGER
+# ---------------------------------------------------------
+threshold = int(mV2adc(50, chRange, maxADC))  # 50 mV
+status["trigger"] = ps.ps5000aSetSimpleTrigger(chandle, 1, channelA, threshold, 2, 0, 1000)
+assert_pico_ok(status["trigger"])
 
-# Create time data
-time = np.linspace(0, (totalSamples - 1) * actualSampleIntervalNs, totalSamples)
+# ---------------------------------------------------------
+#        SAMPLES E TIMEBASE
+# ---------------------------------------------------------
+preTriggerSamples = 0
+postTriggerSamples = 10
+maxSamples = preTriggerSamples + postTriggerSamples
+timebase = 315 # ~1 ns
 
-# Plot data from channel A and B
-plt.plot(time, adc2mVChAMax[:])
-#plt.plot(time, adc2mVChBMax[:])
-plt.xlabel('Time (ns)')
-plt.ylabel('Voltage (mV)')
+timeIntervalns = ctypes.c_float()
+returnedMaxSamples = ctypes.c_int32()
+
+status["getTimebase2"] = ps.ps5000aGetTimebase2(
+    chandle, timebase, maxSamples,
+    ctypes.byref(timeIntervalns),
+    ctypes.byref(returnedMaxSamples), 0
+)
+assert_pico_ok(status["getTimebase2"])
+print("Intervallo di campionamento (ns):", timeIntervalns.value)
+
+# ---------------------------------------------------------
+#            BUFFER
+# ---------------------------------------------------------
+bufferA = (ctypes.c_int16 * maxSamples)()
+bufferAmin = (ctypes.c_int16 * maxSamples)()
+
+# SetDataBuffers **prima** di RunBlock
+status["setDataBuffersA"] = ps.ps5000aSetDataBuffers(
+    chandle, channelA,
+    ctypes.byref(bufferA),
+    ctypes.byref(bufferAmin),
+    maxSamples, 0, 0
+)
+assert_pico_ok(status["setDataBuffersA"])
+
+# ---------------------------------------------------------
+#                 ACQUISIZIONE BLOCK MODE
+# ---------------------------------------------------------
+status["runBlock"] = ps.ps5000aRunBlock(
+    chandle, preTriggerSamples, postTriggerSamples,
+    timebase, None, 0, None, None
+)
+assert_pico_ok(status["runBlock"])
+
+ready = ctypes.c_int16(0)
+while ready.value == 0:
+    status["isReady"] = ps.ps5000aIsReady(chandle, ctypes.byref(ready))
+
+# ---------------------------------------------------------
+#            LETTURA DATI
+# ---------------------------------------------------------
+cmaxSamples = ctypes.c_int32(maxSamples)
+overflow = ctypes.c_int16()
+
+status["getValues"] = ps.ps5000aGetValues(
+    chandle, 0, ctypes.byref(cmaxSamples),
+    0, 0, 0, ctypes.byref(overflow)
+)
+assert_pico_ok(status["getValues"])
+
+# Conversione in numpy
+bufferA_np = np.array(bufferA, dtype=np.int16)
+data_mV = adc2mV(bufferA_np, chRange, maxADC)
+time = np.linspace(0, (cmaxSamples.value - 1) * timeIntervalns.value, cmaxSamples.value)
+
+# Salvataggio file
+np.savetxt("acquisizione.txt", np.column_stack((time, data_mV)),
+           header="Time(ns)\tVoltage(mV)", fmt="%.6f")
+print("File acquisizione.txt salvato.")
+
+# ---------------------------------------------------------
+#            FFT
+# ---------------------------------------------------------
+fs = 1e9 / timeIntervalns.value
+N = len(data_mV)
+
+window = np.hanning(N)
+signal = data_mV * window
+
+fft_vals = np.fft.fft(signal)
+fft_freq = np.fft.fftfreq(N, d=timeIntervalns.value * 1e-9)
+
+half = N // 2
+fft_mag = np.abs(fft_vals[:half])
+fft_freq = fft_freq[:half]
+
+# ---------------------------------------------------------
+#            PLOT
+# ---------------------------------------------------------
+plt.figure(figsize=(12,5))
+
+# Segnale nel tempo (downsampling per leggibilità)
+step = max(1, N//5000)
+plt.subplot(1,2,1)
+plt.plot(time[::step], data_mV[::step])
+plt.title("Segnale nel tempo")
+plt.xlabel("Tempo (ns)")
+plt.ylabel("mV")
+
+# FFT
+plt.subplot(1,2,2)
+plt.plot(fft_freq/1e6, fft_mag)
+plt.title("FFT")
+plt.xlabel("Frequenza (MHz)")
+plt.ylabel("Ampiezza (a.u.)")
+plt.xlim(0, 0.1)
+
+plt.tight_layout()
 plt.show()
 
-# Stop the scope
-# handle = chandle
+# ---------------------------------------------------------
+#            STOP E CHIUSURA
+# ---------------------------------------------------------
 status["stop"] = ps.ps5000aStop(chandle)
-assert_pico_ok(status["stop"])
-
-# Disconnect the scope
-# handle = chandle
 status["close"] = ps.ps5000aCloseUnit(chandle)
-assert_pico_ok(status["close"])
 
-# Display status returns
-print(status)
+print("Acquisizione completata.")
