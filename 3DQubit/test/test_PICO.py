@@ -190,7 +190,7 @@ plt.title("IQ Plot")
 plt.xlabel("Q")
 plt.ylabel("I")
 plt.tight_layout()
-
+plt.axis("equal")
 
 plt.show()
 
