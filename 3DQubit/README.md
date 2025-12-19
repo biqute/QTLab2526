@@ -11,12 +11,13 @@ Fare test al variare della shape. AWG può formare il segnale in modo rettangola
 ## Down Conversion
 1. Fare analisi dati con FFT per verificare che le frequenze tornino
 
-## PicoScope 
-1. Fare classe per oscilloscopio digitale (PicoScope)
 
 ## Attenuazione
 1. Analisi dati per cavo
 2. Analisi dati per attenuatore manuale
+
+## IQ mixer calibration
+Fare fit con ellisse dei dati  `attenuazione.txt `
 
 
  
