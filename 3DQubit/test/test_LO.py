@@ -4,19 +4,19 @@ from LO import LO
 import time
 
 myLO1 = LO("COM11")
-#myLO2 = LO("COM12")
-delta = 0
-myLO1.freq = 1e8 + delta
-#myLO2.freq = 1e8
+myLO2 = LO("COM12")
+delta = 100e3
+myLO1.freq = 5e9 
+myLO2.freq = myLO1.freq - delta
 
 print(myLO1.freq)
-#print(myLO2.freq)
+print(myLO2.freq)
  
 time.sleep(2)
 myLO1.turn_on()
-#myLO2.turn_on()
+myLO2.turn_on()
 
-myLO1.turn_off()
+#myLO1.turn_off()
 #myLO2.turn_off()
 
 
