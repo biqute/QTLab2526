@@ -4,15 +4,15 @@ import pyvisa
 import warnings
 
 #=====================GAUSSIAN_IMPULSE========================
-def gaussian_sine(x, A=1.0, f=3, mu=0.0, sigma=0.5):
+def gaussian_sine(x, A=1.0, f=1e7, mu=0.0, sigma=1e-7):
     
     gauss = A * np.exp(-((x - mu)**2) / (2 * sigma**2))
     sine = np.sin(2 * np.pi * f * x)
-    
     y = gauss * sine
     return y
 #=====================DATA_GENERATION==========================
-def upload_waveform(name, func, interval, samples_per_second):
+def upload_waveform(name, func, interval):
+    samples_per_second = 2.4e9
     duration = interval[1] - interval[0]
     samples = int(duration * samples_per_second)
     array = np.zeros(samples, dtype=np.int16)
@@ -44,7 +44,7 @@ def upload_waveform(name, func, interval, samples_per_second):
     rm = pyvisa.ResourceManager ()
     SDG = rm.open_resource("TCPIP0::193.206.156.10::inst0::INSTR")
 
-    SDG.write_binary_values(f"C1:WVDT WVNM,{name},LENGTH,{samples},WAVEDATA,", array, datatype="h")
+    SDG.write_binary_values(f"C1:WVDT WVNM,{name},LENGTH,{samples},WAVEDATA,", array, datatype="h", is_big_endian=False, header_fmt='empty')
     SDG.write(f"C1:ARWV NAME,{name}")
     
     arb_freq = 1/duration
@@ -69,6 +69,6 @@ def upload_waveform(name, func, interval, samples_per_second):
 
 
 
-sigma_ = 0.5
+sigma_ = 1e-7
 interval = [-5*sigma_, +5*sigma_]
-upload_waveform('singleshot', gaussian_sine, interval, 100)
+upload_waveform('singleshot', gaussian_sine, interval)

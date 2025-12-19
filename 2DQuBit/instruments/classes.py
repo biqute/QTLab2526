@@ -1,7 +1,10 @@
 import numpy as np
 import pyvisa
 import re
-
+import warnings
+import matplotlib.pyplot as plt
+import sys
+import time
 
 # ----------------------------- WAVEFORM GENERATOR ---------------------------------
 
@@ -32,8 +35,25 @@ class SDG() :
         self._SDG.write(f'C{ch}'+f":BSWV OFST,{off}")
 
     def manual_trig(self):
+
+        tds = TDS('3')
         self._SDG.write("C1:BTWV MTRIG")
+        time.sleep(1e-2)
+        sta = 0
+        sto = 500
+        X = tds.acquisition(ch = 1, start = sta , stop = sto)
+        print(max(X['data']), min(X['data']))
+        #x = np.linspace(0, (sto-sta)/X['sample_rate'], len(X['data']))
+        x = np.linspace(0, 10*X["H_scale"], len(X['data']))
+        y = np.zeros(len(x))
+        fig, ax = plt.subplots(figsize=(10,5))
+        plt.plot(x, X['data'])
+        plt.plot(x, y)
+        plt.show()
         
+    def set_samp(self, srate):
+        self._SDG.write(f"C1:SRATE VALUE,{srate}") 
+
     def set_formwave(self, ch, wtp, index = 0) : #probably pass wtp as string
         if wtp == 'arb' or wtp == 'ARB':
             self._SDG.write(f'C{ch}'+":BSWV WVTP,ARB")
@@ -90,24 +110,17 @@ class SDG() :
     def turn_mod_on(self, ch):
         self._SDG.write(f"C{ch}:MDWV STATE,ON")
 
-    def set_burst(self, ch):
-        self._SDG.write(f"C{ch}:BTWV CARR,WVTP,SINE")
-        print(self._SDG.query(f"*OPC?"))
 
-    def burst_on(self):
-        self._SDG.write(f"C1:BTWV STATE,OFF")
-        print(self._SDG.query(f"*OPC?"))
-        self._SDG.write(f"C1:BTWV TRSR,MAN")
-        self._SDG.write(f"C1:BTWV GATE_NCYC,NCYC")
-        self._SDG.write(f"C1:BTWV TIME,1")
-        self._SDG.write(f"C1:BTWV PRD,1000S")
-        self._SDG.write(f"C1:BTWV COUNT,1")
-        self._SDG.write(f"C1:BTWV TRMD,OFF")    #....
-        self._SDG.write(f"C1:BTWV DLAY,0S")
-        self._SDG.write(f"C1:BTWV STATE,ON")
-        print(f"Modalità Burst PARAMETERS: {self._SDG.query('C1:BTWV?')}")
-        self._SDG.write(f"C1:BTWV MTRIG")
-        print(self._SDG.query(f"*OPC?"))
+    def burst(self, ncyc=1, time=1, prd=3):
+        self._SDG.write("C1:BTWV MODE,NCYC") 
+        self._SDG.write(f"C1:BTWV NCYC,{ncyc}") 
+        self._SDG.write(f"C1:BTWV TIME,{time}")
+        self._SDG.write(f"C1:BTWV PRD,{prd}")
+        self._SDG.write("C1:BTWV TRSR,MAN")
+        self._SDG.write("C1:BTWV STATE,ON")
+        self._SDG.write("C1:OUTP ON") 
+        self._SDG.write("C1:BTWV ILVL,0V")
+        print(self._SDG.query("*OPC?"))
 
     def modulation(self,ch, f_m):
         """Turn ON and OFF the modulation"""
@@ -120,20 +133,61 @@ class SDG() :
         print(self._SDG.query(f"*OPC?"))
     
 
-    def gaussian_pulse(self, ch, f, amp, phase, off, f_m) :
-        SDG.set_all(self, ch, f, amp, phase, off)
-        SDG.set_formwave(self, ch, 'SINE')
-        SDG.modulation(self, ch, f_m)
-       
-    def singleshot(self, ch, f, amp, phase, off, f_m ):
-        SDG.gaussian_pulse(self, ch, f, amp, phase, off, f_m)
-        a =self._SDG.query(f'C{ch}:MDWV?')
-        parts = a.split(',')
-        if parts[1] != 'OFF': SDG.turn_mod_off(self, ch)
-        SDG.set_burst(self, ch)
-        SDG.burst_on(self)
+    def gaussian_sine(x, A=1.0, f=1e4, mu=0.0, sigma=1e-3):
+        gauss = A * np.exp(-((x - mu)**2) / (2 * sigma**2))
+        sine = np.sin(2 * np.pi * f * x)
+        y = gauss * sine
+        return y
+    
+    def upload_waveform(self, name = 'singleshot', func = gaussian_sine, interval = [-1,1]):
+        samples_per_second = 2.4e5
+        duration = interval[1] - interval[0]
+        samples = int(duration * samples_per_second)
+        array = np.zeros(samples, dtype=np.int16)
+        print("samples =", samples)
+        N = 15
+        cropped = 0
+        for i in range(0,samples):
+            f = func(interval[0] + i / samples_per_second)
+            n = int(round((2**N)*f))
 
+            if n > (2**N - 1): 
+                n = 2**N - 1
+                cropped += 1
+            if n < -2**N: 
+                n = -2**N
+                cropped += 1
+            array[i] = n
+        
+            if cropped > 0: 
+                warnings.warn(f"The function 'func' was cropped to the range [-1, +1], for a total of {cropped} cropped samples.", stacklevel=2)
+        
+        self._SDG.write_binary_values(f"C1:WVDT WVNM,{name},LENGTH,{samples},WAVEDATA,", array, datatype="h", is_big_endian=False, header_fmt='empty')
+        '''
+        fig, ax = plt.subplots(figsize=(10,5))
+        plt.plot(np.linspace(interval[0], interval[1], samples), array)
+        plt.show()
+        '''
+        self._SDG.write(f"C1:ARWV NAME,{name}")
+        tds = TDS('3')
 
+    
+        arb_freq = 1/duration
+
+        self._SDG.write(f"C1:BSWV FRQ,{arb_freq}")
+
+        self._SDG.write("C1:BTWV MODE,NCYC") 
+        self._SDG.write("C1:BTWV NCYC,1") 
+        self._SDG.write(f"C1:BTWV TIME,1")
+        self._SDG.write(f"C1:BTWV PRD,3")
+        self._SDG.write("C1:BTWV TRSR,MAN")
+        self._SDG.write("C1:BTWV STATE,ON")
+        self._SDG.write("C1:OUTP ON") 
+        self._SDG.write("C1:BTWV ILVL,0V")
+
+        print(self._SDG.query("*OPC?"))
+
+            #self.burst(ncyc, time, prd)
 
     
         
@@ -254,8 +308,25 @@ class TDS() :
         rescaled_data = data_array*4*v_sc/100
         result = dict(H_scale=float(h_sc), sample_rate = float(Sr), V_scale = float(v_sc), raw_data = data_array, data = rescaled_data)
         return result
-    
-        
+
+
+    def be_ready(self):
+        self._TDS.write("ACQ:STOPAFTER SEQUENCE")
+        self._TDS.write("ACQ:STATE ON")
+
+    def wait(self):
+        print("In attesa dell'impulso...")
+        timeout = 6.0
+        start_time = time.time()
+        while True:
+            # ACQ:STATE? diventa '0' quando l'oscilloscopio ha finito di catturare l'onda
+            if self._TDS.query("ACQ:STATE?").strip() == '0':
+                print("Impulso catturato con successo!")
+                break
+            if (time.time() - start_time) > timeout:
+                print("Errore: L'impulso non è arrivato in tempo.")
+                return
+            time.sleep(0.01)
 
     def set_trigger(self, source_channel=2, coupling='DC'):
         ch_name = f'CH{source_channel}'
