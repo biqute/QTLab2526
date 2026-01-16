@@ -148,7 +148,7 @@ data_mV_B = adc2mV(bufferB_np, chRange, maxADC)
 time = np.linspace(0, (cmaxSamples.value - 1) * timeIntervalns.value, cmaxSamples.value)
 
 # Salvataggio file
-np.savetxt("../data/acquisizione.txt", np.column_stack((time, data_mV_A, data_mV_B)),
+np.savetxt("../data/pico_data.txt", np.column_stack((time, data_mV_A, data_mV_B)),
            header="Time(ns)\tVoltage(mV)-A\tVoltage(mV)-B", fmt="%.6f")
 print("File acquisizione.txt salvato.")
 
@@ -200,7 +200,7 @@ plt.show()
 status["stop"] = ps.ps5000aStop(chandle)
 status["close"] = ps.ps5000aCloseUnit(chandle)
 
-save_as = "pico_plot"
+save_as = "pico_plot_new"
 save_as += ".pdf"
 plt.savefig(f"../data0_plots/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in ../data/{save_as}")
