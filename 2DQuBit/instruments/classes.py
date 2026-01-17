@@ -5,6 +5,7 @@ import warnings
 import matplotlib.pyplot as plt
 import sys
 import time
+import serial
 
 # ----------------------------- WAVEFORM GENERATOR ---------------------------------
 
@@ -34,11 +35,13 @@ class SDG() :
 
         self._SDG.write(f'C{ch}'+f":BSWV OFST,{off}")
 
-    def manual_trig(self):
-
+    def manual_trig(self, sigma):
         tds = TDS('3')
+        tds.prepare_for_trigger()
         self._SDG.write("C1:BTWV MTRIG")
-        time.sleep(1e-2)
+        tds.wait(sigma)
+        # 4. Acquisizione dati
+        # Ora che l'evento è avvenuto e l'acquisizione è ferma, leggiamo i dati
         sta = 0
         sto = 500
         X = tds.acquisition(ch = 1, start = sta , stop = sto)
@@ -132,65 +135,7 @@ class SDG() :
         self._SDG.write(f"C1:MDWV MDSP,ARB,INDEX,19")
         print(self._SDG.query(f"*OPC?"))
     
-
-    def gaussian_sine(x, A=1.0, f=1e4, mu=0.0, sigma=1e-3):
-        gauss = A * np.exp(-((x - mu)**2) / (2 * sigma**2))
-        sine = np.sin(2 * np.pi * f * x)
-        y = gauss * sine
-        return y
-    
-    def upload_waveform(self, name = 'singleshot', func = gaussian_sine, interval = [-1,1]):
-        samples_per_second = 2.4e5
-        duration = interval[1] - interval[0]
-        samples = int(duration * samples_per_second)
-        array = np.zeros(samples, dtype=np.int16)
-        print("samples =", samples)
-        N = 15
-        cropped = 0
-        for i in range(0,samples):
-            f = func(interval[0] + i / samples_per_second)
-            n = int(round((2**N)*f))
-
-            if n > (2**N - 1): 
-                n = 2**N - 1
-                cropped += 1
-            if n < -2**N: 
-                n = -2**N
-                cropped += 1
-            array[i] = n
-        
-            if cropped > 0: 
-                warnings.warn(f"The function 'func' was cropped to the range [-1, +1], for a total of {cropped} cropped samples.", stacklevel=2)
-        
-        self._SDG.write_binary_values(f"C1:WVDT WVNM,{name},LENGTH,{samples},WAVEDATA,", array, datatype="h", is_big_endian=False, header_fmt='empty')
-        '''
-        fig, ax = plt.subplots(figsize=(10,5))
-        plt.plot(np.linspace(interval[0], interval[1], samples), array)
-        plt.show()
-        '''
-        self._SDG.write(f"C1:ARWV NAME,{name}")
-        tds = TDS('3')
-
-    
-        arb_freq = 1/duration
-
-        self._SDG.write(f"C1:BSWV FRQ,{arb_freq}")
-
-        self._SDG.write("C1:BTWV MODE,NCYC") 
-        self._SDG.write("C1:BTWV NCYC,1") 
-        self._SDG.write(f"C1:BTWV TIME,1")
-        self._SDG.write(f"C1:BTWV PRD,3")
-        self._SDG.write("C1:BTWV TRSR,MAN")
-        self._SDG.write("C1:BTWV STATE,ON")
-        self._SDG.write("C1:OUTP ON") 
-        self._SDG.write("C1:BTWV ILVL,0V")
-
-        print(self._SDG.query("*OPC?"))
-
-            #self.burst(ncyc, time, prd)
-
-    
-        
+       
 
     
 # ----------------------------- VECTOR NETWORK ANALYSER ---------------------------------
@@ -272,7 +217,7 @@ class TDS() :
  
     def turn_off(self):
         self._TDS.write(":CHAN1:DISP OFF")
-
+    
     def read_par (self, ch):
         a = self._TDS.query(f'CH{ch}?')
         return a
@@ -287,13 +232,33 @@ class TDS() :
         if res == 50 or res == 1e6:
             self._TDS.write(f'CH{ch}:TER {res}')
         else: raise ValueError('The resistence must be 50  o 1M')
-    
+
     def get_sample_rate(self):
         return self._TDS.query('HORizontal:MAIn:SAMPLERate?')
 
     def set_sample_rate(self, num):
         self._TDS.write(f'HORizontal:MAIn:SAMPLERate {num}')
+   
+    def set_hor_scale(self, y):
+        self._TDS.write(f'HORizontal:MAIn:SCAle {y}')
 
+    def prepare_for_trigger(self):
+        self._TDS.write("ACQ:STOPAFTER SEQUENCE") # Si ferma dopo un singolo evento
+        self._TDS.write("ACQ:STATE ON")           # Avvia l'ascolto
+
+        # Aspetta un istante per garantire che il comando sia recepito
+        time.sleep(0.1) 
+        # 2. Invia l'impulso dal generatore
+        # L'oscilloscopio catturerà l'onda istantaneamente via hardware
+    '''
+    def wait(self):
+        # 3. Attesa del completamento (SINCRONIZZAZIONE)
+        # Interroghiamo lo stato del trigger. Finché è 'READY', sta ancora aspettando l'onda.
+        # Quando l'onda passa, lo stato cambierà.
+        print("In attesa del segnale...")
+        while self._TDS.query("TRIG:STAT?").strip() == "READY":
+            time.sleep(0.01)
+    '''
     def acquisition(self, ch, start, stop):
         h_sc = self._TDS.query("HOR:SCA?")
         Sr = self._TDS.query("HORizontal:MAIn:SAMPLERate?")
@@ -309,25 +274,19 @@ class TDS() :
         result = dict(H_scale=float(h_sc), sample_rate = float(Sr), V_scale = float(v_sc), raw_data = data_array, data = rescaled_data)
         return result
 
-
-    def be_ready(self):
-        self._TDS.write("ACQ:STOPAFTER SEQUENCE")
-        self._TDS.write("ACQ:STATE ON")
-
-    def wait(self):
+    def wait(self, sigma_):
         print("In attesa dell'impulso...")
-        timeout = 6.0
+        timeout = sigma_ * 50
         start_time = time.time()
         while True:
             # ACQ:STATE? diventa '0' quando l'oscilloscopio ha finito di catturare l'onda
+            if (time.time() - start_time) > timeout:
+                print("Errore: L'impulso non è arrivato in tempo.")
+                break
             if self._TDS.query("ACQ:STATE?").strip() == '0':
                 print("Impulso catturato con successo!")
                 break
-            if (time.time() - start_time) > timeout:
-                print("Errore: L'impulso non è arrivato in tempo.")
-                return
-            time.sleep(0.01)
-
+            
     def set_trigger(self, source_channel=2, coupling='DC'):
         ch_name = f'CH{source_channel}'
         self._TDS.write(f'TRIGger:A:TYPe PULSE')
@@ -387,3 +346,55 @@ class TDS() :
         if state not in ['OFF','ON','RUN','STOP']:
             raise ValueError("State must be 'OFF', 'ON', 'RUN', or 'STOP'")
         self._TDS.write(f"ACQ:STATE {state}")
+   
+    def get_acquire_state(self):
+        return self._TDS.query("ACQ:STATE?")
+    
+
+
+class LO():
+
+    debug = True
+    debug_prefix = ""
+
+    def __init__(self, name):
+        self._LO = serial.Serial(name)  # open serial port
+        self._LO.flushInput() # Clear the input buffer to ensure there are no pending commands
+
+        if not self._LO.is_open: raise Exception("Connection failed.")
+
+
+    def write(self, unterminated_command):
+        command_utf8 = (unterminated_command + "\r\n").encode(encoding="utf-8")
+        self._LO.write(command_utf8)
+
+        if self.debug: print(f"{self.debug_prefix}[{unterminated_command}]")
+
+    def query(self, unterminated_command):    
+        command_utf8 = (unterminated_command + "\r\n").encode(encoding="utf-8")
+        self._LO.write(command_utf8)
+        string = self._LO.readline().decode("utf-8").strip()
+
+        if self.debug: print(f"{self.debug_prefix}[{unterminated_command}] {string}")
+
+        return string
+    
+    def get_IDN(self):
+        return self.query("*IDN?")
+    
+    def turn_on(self):
+        self.write("OUTP:STAT ON") # turn on the output
+    
+    def turn_off(self):
+        self.write("OUTP:STAT OFF") # turn off the output
+
+    def set_freq(self, f):
+        """Set synthetized frequency in Hz"""
+        f_millis = f * 1000 # f in mHz
+        self.write(f"FREQ {f_millis}mlHz")
+        time.sleep(0.005)
+        # self.write('OUTP:STAT ON')
+        self.freq = f
+
+        if int(self.query("FREQ?")) != f_millis: 
+            raise Exception(f"Could not set 'freq' to {f}.")
