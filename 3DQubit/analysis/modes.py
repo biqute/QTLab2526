@@ -19,3 +19,5 @@ d.fast_plot(x=n_modes, y=residuals,
                 point_tipe = 'o',
                 save_as=save_as)
 
+
+

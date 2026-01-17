@@ -15,7 +15,6 @@ def lorentzian_power_tilt(f, A, f0, gamma, y0, m):
 
 # === Lettura dati ===
 data_file = "misura_S21"
-
 save_as = "Fit_Lorentz"
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
@@ -53,13 +52,6 @@ print(f"Gamma (FWHM) = {gamma_fit:.6g}")
 f_fit = np.linspace(f.min(), f.max(), 2000)
 y_fit = lorentzian_power_tilt(f_fit, *popt)
 
-"""fig, ax = plt.subplots()
-
-ax.set_xlabel("Frequenza [Hz]")
-ax.set_ylabel("|S21| (modulo)")
-#ax.legend()
-fig.tight_layout()"""
-
 fig = plt.figure(figsize=(10, 6), constrained_layout=True) # --Layout: big left (IQ), right (mag, phase)
 
 gs = GridSpec(
@@ -89,16 +81,16 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(f, y, '.', label="Dati (|S21|)")
-ax_mag.plot(f_fit, y_fit, '-', label="Fit Lorentz + tilt")
-ax_mag.set_xlabel(r"$f[GHz]$")
+ax_mag.plot(f/1e9, y, '.', label="Dati (|S21|)")
+ax_mag.plot(f_fit/1e9, y_fit, '-', label="Fit Lorentz + tilt")
+ax_mag.set_xlabel(r"$f\,[GHz]$")
 ax_mag.set_ylabel(r"$|S_{21}|$")
 ax_mag.grid(True, alpha=0.3)
 ax_mag.set_title("Magnitude")
 
 #----Phase plot-------
-ax_phase.plot(f, phase, '-', lw=1)
-ax_phase.set_xlabel(r"$f [GHz]$")
+ax_phase.plot(f/1e9, phase, '-', lw=1)
+ax_phase.set_xlabel(r"$f\,[GHz]$")
 ax_phase.set_ylabel(r"$\phi [rad]$")
 ax_phase.grid(True, alpha=0.3)
 ax_phase.set_title("Phase")
@@ -106,5 +98,7 @@ ax_phase.legend(loc ="best")
             
 save_as += ".pdf"
 fig.savefig(f"../data0_plots/{save_as}", bbox_inches="tight")
-print(f"Grafico salvato in ../data/{save_as}")
+print(f"Grafico salvato in ../data0_plots/{save_as}")
+
+plt.show()
 
