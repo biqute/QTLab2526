@@ -9,12 +9,11 @@ import os
 
 sys.path.append(r"C:\Users\kid\labQT\Lab2025\3DQubit")
 
-#from QTLab2526.SinglePhoton.PICO.instruments import Instrument
 import threading
 import json
 import atexit
 
-class PicoScope():
+class PICO():
     """
     Interface for controlling PicoScope 5000 series oscilloscopes.
     
