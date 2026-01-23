@@ -219,14 +219,25 @@ def main():
         time_axis = np.linspace(
             0, (cmaxSamples.value - 1) * timeIntervalns.value, cmaxSamples.value
         )
-
+        # --- SALVATAGGIO DATI SU FILE TXT ---
+        # Creiamo una matrice con due colonne: Tempo e Tensione
+        data_to_save = np.column_stack((time_axis, data_mV))
+        filename_txt = "../data/gaus_env_data.txt"
+        np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Tempo(us) Tensione(mV)", delimiter='\t')
+        print(f"Dati salvati in: {filename_txt}")
         plt.figure(figsize=(10, 6))
         plt.plot(time_axis / 1000.0, data_mV) # x in µs
         plt.xlabel("Tempo (µs)")
         plt.ylabel("Tensione (mV)")
         plt.title(f"Acquisizione AWG (16-bit) - {FREQUENCY_HZ} Hz")
         plt.grid(True)
+        
+        nome_grafico = "gauss_envelope.pdf"
+        plt.savefig(f"../data0_plots/{nome_grafico}")
+        print(f"Grafico salvato in: data0_plots/{nome_grafico}")
+        
         plt.show()
+        
 
         status["stop"] = ps.ps5000aStop(chandle)
 
