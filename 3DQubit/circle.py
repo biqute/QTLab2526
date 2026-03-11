@@ -6,24 +6,16 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from circle_fit import CircleFitter
 
-########data_2 : fr = 7416673638.266621,  FWHM = 1170395.373197911
-########data_0 : fr = 7574662954.98695,   FWHM = 1517610.169032476
-
 ########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,
     "font.family": "Helvetica"
 })
 
-############# FIT FUNCTIONS ################
 
 #---Phase fit to get resonance f------
 def theta_model(f, theta0, Qr, fr):
     return theta0 + 2*np.arctan( 2*Qr*(1.0 - f/fr) )
-
-def phase_residuals(p, f, theta):
-    theta0, Qr, fr = p
-    return theta_model(f, theta0, Qr, fr) - theta
 
 #---Complex model S21 notch----------
 
@@ -31,10 +23,6 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
     mod_QC = abs_Qc
     phi = phase_Qc
     return a * np.exp(1j*alpha)*np.exp(-1j* 2*np.pi*tau * f) * (1 - ((Ql/mod_QC) * np.exp(1j *phi))/(1 + 2j *Ql*(f/f0 -1)))
-
-def S21_notch_real(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
-    z = S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau)
-    return np.hstack([z.real, z.imag])
 
 ################ MAIN ########################
 # ---------------- Load data ----------------
@@ -58,22 +46,22 @@ fitter = CircleFitter()
 
 S21 = signal * np.exp(1j * phase)
 
-TAU = fitter.guess_delay(frequencies, S21)
+TAU = fitter._guess_delay(frequencies, S21)
 
 print("initial TAU guess:", TAU)
 
-S21_calibrated = fitter.remove_cable_delay(frequencies, S21, TAU)
+S21_calibrated = fitter._remove_cable_delay(frequencies, S21, TAU)
 
 # ---------------- Circle fit via CircleFitter ----------------
 
-tau_true = fitter.fit_delay(frequencies, S21_calibrated)
+tau_true = fitter._fit_delay(frequencies, S21_calibrated)
 
 print("true tau:", tau_true)
 
-S21_calibrated = fitter.remove_cable_delay(frequencies, S21_calibrated, tau_true)
+S21_calibrated = fitter._remove_cable_delay(frequencies, S21_calibrated, tau_true)
 
 #------Ideal circle-----
-x_c, y_c, r_0 = fitter.fit_from_complex(S21_calibrated)
+x_c, y_c, r_0 = fitter._fit_from_complex(S21_calibrated)
 
 theta = np.linspace(0, 2*np.pi, 400)
 xcirc = r_0 * np.cos(theta) +x_c
@@ -82,7 +70,7 @@ ycirc = r_0 * np.sin(theta) +y_c
 
 
 #------Translating to the origin---
-S21_centered = S21_calibrated - x_c - 1j* y_c
+S21_centered = fitter._center(S21_calibrated, x_c, y_c)
 
 real_S21 = S21_centered.real 
 imag_S21 = S21_centered.imag
@@ -94,24 +82,8 @@ span = np.degrees(np.max(np.unwrap(angles)) - np.min(np.unwrap(angles)))
 print("Arc span =", span, "degrees")
 
 #-----Phase fit to get resonance----------
-#print (np.asin(y_c/r_0))
-fr0 = 7416673638.266621 #from lorentzian fit
-theta0_0 = -4
-Qr0 =  fr0/1170395.373197911#from Lorentzian fit FWHM
-
-print(Qr0)
-
-
-p0 = [theta0_0, Qr0, fr0] #initial guess
-
-res_fase = least_squares(
-    lambda p: phase_residuals(p, frequencies, phase_centered),
-    x0=p0,
-    bounds=([-10*np.pi,     1e2,     frequencies.min()],        #Qr0/5, Qr0*5 works for data.npz!!!!!
-            [ 10*np.pi, 1e7, frequencies.max()])
-)
-
-theta_0, Q_r, f_r = res_fase.x
+f_r_guess, Q_r_guess = fitter._fit_lorentz(S21_calibrated, frequencies)
+theta_0, Q_r, f_r = fitter._fit_phase(S21_centered, frequencies, -4, Q_r_guess, f_r_guess)
 
 theta_fit = theta_model(frequencies, theta_0, Q_r, f_r)
 
@@ -131,27 +103,9 @@ print(alpha)
 print(a_scaling)
 
 
-#---Canonical form of S_21---
-
-S21_final = S21_calibrated/a_scaling * np.exp(-1j*alpha)
-
-real_S21_final = S21_final.real
-imag_S21_final = S21_final.imag
-
-phase_final = np.unwrap(np.angle(S21_final))
-signal_final = abs(S21_final)
-
-
 #---Final circle fit of the canonical form---
 
-x_can, y_can, r_0_can = fitter.fit_from_complex(S21_final)
-
-print(x_can, y_can, r_0_can)
-
-theta_can = np.linspace(0, 2*np.pi, 400)
-xcirc_can = x_can + r_0_can * np.cos(theta)
-ycirc_can = y_can + r_0_can * np.sin(theta)
-
+x_can, y_can, r_0_can = fitter._fit_from_complex(fitter._canonize(frequencies, S21, a_scaling, alpha, TAU + tau_true))
 
 #---Quality factors----
 Q_c_mag = Q_r * 2* r_0_can
@@ -166,29 +120,16 @@ Q_i_rev = 1/Q_r - Q_c_rev.real
 
 Q_i = 1/Q_i_rev
 
-print("Internal Quality Factor Q_i =", Q_i)
-print("absolute value |Qc|", abs(Q_c))
-print("phase of Qc (rad)", np.angle(Q_c))
-
 
 #---Performing complex fit now-----
 S = signal * np.exp(1j * phase)  # complex
 
 ydata = np.hstack([S.real, S.imag])
 
-abs_Qc = abs(Q_c)
-phase_Qc = np.angle(Q_c)
+params, pcov = fitter._fit_notch(S, frequencies, Q_r, Q_c, f_r, a_scaling, alpha, TAU + tau_true)
 
 
-p0 = [Q_r , abs_Qc, phase_Qc, f_r, a_scaling, alpha, TAU + tau_true] #params from circle fit
-
-# Bounds 
-lower = [1,   1e1,   -np.pi, frequencies.min() , 1e-2, -np.pi, -1e7]
-upper = [1e8 ,  1e8,   np.pi, frequencies.max(),  1e2,  np.pi,  1e7 ]
-
-popt, pcov = curve_fit(S21_notch_real, frequencies, ydata, p0=p0, bounds=(lower, upper), maxfev = 10000)
-
-Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit = popt
+Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit = params
 
 Qc_fit= abs_Qc_fit * np.exp(-1j * phase_Qc_fit)
 
@@ -198,31 +139,20 @@ Qi_fit_rev = 1/Ql_fit - Qc_fit_rev.real
 
 Qi_fit = 1/Qi_fit_rev
 
-print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", popt)
+print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
 
 print("cov matrix:", pcov)
 
 
 S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit) #/a_fit * np.exp(+1j* 2*np.pi*(TAU+tau_fit)*frequencies)*np.exp(-1j*alpha_fit)
-S_canonized = fitter.canonize(frequencies, S, a_fit, alpha_fit, TAU+tau_fit)
+S_canonized = fitter._canonize(frequencies, S, a_fit, alpha_fit, TAU+tau_fit)
 
 
 #------Residuals-------
 
-residuals_mag = abs(S) - abs(S_fit)
-residuals_phase = np.unwrap(np.angle(S)) - np.unwrap(np.angle(S_fit))
-
 residuals = S - S_fit
 
-x = residuals.real
-y = residuals.imag
-data = np.column_stack([x, y])  # shape (N, 2)
 
-mean = data.mean(axis=0)        # [mean_x, mean_y]
-cov = np.cov(data, rowvar=False)  # 2x2 covariance matrix
-
-print ("res mean =", mean)
-print("res cov =", cov)
 
 #---Plot section----
 
@@ -259,16 +189,16 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(residuals.real[::50], residuals.imag[::50],marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
-#ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
+ax_mag.plot(frequencies[::150]/1e9, abs(S)[::150],marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
 ax_mag.set_xlabel(r"$f[GHz]$")
 ax_mag.set_ylabel(r"$|S_{21}|$")
 ax_mag.grid(True, alpha=0.3)
 ax_mag.set_title("Magnitude")
 
 #----Phase plot-------
-ax_phase.plot(frequencies[::200]/1e9, residuals_phase[::200], marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
-#ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='arg(S_{21})')
+ax_phase.plot(frequencies[::200]/1e9, np.unwrap(np.angle(S))[::200], marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='arg(S_{21})')
 ax_phase.set_xlabel(r"$f [GHz]$")
 ax_phase.set_ylabel(r"$\phi [rad]$")
 ax_phase.grid(True, alpha=0.3)
