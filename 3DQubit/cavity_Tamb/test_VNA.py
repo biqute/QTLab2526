@@ -8,19 +8,23 @@ import pyvisa
 
 ## code to characterize cavity 
 
-ip = '193.206.156.99'
+#ip = '193.206.156.99'
+#ip = '192.168.40.10'
+ip = '193.206.156.3'
+#ip = '192.168.3.47'
+#ip = '193.206.156.1'
+#ip = '212.189.204.254'
 
-f_min = 4.28e9
-f_max = 4.45e9
-f_central = 6e9
-f_span = 0.5e9
+f_min = 1e9
+f_max = 15e9
+f_central = 13.64e9
+f_span = 700e6
 n_points = 1001
 n_means = 20
 power = 0
 ifband = 10000
 
-
-n_misura = "0"
+n_misura = "13.64GHz"
 data_file = "cavity_" + n_misura
 output_file = "cavity_plot" +  n_misura
 

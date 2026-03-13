@@ -14,8 +14,8 @@ def lorentzian_power_tilt(f, A, f0, gamma, y0, m):
     return y0 + m*(f - f0) + A / (1 + 4*(f - f0)**2 / gamma**2)
 
 # === Lettura dati ===
-data_file = "misura_S21"
-save_as = "Fit_Lorentz"
+data_file = "cavity_10.335GHz"
+save_as = "Fit_"+data_file
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
 data = np.loadtxt("../data/"+data_file + ".txt", delimiter="\t")
