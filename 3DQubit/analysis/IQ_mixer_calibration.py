@@ -73,6 +73,7 @@ fig, ax = plt.subplots()
 #----Signal plot-----
 ax.plot(Q, I, marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8,  label="Mixer Response")
 ax.plot(xcirc, ycirc,'-', ms=1.5, color = "red", label="Fitted Response")
+ax.plot(x_c, y_c,marker='o', ms=1.5, color = "red", label="x_c, y_c")
 ax.set_xlabel(r"$Q$")
 ax.set_ylabel(r"$I$")
 ax.axis('equal')

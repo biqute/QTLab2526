@@ -165,8 +165,8 @@ class CircleFitter:
 
         p = optimize.least_squares(
             lambda p: phase_residuals(p, frequencies, phase_centered),
-            x0=p0, bounds=([-10*np.pi,     0,     frequencies.min()],        
-            [ 10*np.pi, 1e7, frequencies.max()]))
+            x0=p0, bounds=([-np.pi,     0,     frequencies.min()],        
+            [ np.pi, 1e7, frequencies.max()]))
 
         return p.x
 
