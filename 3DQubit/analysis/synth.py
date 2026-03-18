@@ -1,4 +1,3 @@
-## comincio con il fittare lo spettro del PSA
 
 import sys
 sys.path.append("../classes")

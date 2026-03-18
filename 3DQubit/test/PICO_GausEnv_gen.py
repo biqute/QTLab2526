@@ -40,7 +40,7 @@ os.add_dll_directory(dll_path)
 print("DLL loaded from:", dll_path)
 
 # ================== PARAMETRI AWG ===========================
-FREQUENCY_HZ      = 500.0       #  Hz 
+FREQUENCY_HZ      = 1500.0       #  Hz 
 DUTY_CYCLE_TARGET = 0.1       # quanto sta sopra dell'onda quadra   
 AMPLITUDE_VPP_V   = 1.39         # Volt picco-picco
 # Offset per avere segnale tra 0V (High) e -1.39V (Low)
@@ -57,6 +57,7 @@ def main():
     # --------------------------------------------------------
     resolution = ps.PS5000A_DEVICE_RESOLUTION["PS5000A_DR_16BIT"]
     status["openunit"] = ps.ps5000aOpenUnit(ctypes.byref(chandle), None, resolution)
+
 
     try:
         assert_pico_ok(status["openunit"])
@@ -96,8 +97,10 @@ def main():
 # ============================================================
 # 3) Setup AWG (Generatore di Funzioni) - VERSIONE GAUSSIANA
 # ============================================================
-        N_OSCILLAZIONI = 15  # Numero di cicli della sinusoide dentro la campana
-        LARGHEZZA_SIGMA = 0.8
+        f_real = 22.5e3 ## frequenza in Hz
+        N_OSCILLAZIONI = f_real/FREQUENCY_HZ  # Numero di cicli della sinusoide dentro la campana
+        print(f'Frequency of signal = {f_real} Hz')
+        LARGHEZZA_SIGMA = 1
         signal_float = generate_gaussian_sinusoid(WAVEFORM_SAMPLES, N_OSCILLAZIONI, LARGHEZZA_SIGMA)
         waveform = (signal_float * max_val.value).astype(np.int16)
 # Visualizziamo i parametri per debug
@@ -167,8 +170,8 @@ def main():
         # Timebase 127 a 16-bit corrisponde a circa 1000ns (1µs) per campione.
         # Con 5000 campioni => 5ms totali (vedrai ~7 cicli da 0.66ms l'uno)
         # Aumenta i campioni per vedere l'intera campana (1.5kHz = 666us di periodo)
-        preTriggerSamples = 1000
-        postTriggerSamples = 1000 
+        preTriggerSamples = 400
+        postTriggerSamples = 400 
         timebase = 64 # Rallenta il campionamento per catturare più tempo
         totalSamples = preTriggerSamples + postTriggerSamples
        
@@ -221,18 +224,18 @@ def main():
         )
         # --- SALVATAGGIO DATI SU FILE TXT ---
         # Creiamo una matrice con due colonne: Tempo e Tensione
-        data_to_save = np.column_stack((time_axis, data_mV))
-        filename_txt = "../data/gaus_env_data.txt"
-        np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Tempo(us) Tensione(mV)", delimiter='\t')
+        data_to_save = np.column_stack((time_axis/1000, data_mV))
+        filename_txt = "../data/gaus_env_data_new.txt"
+        np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Time(us) Voltage(mV)", delimiter='\t')
         print(f"Dati salvati in: {filename_txt}")
         plt.figure(figsize=(10, 6))
         plt.plot(time_axis / 1000.0, data_mV) # x in µs
-        plt.xlabel("Tempo (µs)")
-        plt.ylabel("Tensione (mV)")
+        plt.xlabel("Time (µs)")
+        plt.ylabel("Voltage (mV)")
         plt.title(f"Acquisizione AWG (16-bit) - {FREQUENCY_HZ} Hz")
         plt.grid(True)
         
-        nome_grafico = "gauss_envelope.pdf"
+        nome_grafico = "gauss_envelope_new.pdf"
         plt.savefig(f"../data0_plots/{nome_grafico}")
         print(f"Grafico salvato in: data0_plots/{nome_grafico}")
         

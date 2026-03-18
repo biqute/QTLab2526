@@ -14,13 +14,19 @@ dll_path = os.path.abspath(os.path.dirname(__file__))
 os.add_dll_directory(dll_path)
 print("DLL loaded from:", dll_path)
 
+DURATA_IMPULSO_US = 100.0  # Durata dello stato HIGH desiderata in microsecondi
+
+
 # ================== PARAMETRI AWG ===========================
-FREQUENCY_HZ      = 1000.0       # 1.5 kHz (Periodo ~666 µs)
+FREQUENCY_HZ      = 1500.0       # 1.5 kHz (Periodo ~666 µs)
 DUTY_CYCLE_TARGET = 0.9998       # 99.98 %    
 AMPLITUDE_VPP_V   = 1.00       # Volt picco-picco
 # Offset per avere segnale tra 0V (High) e -1.39V (Low)
 OFFSET_V          = -AMPLITUDE_VPP_V / 2
 WAVEFORM_SAMPLES  = 30000         # punti tabella AWG
+
+periodo_us = (1.0 / FREQUENCY_HZ) * 1e6
+DUTY_CYCLE_TARGET = DURATA_IMPULSO_US / periodo_us
 # ============================================================
 
 def main():
@@ -134,13 +140,11 @@ def main():
         assert_pico_ok(status["trigger"])
 
         # ----------------------------------------------------
-        # 5) Timebase e Acquisizione
-        # ----------------------------------------------------
-        # Timebase 127 a 16-bit corrisponde a circa 1000ns (1µs) per campione.
-        # Con 5000 campioni => 5ms totali (vedrai ~7 cicli da 0.66ms l'uno)
-        timebase = 4
-        preTriggerSamples = 5
-        postTriggerSamples = 25
+        # --- 5) Timebase e Acquisizione ottimizzata ---
+        # Per 1.5 kHz (periodo 666 us), vogliamo vedere almeno 1-2 ms
+        timebase = 65  # Circa 1us per campione (dipende dal modello, controlla il print)
+        preTriggerSamples = 500
+        postTriggerSamples = 2000 
         totalSamples = preTriggerSamples + postTriggerSamples
        
         timeIntervalns = ctypes.c_float()
@@ -194,16 +198,16 @@ def main():
         # --- SALVATAGGIO DATI SU FILE TXT ---
         # Creiamo una matrice con due colonne: Tempo e Tensione
         data_to_save = np.column_stack((time_axis, data_mV))
-        filename_txt = "../data/pico_gen_square_data.txt"
-        np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Tempo(us) Tensione(mV)", delimiter='\t')
+        filename_txt = "../data/pico_gen_square_data_new.txt"
+        np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Time(us) Voltage(mV)", delimiter='\t')
         print(f"Dati salvati in: {filename_txt}")
         plt.figure(figsize=(10, 6))
-        plt.plot(time_axis / 1000.0, data_mV) # x in µs
-        plt.xlabel("Tempo (µs)")
-        plt.ylabel("Tensione (mV)")
+        plt.plot(time_axis, data_mV) # x in µs
+        plt.xlabel("Time (µs)")
+        plt.ylabel("Voltage (mV)")
         plt.title(f"Acquisizione AWG (16-bit) - {FREQUENCY_HZ} Hz")
         plt.grid(True)
-        nome_grafico = "pico_gen_square.pdf"
+        nome_grafico = "pico_gen_square_new.pdf"
         plt.savefig(f"../data0_plots/{nome_grafico}")
         print(f"Grafico salvato in: data0_plots/{nome_grafico}")
         plt.show()
