@@ -17,14 +17,14 @@ ip = '193.206.156.3'
 
 f_min = 1e9
 f_max = 15e9
-f_central = 13.64e9
-f_span = 700e6
+f_central = 13.642e9
+f_span = 180e6
 n_points = 1001
 n_means = 20
 power = 0
 ifband = 10000
 
-n_misura = "13.64GHz"
+n_misura = "13_642GHz"
 data_file = "cavity_" + n_misura
 output_file = "cavity_plot" +  n_misura
 
