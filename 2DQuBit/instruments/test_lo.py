@@ -1,10 +1,20 @@
 import numpy as np
+import time
 import pyvisa
-from classes import LO
+from classes2 import LO
+import serial.tools.list_ports
 
-my_lo = LO(name='COM7')
-print(my_lo.get_IDN())
-my_lo.set_freq(5e9)
-my_lo.turn_off()
+ports = serial.tools.list_ports.comports()
+for p in ports:
+    print(p.device)
+
+
+my_lo = LO(name='COM9')
+my_lo.turn_on()
+my_lo.set_freq(5000000000)
+my_lo.set_pow(30)
+#my_lo.turn_on()
+
+
 
 
