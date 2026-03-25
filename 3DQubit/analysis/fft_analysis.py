@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from numpy.fft import fft, fftfreq
 
 # 1. Caricamento dati 
-data_square = np.loadtxt("../data/pico_gen_square_data_new.txt")
+data_square = np.loadtxt("../data/square_env_data_new.txt")
 data_gaus = np.loadtxt("../data/gaus_env_data_new.txt")
 
 t_s = data_square[:, 0]  # Tempo square
@@ -14,13 +14,13 @@ y_g = data_gaus[:, 1]    # Ampiezza gaussiana
 
 # 2. Parametri di campionamento per square
 dt_s = t_s[1] - t_s[0]
-dt_s_sec = dt_s * 1e-9       # CONVERSIONE IN SECONDI
+dt_s_sec = dt_s * 1e-6       # CONVERSIONE IN SECONDI
 fs_s = 1 / dt_s_sec              
 n_s = len(t_s)             
 
 # 2. Parametri di campionamento per gaussiano
 dt_g = t_g[1] - t_g[0]     
-dt_g_sec = dt_g * 1e-9       # CONVERSIONE IN SECONDI
+dt_g_sec = dt_g * 1e-6       # CONVERSIONE IN SECONDI
 fs_g = 1 / dt_g_sec              
 n_g = len(t_g)             
 
@@ -40,6 +40,13 @@ amp_square = np.abs(X_square[:half_n_s]) / n_s
 half_n_g = n_g // 2                      # AGGIUNTO
 freq_plot_g = freq_g[:half_n_g]          # AGGIUNTO
 amp_gaus = np.abs(X_gaus[:half_n_g]) / n_g
+
+data_to_save = np.column_stack((freq_plot_s, amp_square))
+np.savetxt("../data/fft_square.txt", data_to_save, fmt='%.6f', header="Freq(Hz) Amp(arb)", delimiter='\t')
+
+data_to_save = np.column_stack((freq_plot_g, amp_gaus))
+np.savetxt("../data/fft_gauss.txt", data_to_save, fmt='%.6f', header="Freq(Hz) Amp(arb)", delimiter='\t')
+
 
 # 4. Visualizzazione
 plt.figure(figsize=(14, 6))
@@ -68,4 +75,7 @@ plt.xlim(0, limit_x)
 plt.legend()
 
 plt.tight_layout()
+
+nome_grafico = "fft_PICO.pdf"
+plt.savefig(f"../data0_plots/{nome_grafico}")
 plt.show()

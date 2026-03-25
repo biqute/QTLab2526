@@ -42,10 +42,13 @@ print("DLL loaded from:", dll_path)
 # ================== PARAMETRI AWG ===========================
 FREQUENCY_HZ      = 1500.0       #  Hz 
 DUTY_CYCLE_TARGET = 0.1       # quanto sta sopra dell'onda quadra   
-AMPLITUDE_VPP_V   = 1.39         # Volt picco-picco
+AMPLITUDE_VPP_V   = 1        # Volt picco-picco
 # Offset per avere segnale tra 0V (High) e -1.39V (Low)
-OFFSET_V          = -AMPLITUDE_VPP_V / 2
+OFFSET_V          = 0
 WAVEFORM_SAMPLES  = 30000         # punti tabella AWG
+
+
+
 # ============================================================
 
 def main():
@@ -97,7 +100,7 @@ def main():
 # ============================================================
 # 3) Setup AWG (Generatore di Funzioni) - VERSIONE GAUSSIANA
 # ============================================================
-        f_real = 22.5e3 ## frequenza in Hz
+        f_real = 15e3 ## frequenza in Hz
         N_OSCILLAZIONI = f_real/FREQUENCY_HZ  # Numero di cicli della sinusoide dentro la campana
         print(f'Frequency of signal = {f_real} Hz')
         LARGHEZZA_SIGMA = 1
@@ -232,7 +235,7 @@ def main():
         plt.plot(time_axis / 1000.0, data_mV) # x in µs
         plt.xlabel("Time (µs)")
         plt.ylabel("Voltage (mV)")
-        plt.title(f"Acquisizione AWG (16-bit) - {FREQUENCY_HZ} Hz")
+        plt.title(f"PICO signal generation - {f_real} Hz")
         plt.grid(True)
         
         nome_grafico = "gauss_envelope_new.pdf"
