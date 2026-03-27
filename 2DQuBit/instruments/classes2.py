@@ -239,6 +239,40 @@ class VNA():
         
         return self._VNA.query("*OPC?")
     
+    def get_data(self, Sij="S21"):
+        
+        self._VNA.write(f"CALC:PAR:DEF {Sij}")
+        self._VNA.write("FORM ASC")
+        self._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
+        self._VNA.write("INIT:IMM")      # Fa partire uno sweep singolo
+        self._VNA.query("*OPC?")
+
+        #self._VNA.wait
+        # Dati formattati (Reale, Immaginario)
+        data_string = self._VNA.query("CALC:DATA:SDATA?")
+        data = np.array(list(map(float, data_string.split(","))))
+        
+        real = np.array(data[0::2])
+        imag = np.array(data[1::2])
+        self._VNA.write("INIT:CONT ON")
+
+        return real, imag
+    
+
+    def save_vna_data(filename, freqs, real, imag):
+
+        # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
+        S21_complex = real + 1j * imag
+        
+        # 2. Estraiamo Ampiezza (signal) e Fase in radianti (phase)
+        signal = np.abs(S21_complex)
+        phase = np.angle(S21_complex)
+        
+        # 3. Salviamo i dati indicando esplicitamente le chiavi 'freq', 'signal' e 'phase'
+        # Questo farà in modo che la funzione safe_load_npz del tuo script le riconosca subito.
+        np.savez(filename, freq=freqs, signal=signal, phase=phase)
+        
+        print(f"File salvato con successo: {filename} ({len(freqs)} punti)")
 
 # - - - - - - - - - - - - - - - - - OSCILLOSCOPE - - - - - - - - - - - - - 
 
@@ -459,3 +493,96 @@ def acquire_IQ(dict_par):
     plt.plot(X_phi, phi)
     plt.plot()
     plt.show()
+
+
+
+# SIMULATORE DI VNA PER TESTARE IL CODICE DI ACQUISIZIONE E ANALISI DEI DATI SENZA AVERE IL VNA A DISPOSIZIONE
+class MockVNA:
+    def __init__(self, f_center=4.58, span=0.01, num_points=2000):
+        # Imposta le frequenze che il VNA scansionerà (in GHz)
+        self.freqs = np.linspace(f_center - span/2, f_center + span/2, num_points)
+        
+        # Parametri fisici del tuo risonatore superconduttore
+        self.f0 = f_center      # Frequenza di risonanza (GHz)
+        self.Ql = 15000         # Fattore di qualità caricato (Loaded Q)
+        self.Qc = 18000         # Fattore di qualità di accoppiamento (Coupling Q)
+        
+        # Imperfezioni del setup nel criostato
+        self.cable_delay = 15e-9 # Ritardo dei cavi (15 ns)
+        self.noise_level = 0.002 # Livello di rumore bianco
+
+    def get_frequencies(self):
+        """Restituisce l'array delle frequenze scansionate."""
+        return self.freqs
+
+    def get_data(self, param="S21"):
+        """Restituisce le componenti Reale e Immaginaria del segnale."""
+        if param != "S21":
+            raise ValueError("Errore: il simulatore supporta solo S21.")
+
+        # 1. Calcolo della risposta ideale del risonatore (Notch)
+        dx = (self.freqs - self.f0) / self.f0
+        S21_ideal = 1 - (self.Ql / self.Qc) / (1 + 2j * self.Ql * dx)
+
+        # 2. Aggiunta della rotazione di fase dovuta ai cavi lunghi
+        cable_phase = np.exp(-2j * np.pi * self.freqs * 1e9 * self.cable_delay)
+        
+        # 3. Aggiunta del rumore di misura
+        noise = np.random.normal(0, self.noise_level, len(self.freqs)) + \
+                1j * np.random.normal(0, self.noise_level, len(self.freqs))
+
+        # Segnale finale combinato
+        S21_measured = (S21_ideal + noise) * cable_phase
+
+        return np.real(S21_measured), np.imag(S21_measured)
+    
+    def save_vna_data(self, filename, freqs, real, imag):
+
+        # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
+        S21_complex = real + 1j * imag
+        
+        # 2. Estraiamo Ampiezza (signal) e Fase in radianti (phase)
+        signal = np.abs(S21_complex)
+        phase = np.angle(S21_complex)
+        
+        # 3. Salviamo i dati indicando esplicitamente le chiavi 'freq', 'signal' e 'phase'
+        # Questo farà in modo che la funzione safe_load_npz del tuo script le riconosca subito.
+        np.savez(filename, freq=freqs, signal=signal, phase=phase)
+        
+        print(f"File salvato con successo: {filename} ({len(freqs)} punti)")
+
+
+    def save_vna_data2(self, filename, freqs, real, imag):
+        import numpy as np # Assicurati che numpy sia importato
+
+        # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
+        S21_complex = real + 1j * imag
+        
+        # 2. Estraiamo Ampiezza (signal) e Fase in radianti (phase)
+        signal = np.abs(S21_complex)
+        phase = np.angle(S21_complex)
+        
+        # 3. Creiamo l'array strutturato (Structured Array) esattamente come lo vuole il fit
+        # Definiamo il tipo di dato (dtype) complesso con i nomi richiesti
+        dt = np.dtype([('freq', '<f8'), 
+                       ('signal', '<f8'), 
+                       ('phase', '<f8'), 
+                       ('error_signal', '<f8'), 
+                       ('error_phase', '<f8')])
+        
+        # Creiamo un array vuoto con questa struttura, lungo quanto i nostri dati
+        structured_data = np.zeros(len(freqs), dtype=dt)
+        
+        # Riempiamo l'array strutturato
+        structured_data['freq'] = freqs
+        structured_data['signal'] = signal
+        structured_data['phase'] = phase
+        # I campi 'error_signal' ed 'error_phase' rimangono a zero, 
+        # dato che nel mock non calcoliamo l'errore punto per punto.
+        
+        # 4. Salviamo l'array strutturato in un file .npz usando un dizionario.
+        # Spesso questi vecchi script si aspettano che la chiave sia '0' o 'arr_0'
+        # Usare '0' nel dizionario simula il comportamento di default o specifico.
+        np.savez(filename, **{'0': structured_data}) 
+        
+        print(f"File salvato con successo NEL NUOVO FORMATO STRUTTURATO: {filename} ({len(freqs)} punti)")
