@@ -6,21 +6,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvisa
     
-ip = '193.206.156.99'
+ip = '193.206.156.3'
 
 f_min = 4.28e9
 f_max = 4.45e9
-f_central = 8.6420e9
+f_central = 7.49e9
 f_span = 0.1e9
 n_points = 1001
 n_means = 20
 power = 0
-ifband = 10000
+ifband = 1000
 
 
-n_misura = "5"
-data_file = "misura_S21_" + n_misura
-output_file = "risonanza_test_plot_" +  n_misura
+n_misura = "0"
+data_file = "10mK_MKID" + n_misura
+output_file = "MKID_plot" +  n_misura
 
 Sij = "S21"
 
