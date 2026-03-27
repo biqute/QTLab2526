@@ -2,32 +2,41 @@ from classes2 import VNA, MockVNA
 import numpy as np
 import matplotlib.pyplot as plt
 
-#my_vna = VNA(ip_address ='193.206.156.25') 
-#my_vna.get_IDN()
+my_vna = VNA(ip_address ='193.206.156.3') 
+my_vna.get_IDN()
 
 
-'''
-f_start = 7.4e9
-f_stop = 7.45e9
-my_vna.set_freq_minmax(f_start, f_stop)
-points = 10000
+#my_vna.set_freq_minmax(f_start, f_stop)
+f_center = 8.6435e9
+span = 0.004e9
+my_vna.set_freq_center(f_center, span)
+
+f_start = f_center-(span/2)
+f_stop = f_center+(span/2)
+#f_start = 7.2e9
+#f_stop = 8.8e9
+points = 1200
 my_vna.set_points(points)
-
+my_vna.set_power(-5)
+my_vna.set_sweep_time(0.00001)
+my_vna.set_average(10)
 freqs = np.linspace(f_start, f_stop, points)
-'''
 
+'''
 my_vna = MockVNA(f_center=5.1) # simulate a VNA with a resonance at 5.1 GHz
 freqs = my_vna.get_frequencies()
+'''
+
 real, imag = my_vna.get_data("S21")
-my_vna.save_vna_data2("dati_new.npz", freqs, real, imag)
+my_vna.save_vna_data2("mkid100K_7.npz", freqs, real, imag)
 
 # plot grezzo dei dati acquisiti
-data = np.load('dati_new.npz', allow_pickle=True)
-'''
-freqs = data['freq']
-mag = data['signal']
-phase = data['phase']
-'''
+data = np.load('mkid100K_7.npz', allow_pickle=True)
+
+#freqs = data['freq']
+#mag = data['signal']
+#phase = data['phase']
+
 
 # metodo alternativo -------------------------------
 struttura = data['0']

@@ -259,7 +259,7 @@ class VNA():
         return real, imag
     
 
-    def save_vna_data(filename, freqs, real, imag):
+    def save_vna_data(self, filename, freqs, real, imag):
 
         # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
         S21_complex = real + 1j * imag
@@ -273,6 +273,43 @@ class VNA():
         np.savez(filename, freq=freqs, signal=signal, phase=phase)
         
         print(f"File salvato con successo: {filename} ({len(freqs)} punti)")
+        
+        
+        
+    def save_vna_data2(self, filename, freqs, real, imag):
+        import numpy as np # Assicurati che numpy sia importato
+
+        # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
+        S21_complex = real + 1j * imag
+        
+        # 2. Estraiamo Ampiezza (signal) e Fase in radianti (phase)
+        signal = np.abs(S21_complex)
+        phase = np.angle(S21_complex)
+        
+        # 3. Creiamo l'array strutturato (Structured Array) esattamente come lo vuole il fit
+        # Definiamo il tipo di dato (dtype) complesso con i nomi richiesti
+        dt = np.dtype([('freq', '<f8'), 
+                       ('signal', '<f8'), 
+                       ('phase', '<f8'), 
+                       ('error_signal', '<f8'), 
+                       ('error_phase', '<f8')])
+        
+        # Creiamo un array vuoto con questa struttura, lungo quanto i nostri dati
+        structured_data = np.zeros(len(freqs), dtype=dt)
+        
+        # Riempiamo l'array strutturato
+        structured_data['freq'] = freqs
+        structured_data['signal'] = signal
+        structured_data['phase'] = phase
+        # I campi 'error_signal' ed 'error_phase' rimangono a zero, 
+        # dato che nel mock non calcoliamo l'errore punto per punto.
+        
+        # 4. Salviamo l'array strutturato in un file .npz usando un dizionario.
+        # Spesso questi vecchi script si aspettano che la chiave sia '0' o 'arr_0'
+        # Usare '0' nel dizionario simula il comportamento di default o specifico.
+        np.savez(filename, **{'0': structured_data}) 
+        
+        print(f"File salvato con successo NEL NUOVO FORMATO STRUTTURATO: {filename} ({len(freqs)} punti)")
 
 # - - - - - - - - - - - - - - - - - OSCILLOSCOPE - - - - - - - - - - - - - 
 

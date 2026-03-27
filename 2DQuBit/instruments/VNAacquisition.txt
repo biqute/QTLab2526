@@ -1,0 +1,102 @@
+
+ACQUISIZIONI DATI DI RISONANZA DEL MKID
+
+parametri di acquisizione dati:
+
+PRIMO PICCO
+
+f_start = 5.9e9 Hz
+f_stop = 6.1e9 Hz
+points = 1001
+power: -5 dB
+scala verticale 5dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 5.99 GHz
+
+PRIMO PICCO NEW
+
+f_center = 5.99e9 Hz
+span = 0.08e9 Hz
+points = 1200
+power: -5 dB
+scala verticale 5dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 5.99 GHz
+
+data_phase.npz acquisita per calibrare la fase con delay 58.460882 ns
+
+SECONDO PICCO
+
+f_center = 7.492e9 Hz
+span = 0.01e9 Hz
+points = 1200
+power: -5 dB
+scala verticale 7dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 7.492 GHz
+
+TERZO PICCO
+
+f_center = 7.8123e9 Hz
+span = 0.004e9 Hz
+points = 1200
+power: -5 dB
+scala verticale 7dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 7.8123 GHz
+
+QUARTO PICCO
+
+f_center = 7.9924e9 Hz
+span = 0.004e9 Hz
+points = 1200
+power: -5 dB
+scala verticale 7dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 7.9924 GHz
+
+QUINTO PICCO
+
+f_center = 8.245e9 Hz
+span = 0.17e9
+points = 1200
+power: -5 dB
+scala verticale 7dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 8.245e9 GHz
+
+SESTO PICCO
+
+f_center = 8.398e9 Hz
+span = 0.004e9
+points = 1200
+power: -5 dB
+scala verticale 7dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 8.398e9 GHz
+
+SETTIMO PICCO
+
+f_center = 8.6435e9 Hz
+span = 0.004e9
+points = 1200
+power: -5 dB
+scala verticale 7dB
+sweep time: 0.00001 
+averages: 10
+electrical delay: 58.460882 ns
+PICCO STIMATO 8.6435e9 GHz
