@@ -13,11 +13,11 @@ def lorentzian_power_tilt(f, A, f0, gamma, y0, m):
     """Lorentziana in potenza + pendenza lineare."""
     return y0 + m*(f - f0) + A / (1 + 4*(f - f0)**2 / gamma**2)
 
-# === Lettura dati ===
-n_misura = "5"
 
-data_file = "misura_S21_" + n_misura
-save_as = "fast_resonance_plot_" + n_misura
+# === Lettura dati ===
+n_misura = "0"
+data_file = "10mK_MKID" + n_misura
+save_as = "fast_resonance_plot_" + data_file
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
 data = np.loadtxt("../data/"+data_file + ".txt", delimiter="\t")
@@ -35,7 +35,7 @@ phase = np.atan(imag/real)
 y = np.sqrt(real**2 + imag**2)
 
 # === Stime iniziali ===
-f0_guess = f[np.argmax(y)]          # picco massimo (o np.argmin se è una "dip")
+f0_guess = f[np.argmin(y)]          # picco massimo (o np.argmin se è una "dip")
 gamma_guess = (f.max() - f.min()) / 10
 A_guess = y.max() - y.min()
 y0_guess = np.median(np.r_[y[:max(10, len(y)//10)], y[-max(10, len(y)//10):]])

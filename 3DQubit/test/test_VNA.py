@@ -10,15 +10,15 @@ ip = '193.206.156.3'
 
 f_min = 4.28e9
 f_max = 4.45e9
-f_central = 7.49e9
-f_span = 0.05e9
+f_central = 7.8121e9
+f_span = 0.04e9
 n_points = 1001
 n_means = 10
 power = 0
 ifband = 1000
 
 
-n_misura = "0"
+n_misura = "1"
 data_file = "10mK_MKID" + n_misura
 output_file = "MKID_plot" +  n_misura
 
@@ -55,6 +55,14 @@ try:
     data.save_txt(file_to_save=data_file
                   #, commento="freq, I e Q"
                   )
+    
+    import numpy as np
+
+    # Raggruppa le variabili in colonne
+    dati_completi = np.column_stack((freq, powe, phi))
+
+    # Salva direttamente nel file txt
+    np.savetxt(data_file+"real.txt", dati_completi, header="Freq\tPowe\tPhi", delimiter="\t", comments="")
 
     # Creating window (fig) with 2 axes (ax1, ax2) 
     fig, (ax1, ax2) = plt.subplots(
