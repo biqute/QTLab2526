@@ -10,15 +10,15 @@ ip = '193.206.156.3'
 
 f_min = 4.28e9
 f_max = 4.45e9
-f_central = 7.8121e9
-f_span = 0.04e9
+f_central = 5.988e9
+f_span = 0.3e9
 n_points = 1001
 n_means = 10
 power = 0
 ifband = 1000
 
 
-n_misura = "1"
+n_misura = "6"
 data_file = "10mK_MKID" + n_misura
 output_file = "MKID_plot" +  n_misura
 
