@@ -11,9 +11,9 @@ ip = '193.206.156.3'
 f_min = 4.28e9
 f_max = 4.45e9
 f_central = 7.49e9
-f_span = 0.1e9
+f_span = 0.05e9
 n_points = 1001
-n_means = 20
+n_means = 10
 power = 0
 ifband = 1000
 
