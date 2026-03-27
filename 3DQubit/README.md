@@ -2,6 +2,10 @@
 
 # TO DO
 
+## NOTA PER DATI MKDI CRYO
+1. I .txt con scritto 'real' sono formattati così: freq amp phase e si trovano (per ora) dentro /test
+2. I .txt senza 'real' sono formattati così: freq I Q
+
 ## Cavity modes
 1. Fare analisi più statistica dei residui
 2. Rifare misure con cavità bella (a T ambiente)
