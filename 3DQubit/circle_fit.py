@@ -153,7 +153,7 @@ class CircleFitter:
         def theta_model(f, theta0, Qr, fr):
 
             return theta0 + 2*np.arctan( 2*Qr*(1.0 - f/fr) )
-        
+    
         def phase_residuals(p, f, theta):
 
             theta0, Qr, fr = p
@@ -165,8 +165,8 @@ class CircleFitter:
 
         p = optimize.least_squares(
             lambda p: phase_residuals(p, frequencies, phase_centered),
-            x0=p0, bounds=([-np.pi,     0,     frequencies.min()],        
-            [ np.pi, 1e7, frequencies.max()]))
+            x0=p0, bounds=([-2*np.pi,  0, frequencies.min()],        
+            [ 2*np.pi,1e7, frequencies.max()]))
 
         return p.x
 
@@ -188,10 +188,11 @@ class CircleFitter:
 
         p0 = [Ql_guess , abs_Qc_guess, phase_Qc_guess, fr_guess, a_guess, alpha_guess, tau_guess]
 
-        lower = [1,   1e1,   -np.pi, f_data.min() , 1e-2, -np.pi, -1e7]
-        upper = [1e8 ,  1e8,   np.pi, f_data.max(),  1e2,  np.pi,  1e7 ]
+        lower = [1,   1e1,   -np.pi, f_data.min() , 1e-7, -np.pi, -1e7]
+        upper = [1e8 ,  1e8,   np.pi, f_data.max(),  1e7,  np.pi,  1e7 ]
 
         popt, pcov = optimize.curve_fit(S21_notch_real, f_data, ydata, p0=p0, bounds=(lower, upper), maxfev = 10000)
 
         return popt, pcov
+
 
