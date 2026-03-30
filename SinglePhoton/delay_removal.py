@@ -6,13 +6,13 @@ from scipy.optimize import curve_fit
 # -------------------------------------------------------
 # Load synthetic data
 # -------------------------------------------------------
-data = pd.read_csv("synthetic_s21.csv")
+data = pd.read_csv(r"C:\Users\kid\labQT\Lab2025\Single photon\QTLab2526\SinglePhoton\NC_S21_large_int.csv")
 
-mask = (data["frequency"] >= 5.05e9) & (data["frequency"] <= 5.13e9)
+#mask = (data["frequency"] >= 5.05e9) & (data["frequency"] <= 5.13e9)
 #mask = (data["frequency"] <= 4.96e9) | (data["frequency"] >= 5.03e9)
 #mask = (data["frequency"] <= 4.945e9)
 #mask = (data["frequency"] >= 5.13e9)
-data = data[mask]
+#data = data[mask]
 
 freq = data["frequency"].values
 phase = data["phase"].values

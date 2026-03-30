@@ -1,11 +1,11 @@
 import numpy as np
 import pyvisa
 import csv
-from VNA.VNA_class import VNA
+from VNA_class import VNA
 
 #193.206.156.99
 # Crea un'istanza del VNA con l'indirizzo IP del dispositivo
-test_frequenza = VNA(ip_address_string='193.206.156.99')
+test_frequenza = VNA(ip_address_string='193.206.156.3')
 
 # Funzione per leggere i dati Sij
 def leggi_sij_dati(sij):
@@ -26,7 +26,7 @@ def esporta_in_csv(sij, frequenze, s_real, s_imag, s_magnitude, s_phase_unwrappe
     with open(file_name, mode='w', newline='') as file:
         writer = csv.writer(file)
         # Scrivi l'intestazione del file CSV
-        writer.writerow(["Frequenze (Hz)", "Parte Reale", "Parte Immaginaria", "Ampiezza", "Fase"])
+        writer.writerow(["frequency", "Re(S21)", "Im(S21)", "Amplitude", "phase"])
         
         # Scrivi i dati
         for f, r, i, m, p in zip(frequenze, s_real, s_imag, s_magnitude, s_phase_unwrapped):
