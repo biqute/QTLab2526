@@ -28,7 +28,7 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "1"
+n_misura = "5"
 data_file = "10mK_MKID" + n_misura
 save_as = "resonance_fit_" + data_file
 
@@ -211,7 +211,7 @@ ax_mag.set_title("Magnitude")
 ax_mag.legend(loc ="best")
 #----Phase plot-------
 ax_phase.plot(frequencies[::50]/1e9, np.unwrap(np.angle(S))[::50], marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
-ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='fit')
+ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='Fit')
 ax_phase.set_xlabel(r"$f [GHz]$")
 ax_phase.set_ylabel(r"$\phi [rad]$")
 ax_phase.grid(True, alpha=0.3)
