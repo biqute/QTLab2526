@@ -166,6 +166,12 @@ S_canonized = fitter._canonize(frequencies, S, a_fit, alpha_fit, TAU+tau_fit)
 residuals = S - S_fit
 
 
+#-----Q vs f_r
+
+Q_val_dep = open("data/Q_vs_fr.txt", "a")
+Q_val_dep.write(f"{f_r/1e9}\t{Q_i}\n")
+Q_val_dep.close()
+
 
 #---Plot section----
 
