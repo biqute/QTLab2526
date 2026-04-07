@@ -1,0 +1,128 @@
+Resonance 1
+Resonance Freq (fr) : 5.992620 GHz (first fit 5.992620 GHz)
+Internal Q (Qi)     : 545 (first fit 545)
+Coupling Q (|Qc|)   : 521 (first fit 521)
+Loaded Q (Ql)       : 266 (first fit 430)
+Mismatch Phase (phi): -0.4874 rad (first fit -0.4874 rad)
+Cable Delay (tau)   : 58.3156 ns (Initial input: 58.3156 ns)
+Amplitude Scale (a) : 0.0213 (first fit 0.0192)
+Global Phase (alpha): 1.5997 rad (first fit 1.5997 rad)
+
+
+Resonance 2
+Resonance Freq (fr) : 7.492475 GHz (first fit 7.492475 GHz)
+Internal Q (Qi)     : -35177 (first fit -35177)
+Coupling Q (|Qc|)   : 1460 (first fit 1460)
+Loaded Q (Ql)       : 1523 (first fit 2224)
+Mismatch Phase (phi): -0.3167 rad (first fit -0.3167 rad)
+Cable Delay (tau)   : 58.2339 ns (Initial input: 58.2339 ns)
+Amplitude Scale (a) : 0.0172 (first fit 0.0163)
+Global Phase (alpha): 2.5012 rad (first fit 2.5012 rad)
+
+
+Resonance 3
+Resonance Freq (fr) : 7.812448 GHz (first fit 7.812464 GHz)
+Internal Q (Qi)     : -297677 (first fit -248276)
+Coupling Q (|Qc|)   : 7611 (first fit 7693)
+Loaded Q (Ql)       : 7810 (first fit 9742)
+Mismatch Phase (phi): -0.4016 rad (first fit -0.4311 rad)
+Cable Delay (tau)   : 57.2849 ns (Initial input: 55.4882 ns)
+Amplitude Scale (a) : 0.0164 (first fit 0.0160)
+Global Phase (alpha): 5.5805 rad (first fit 5.3340 rad)
+
+
+Resonance 4
+Resonance Freq (fr) : 7.992693 GHz (first fit 7.992693 GHz)
+Internal Q (Qi)     : -145327 (first fit -145327)
+Coupling Q (|Qc|)   : 4384 (first fit 4384)
+Loaded Q (Ql)       : 4520 (first fit 6177)
+Mismatch Phase (phi): -0.3137 rad (first fit -0.3137 rad)
+Cable Delay (tau)   : 59.4459 ns (Initial input: 59.4459 ns)
+Amplitude Scale (a) : 0.0182 (first fit 0.0172)
+Global Phase (alpha): 5.7844 rad (first fit 5.7843 rad)
+
+
+Resonance 5
+Resonance Freq (fr) : 8.236510 GHz (first fit 8.236510 GHz)
+Internal Q (Qi)     : 511 (first fit 511)
+Coupling Q (|Qc|)   : 130 (first fit 130)
+Loaded Q (Ql)       : 104 (first fit 548)
+Mismatch Phase (phi): 0.2175 rad (first fit 0.2175 rad)
+Cable Delay (tau)   : 59.0082 ns (Initial input: 59.0082 ns)
+Amplitude Scale (a) : 0.0167 (first fit 0.0042)
+Global Phase (alpha): 3.3183 rad (first fit 3.3183 rad)
+
+
+Resonance 6
+Resonance Freq (fr) : 8.643111 GHz (first fit 8.643111 GHz)
+Internal Q (Qi)     : 26104 (first fit 26104)
+Coupling Q (|Qc|)   : 4798 (first fit 4798)
+Loaded Q (Ql)       : 4053 (first fit 4618)
+Mismatch Phase (phi): 0.2967 rad (first fit 0.2967 rad)
+Cable Delay (tau)   : 58.2982 ns (Initial input: 58.2982 ns)
+Amplitude Scale (a) : 0.0084 (first fit 0.0083)
+Global Phase (alpha): 3.2361 rad (first fit 3.2362 rad)
+
+Con errori:
+
+Resonance 1
+Resonance Freq (fr) : 5.992608 ± 0.000002 GHz
+Internal Q (Qi)     : 544.084 ± 0.158
+Coupling Q (|Qc|)   : 519.657 ± 0.194
+Loaded Q (Ql)       : 265.795 ± 0.084
+Mismatch Phase (phi): -0.4853 ± 0.0002 rad
+Cable Delay (tau)   : 58.3280 ± 0.0007 ns
+Amplitude Scale (a) : 0.0213 ± 0.0000
+Global Phase (alpha): 2.0659 ± 0.0263 rad
+
+Resonance 2
+Resonance Freq (fr) : 7.492473 ± 0.000000 GHz
+Internal Q (Qi)     : -35428.523 ± 84.561
+Coupling Q (|Qc|)   : 1458.071 ± 0.277
+Loaded Q (Ql)       : 1520.654 ± 0.347
+Mismatch Phase (phi): -0.3158 ± 0.0001 rad
+Cable Delay (tau)   : 58.2541 ± 0.0019 ns
+Amplitude Scale (a) : 0.0172 ± 0.0000
+Global Phase (alpha): 3.4522 ± 0.0888 rad
+
+Resonance 3
+Resonance Freq (fr) : 7.812468 ± 0.000002 GHz
+Internal Q (Qi)     : -233174.439 ± 13040.043
+Coupling Q (|Qc|)   : 7720.509 ± 22.041
+Loaded Q (Ql)       : 7984.892 ± 28.716
+Mismatch Phase (phi): -0.4379 ± 0.0023 rad
+Cable Delay (tau)   : 55.2334 ± 0.0832 ns
+Amplitude Scale (a) : 0.0161 ± 0.0000
+Global Phase (alpha): 5.3946 ± 4.0815 rad
+
+Resonance 4
+Resonance Freq (fr) : 7.992693 ± 0.000001 GHz
+Internal Q (Qi)     : -145327.444 ± 2622.667
+Coupling Q (|Qc|)   : 4383.867 ± 4.557
+Loaded Q (Ql)       : 4520.221 ± 5.766
+Mismatch Phase (phi): -0.3137 ± 0.0009 rad
+Cable Delay (tau)   : 59.4459 ± 0.0393 ns
+Amplitude Scale (a) : 0.0182 ± 0.0000
+Global Phase (alpha): 5.7843 ± 1.9746 rad
+
+Resonance 5
+
+Resonance Freq (fr) : 8.236510 ± 0.000010 GHz
+Internal Q (Qi)     : 510.924 ± 0.170
+Coupling Q (|Qc|)   : 129.949 ± 0.170
+Loaded Q (Ql)       : 103.599 ± 0.114
+Mismatch Phase (phi): 0.2175 ± 0.0004 rad
+Cable Delay (tau)   : 59.0082 ± 0.0029 ns
+Amplitude Scale (a) : 0.0167 ± 0.0000
+Global Phase (alpha): 3.3183 ± 0.1524 rad
+
+Resonance 6
+
+Resonance Freq (fr) : 8.643111 ± 0.000001 GHz
+Internal Q (Qi)     : 25662.651 ± 94.847
+Coupling Q (|Qc|)   : 4781.188 ± 3.384
+Loaded Q (Ql)       : 4030.305 ± 3.750
+Mismatch Phase (phi): 0.2962 ± 0.0007 rad
+Cable Delay (tau)   : 58.2910 ± 0.0046 ns
+Amplitude Scale (a) : 0.0084 ± 0.0000
+Global Phase (alpha): 2.8489 ± 0.2481 rad
