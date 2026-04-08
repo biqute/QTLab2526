@@ -1,0 +1,46 @@
+from scipy.optimize import curve_fit
+import numpy as np
+import matplotlib.pyplot as plt
+
+########## SCRIPT 4 LATEX #####
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica"
+})
+
+# === Lettura dati ===
+n_misura = "0"
+data_file = "2_10mK_MKID" + n_misura
+
+data = np.loadtxt("../cryo2/" + data_file + ".txt", delimiter="\t")
+
+f_1 = data[:, 0]
+real_1 = data[:, 1]
+imag_1 = data[:, 2]
+module_1 = np.sqrt(real_1**2 + imag_1**2)
+
+# === Plot ===
+fig, ax = plt.subplots()
+
+# --- Base resonance ---
+ax.plot(f_1, module_1, '-', label=r"$10\,mK$")
+
+# --- Temperature-dependent resonances ---
+Temps = ["25mK", "300mK", "400mK", "500mK"]
+
+for t in Temps:
+    data_t = np.loadtxt(f"../T_dep/MKID_resonance_{t}.txt", delimiter="\t")
+    f_t      = data_t[:, 0]
+    real_t   = data_t[:, 1]
+    imag_t   = data_t[:, 2]
+    module_t = np.sqrt(real_t**2 + imag_t**2)
+    ax.plot(f_t, module_t, '-', label=rf"${t}$")
+
+ax.set_xlabel(r"$f\ [\mathrm{GHz}]$")
+ax.set_ylabel(r"$|S_{21}|$")
+ax.set_title("Resonance analysis")
+ax.legend(loc='upper right')
+ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
