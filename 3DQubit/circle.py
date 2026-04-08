@@ -28,13 +28,13 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "5"
-data_file = "10mK_MKID" + n_misura
+n_misura = "4"
+data_file = "2_10mK_MKID" + n_misura
 save_as = "resonance_fit_" + data_file
 
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-data = np.loadtxt("data/"+data_file + ".txt", delimiter="\t")
+data = np.loadtxt("cryo2/"+data_file + ".txt", delimiter="\t")
 frequencies = data[:, 0]  # Frequenze in Hz
 
 real_S21 = data[:, 1]     # Parte reale di S21
@@ -88,7 +88,7 @@ print("Arc span =", span, "degrees")
 
 #-----Phase fit to get resonance----------
 f_r_guess, Q_r_guess = fitter._fit_lorentz(S21_calibrated, frequencies)
-theta_0, Q_r, f_r = fitter._fit_phase(S21_centered, frequencies, -4, Q_r_guess, f_r_guess)
+theta_0, Q_r, f_r = fitter._fit_phase(S21_centered, frequencies, phase[np.argmin(signal)], Q_r_guess, f_r_guess)
 
 theta_fit = theta_model(frequencies, theta_0, Q_r, f_r)
 
@@ -134,6 +134,8 @@ print("a =", a_scaling)
 print("tau =", TAU + tau_true)
 print("abs_Qc =", abs(Q_c))
 print("phase_Qc =", np.angle(Q_c))
+
+
 #---Performing complex fit now-----
 S = signal * np.exp(1j * phase)  # complex
 
@@ -166,11 +168,11 @@ S_canonized = fitter._canonize(frequencies, S, a_fit, alpha_fit, TAU+tau_fit)
 residuals = S - S_fit
 
 
-#-----Q vs f_r
+#-----Q vs f_r 
 
-Q_val_dep = open("data/Q_vs_fr.txt", "a")
-Q_val_dep.write(f"{f_r/1e9}\t{Q_i}\n")
-Q_val_dep.close()
+#Q_val_dep = open("data/Q_vs_fr.txt", "a")
+#Q_val_dep.write(f"{f_r/1e9}\t{Q_i}\n")
+#Q_val_dep.close()
 
 
 #---Plot section----
@@ -208,7 +210,7 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(frequencies[::50]/1e9, abs(S)[::50],marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_mag.plot(frequencies/1e9, abs(S),marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
 ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
 ax_mag.set_xlabel(r"$f[GHz]$")
 ax_mag.set_ylabel(r"$|S_{21}|$")
@@ -216,7 +218,7 @@ ax_mag.grid(True, alpha=0.3)
 ax_mag.set_title("Magnitude")
 ax_mag.legend(loc ="best")
 #----Phase plot-------
-ax_phase.plot(frequencies[::50]/1e9, np.unwrap(np.angle(S))[::50], marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
 ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='Fit')
 ax_phase.set_xlabel(r"$f [GHz]$")
 ax_phase.set_ylabel(r"$\phi [rad]$")
@@ -225,7 +227,7 @@ ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
 save_as += ".pdf"
-fig.savefig(f"data0_plots/{save_as}", bbox_inches="tight")
+fig.savefig(f"cryo2/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in ../data0_plots/{save_as}")
 
 plt.show()
