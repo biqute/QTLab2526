@@ -28,10 +28,10 @@ freqs = my_vna.get_frequencies()
 '''
 
 real, imag = my_vna.get_data("S21")
-my_vna.save_vna_data2("mkid100K_7.npz", freqs, real, imag)
+my_vna.save_vna_data2("PROVA.npz", freqs, real, imag)
 
 # plot grezzo dei dati acquisiti
-data = np.load('mkid100K_7.npz', allow_pickle=True)
+data = np.load('PROVA.npz', allow_pickle=True)
 
 #freqs = data['freq']
 #mag = data['signal']
