@@ -10,15 +10,15 @@ ip = '193.206.156.3'
 
 f_min = 5e9
 f_max = 8.9e9
-f_central = 7.99215e9
-f_span = 5e6
+f_central = 8.6386e9
+f_span = 30e6
 n_points = 1001
 n_means = 10
 power = 0
 ifband = 1000
 
 
-n_misura = "3"
+n_misura = "6_strana"
 data_file = "../cryo2/"+"2_10mK_MKID" + n_misura
 output_file = "../cryo2/"+"MKID_plot" +  n_misura
 
@@ -62,7 +62,7 @@ try:
     dati_completi = np.column_stack((freq, I, Q))
 
     # Salva direttamente nel file txt
-    np.savetxt(data_file+".txt", dati_completi, header="Freq\tI\tQ", delimiter="\t", comments="")
+    np.savetxt(data_file+".txt", dati_completi, delimiter="\t", comments="")
 
     # Creating window (fig) with 2 axes (ax1, ax2) 
     fig, (ax1, ax2) = plt.subplots(
