@@ -14,17 +14,17 @@ def lorentzian_power_tilt(f, A, f0, gamma, y0, m):
     return y0 + m*(f - f0) + A / (1 + 4*(f - f0)**2 / gamma**2)
 
 # === Lettura dati ===
-data_file = "cavity_10.335GHz"
+data_file = "cavity_7.29GHz"  
 save_as = "Fit_"+data_file
 
-# Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
+# Assumi che il file contenga: freq, real, imag
 data = np.loadtxt("../data/"+data_file + ".txt", delimiter="\t")
 
 # Separa le colonne
-f = data[:, 0]              # Frequenza
+f = data[:, 0]              
 real = data[:, 1]
 imag = data[:, 2]
-phase = np.atan(imag/real)
+phase = np.unwrap(np.atan2(imag, real))
 
 # Calcola modulo o potenza
 # Se il tuo segnale è in dB, puoi fare:
@@ -81,7 +81,7 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(f/1e9, y, '.', label="Dati (|S21|)")
+ax_mag.plot(f/1e9, y, '.', label="Dati (|S21|)", markersize=2)
 ax_mag.plot(f_fit/1e9, y_fit, '-', label="Fit Lorentz + tilt")
 ax_mag.set_xlabel(r"$f\,[GHz]$")
 ax_mag.set_ylabel(r"$|S_{21}|$")
