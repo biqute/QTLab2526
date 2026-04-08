@@ -10,8 +10,8 @@ ip = '193.206.156.3'
 
 f_min = 5e9
 f_max = 8.9e9
-f_central = 8.6386e9
-f_span = 30e6
+f_central = 8.6948e9
+f_span = 40e6
 n_points = 1001
 n_means = 10
 power = 0
