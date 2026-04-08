@@ -8,17 +8,17 @@ import pyvisa
     
 ip = '193.206.156.3'
 
-f_min = 5e9
-f_max = 8.9e9
+f_min = 30e3
+f_max = 14e9
 f_central = 8.6948e9
 f_span = 40e6
-n_points = 1001
-n_means = 10
+n_points = 4001
+n_means = 1
 power = 0
 ifband = 1000
 
 
-n_misura = "6_strana"
+n_misura = "try"
 data_file = "../cryo2/"+"2_10mK_MKID" + n_misura
 output_file = "../cryo2/"+"MKID_plot" +  n_misura
 
@@ -34,8 +34,8 @@ try:
     vna.get_IDN()
 
     # 2. Configurazione della Misura
-    vna.set_freq_span(f_central, f_span)
-    #vna.set_freq_limits(f_min,f_max)
+    #vna.set_freq_span(f_central, f_span)
+    vna.set_freq_limits(f_min,f_max)
     vna.set_sweep_points(n_points)
     vna.set_n_means(n_means)
     vna.set_ifband(ifband)
