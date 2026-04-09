@@ -26,7 +26,7 @@ fig, ax = plt.subplots()
 ax.plot(f_1, module_1, '-', label=r"$10\,mK$")
 
 # --- Temperature-dependent resonances ---
-Temps = ["25mK", "300mK", "400mK", "500mK"]
+Temps = ["25mK", "300mK", "400mK", "500mK", "600mK", "700mK", "800mK", "900mK", "1000mK", "1100mK", "1200mK", "1300mK"]
 
 for t in Temps:
     data_t = np.loadtxt(f"../T_dep/MKID_resonance_{t}.txt", delimiter="\t")
@@ -42,5 +42,14 @@ ax.set_title("Resonance analysis")
 ax.legend(loc='upper right')
 ax.grid(True, alpha=0.3)
 
+
+
+save_as = "moving_resonances_plot"
+save_as += ".pdf"
+fig.savefig(f"../T_dep/{save_as}", bbox_inches="tight")
+print(f"Grafico salvato in ../T_dep/{save_as}")
+
 plt.tight_layout()
+
+
 plt.show()
