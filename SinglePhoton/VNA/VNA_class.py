@@ -36,9 +36,9 @@ class VNA(EthernetDevice):
 
         # Impostazioni iniziali
         self.timeout = 600e3
-        self.min_freq = 8.6422e9
-        self.max_freq = 8.6455e9
-        self.point_count = 10000
+        self.min_freq = 8.6356e9 
+        self.max_freq = 8.6452e9
+        self.point_count = 1000
         self.bandwidth = 1000      # Hz
         self.avg_count = 10
         self.power = -1            # dBm

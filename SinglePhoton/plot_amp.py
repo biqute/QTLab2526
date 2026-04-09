@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Percorso completo del file CSV
-file_path = r"C:\Users\kid\labQT\Lab2025\3D Qubit\QTLab2526\SinglePhoton\Data_cavi_blu\S21_data_50medie_hunger"
+file_path = r"C:\Users\kid\labQT\Lab2025\Single photon\QTLab2526\SinglePhoton\VNA\CRIO_measures_new\11_95mk\picco1_big_new.csv"
 
 # Leggi il CSV
 df = pd.read_csv(file_path)
