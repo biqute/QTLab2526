@@ -128,5 +128,21 @@ class VNA():
     def get_freq(self):
         freq_str = self.__VNA.query("FREQ:DATA?")
         return list(map(float, freq_str.split(",")))
+    
+    def perform_single_sweep(self, timeout=300):
+        """
+        Disabilita lo sweep continuo, avvia uno sweep singolo 
+        e attende il completamento di tutte le medie.
+        """
+        # 1. Disabilita lo sweep continuo
+        self.__VNA.write("INIT:CONT OFF")
+        
+        # 2. (Opzionale) Resetta il conteggio delle medie per partire da zero
+        self.__VNA.write("SENS:AVER:CLE")
+        
+        # 3. Avvia lo sweep (Trigger)
+        self.__VNA.write("INIT:IMM")
+        
+        return self.wait_for_opc(timeout=timeout)
 
     
