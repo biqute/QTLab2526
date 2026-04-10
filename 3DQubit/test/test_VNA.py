@@ -10,15 +10,15 @@ ip = '193.206.156.3'
 
 f_min = 7.36e9
 f_max = 7.54e9
-f_central = 7.49044e9
-f_span = 40e6
+f_central = 7.48987e9
+f_span = 45e6
 n_points = 10001
 n_means = 1
 power = 0
 ifband = 1e3
 
 
-n_misura = "700mK"
+n_misura = "750mK"
 data_file = "../T_dep/"+"2_MKID_resonance_" + n_misura
 output_file = "../T_dep/"+"2_MKID_plot_" +  n_misura
 
