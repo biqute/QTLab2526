@@ -1,37 +1,36 @@
 from classes2 import VNA, MockVNA
 import numpy as np
 import matplotlib.pyplot as plt
-
+import time
 my_vna = VNA(ip_address ='193.206.156.3') 
 my_vna.get_IDN()
 
 
 #my_vna.set_freq_minmax(f_start, f_stop)
-f_center = 8.6435e9
-span = 0.004e9
+f_center = 7.492e9
+span = 0.015e9
 my_vna.set_freq_center(f_center, span)
-
 f_start = f_center-(span/2)
 f_stop = f_center+(span/2)
 #f_start = 7.2e9
 #f_stop = 8.8e9
-points = 1200
+points = 10000
 my_vna.set_points(points)
 my_vna.set_power(-5)
-my_vna.set_sweep_time(0.00001)
-my_vna.set_average(10)
+#my_vna.set_sweep_time(0.00001)
+my_vna.set_average(1)
 freqs = np.linspace(f_start, f_stop, points)
 
 '''
 my_vna = MockVNA(f_center=5.1) # simulate a VNA with a resonance at 5.1 GHz
 freqs = my_vna.get_frequencies()
 '''
-
+my_vna.one_sweep()
 real, imag = my_vna.get_data("S21")
-my_vna.save_vna_data2("PROVA.npz", freqs, real, imag)
+my_vna.save_vna_data2("7GHzpeak_100mK_10kpt.npz", freqs, real, imag)
 
 # plot grezzo dei dati acquisiti
-data = np.load('PROVA.npz', allow_pickle=True)
+data = np.load('7GHzpeak_100mK_10kpt.npz', allow_pickle=True)
 
 #freqs = data['freq']
 #mag = data['signal']

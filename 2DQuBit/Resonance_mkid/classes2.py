@@ -207,7 +207,7 @@ class VNA():
         return self._VNA.query("*OPC?")
 
     def set_points (self, num):
-        if num<10000 :
+        if num<10001 :
             self._VNA.write(f'SWE:POIN {num}')
         else :
             raise ValueError("The number of points must be lower than 10000")
@@ -240,13 +240,14 @@ class VNA():
         return self._VNA.query("*OPC?")
     
     def one_sweep(self):
+        self._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
         self._VNA.write("INIT:IMM")
+        time.sleep(30)
         
     def get_data(self, Sij="S21"):
         
         self._VNA.write(f"CALC:PAR:DEF {Sij}")
         self._VNA.write("FORM ASC")
-        #self._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
         self._VNA.query("*OPC?")
 
         #self._VNA.wait
