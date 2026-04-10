@@ -15,7 +15,7 @@ f_span = 100e6
 n_points = 8001
 n_means = 1
 power = 0
-ifband = 10e3
+ifband = 1e3
 
 
 n_misura = "400mK"
