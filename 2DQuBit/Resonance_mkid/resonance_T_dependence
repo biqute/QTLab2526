@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+
+file_list = ['../13mK/data_mkid1_new.pnz', '../100mK/mkid100k_1.npz']
+temperature = [13,100]  # in mK
+
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+cmap = cm.get_cmap('plasma') 
+T_min, T_max = min(temperature), max(temperature)
+
+for nome_file, T in zip(file_list, temperature):
+    try:
+        data = np.load(nome_file, allow_pickle=True)
+        
+        struttura = data['0']
+        freqs = struttura['freq']
+        mag = struttura['signal']
+        phase = struttura['phase']
+        
+        # magari serve
+        phase_unwrapped = np.unwrap(phase)
+        
+        # Calcolo del colore
+        color_val = (T - T_min) / (T_max - T_min) if T_max > T_min else 0.5
+        colore = cmap(color_val)
+        
+        # Plot dei dati sul grafico comune
+        # Usa '-' al posto di '.' se vuoi una linea continua tra i punti
+        ax1.plot(freqs / 1e9, mag, '.', markersize=3, color=colore, label=f'{T} mK')
+        
+    except Exception as e:
+        print(f"Errore nel processare il file {nome_file}: {e}")
+
+# 4. Formattazione del grafico
+ax1.set_title('Evoluzione delle Risonanze in funzione della Temperatura')
+ax1.set_xlabel('Frequenza (GHz)')
+ax1.set_ylabel('|S21|')
+ax1.grid(True, linestyle='--', alpha=0.7)
+
+# Aggiunta della legenda per riconoscere le temperature
+# Se hai molti file, puoi anche omettere la label e usare una colorbar.
+ax1.legend(title='Temperatura', loc='best', fontsize=9)
+
+plt.tight_layout()
+plt.show()
