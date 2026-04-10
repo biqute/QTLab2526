@@ -8,19 +8,19 @@ import pyvisa
     
 ip = '193.206.156.3'
 
-f_min = 30e3
-f_max = 14e9
-f_central = 7.44e9
+f_min = 7.36e9
+f_max = 7.54e9
+f_central = 7.49e9
 f_span = 100e6
-n_points = 1601
-n_means = 5
+n_points = 8001
+n_means = 1
 power = 0
-ifband = 1000
+ifband = 10e3
 
 
-n_misura = "try"
-data_file = "../T_dep/"+"MKID_resonance_" + n_misura
-output_file = "../T_dep/"+"MKID_plot_" +  n_misura
+n_misura = "400mK"
+data_file = "../T_dep/"+"2_MKID_resonance_" + n_misura
+output_file = "../T_dep/"+"2_MKID_plot_" +  n_misura
 
 Sij = "S21"
 
@@ -34,14 +34,18 @@ try:
     vna.get_IDN()
 
     # 2. Configurazione della Misura
-    vna.set_freq_span(f_central, f_span)
-    #vna.set_freq_limits(f_min,f_max)
+    #vna.set_freq_span(f_central, f_span)
+    vna.set_freq_limits(f_min,f_max)
     vna.set_sweep_points(n_points)
     vna.set_n_means(n_means)
     vna.set_ifband(ifband)
     vna.set_power(power)
-
+    #vna._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
+    #vna._VNA.write("INIT:IMM")
     #phi = np.unwrap(vna.get_phase())
+    
+    
+    #vna.perform_single_sweep(timeout=60000)
     phi = vna.get_phase()
 
     freq = vna.get_freq()
