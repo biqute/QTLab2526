@@ -143,7 +143,6 @@ class VNA():
         # 3. Avvia lo sweep (Trigger)
         self.__VNA.write("INIT:IMM")
         
-        # 4. Usa il tuo metodo wait_for_opc per aspettare la fine
         return self.wait_for_opc(timeout=timeout)
 
     

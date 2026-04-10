@@ -10,7 +10,7 @@ ip = '193.206.156.3'
 
 f_min = 7.36e9
 f_max = 7.54e9
-f_central = 7.4888845e9
+f_central = 7.48868e9
 f_span = 45e6
 n_points = 10001
 n_means = 1
@@ -18,7 +18,7 @@ power = 0
 ifband = 1e3
 
 
-n_misura = "825mK"
+n_misura = "850mK"
 data_file = "../T_dep/"+"2_MKID_resonance_" + n_misura
 output_file = "../T_dep/"+"2_MKID_plot_" +  n_misura
 
@@ -32,7 +32,7 @@ try:
     # 1. Identificazione
     print("VNA ID:")
     vna.get_IDN()
-
+    #'''
     # 2. Configurazione della Misura
     vna.set_freq_span(f_central, f_span)
     #vna.set_freq_limits(f_min,f_max)
@@ -45,7 +45,8 @@ try:
     #phi = np.unwrap(vna.get_phase())
     
     
-    #vna.perform_single_sweep(timeout=60000)
+    vna.perform_single_sweep()
+    #'''
     phi = vna.get_phase()
 
     freq = vna.get_freq()
