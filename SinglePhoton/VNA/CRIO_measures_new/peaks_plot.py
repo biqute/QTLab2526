@@ -11,15 +11,25 @@ import os
 # i percorsi relativi dovrebbero essere simili a questi:
 folder_base = "11_95mk"
 folder_100  = "100mk"
-folder_200  = "200mk"
-folder_300  = "300mk"
+#folder_200  = "200mk"
+folder_350  = "350mk"
+folder_450  = "450mk"
+folder_550  = "550mk"
+folder_650  = "650mk"
+folder_750  = "750mk"
+folder_850  = "850mk"
 
 # Mappiamo le etichette del grafico con il percorso completo dei file
 file_dict = {
-    "11.95 mk": os.path.join(folder_base, "picco4_big_new.csv"),
-    "100 mK": os.path.join(folder_100, "picco4_big_new100mk.csv"),
-    "200 mK": os.path.join(folder_200, "picco4_big_new200mk.csv"),
-    "300 mK": os.path.join(folder_300, "picco4_big_new300mk.csv")
+    "11.95 mk": os.path.join(folder_base, "picco1_big_new.csv"),
+    "100 mk": os.path.join(folder_100, "picco1_big_new100mk.csv"),
+   # "200 mk": os.path.join(folder_200, "picco2_big_new200mk.csv"),
+    "350 mk": os.path.join(folder_350, "picco1_big_new350mk.csv"),
+    "450 mk": os.path.join(folder_450, "picco1_big_new450mk.csv"),
+    "550 mk": os.path.join(folder_550, "picco1_big_new550mk.csv"),
+    "650 mk": os.path.join(folder_650, "picco1_big_new650mk.csv"),
+    "750 mk": os.path.join(folder_750, "picco1_big_new750mk.csv"),
+    "850 mk": os.path.join(folder_850, "picco1_big_new850mk.csv")
 }
 
 # =========================================================
@@ -48,7 +58,7 @@ for label, file_path in file_dict.items():
         print(f"ATTENZIONE: File non trovato al percorso -> {file_path}")
 
 # Formattazione estetica del grafico
-plt.title("Peak4")
+plt.title("Peak3")
 plt.xlabel("Frequency (10e9 GHz)")
 plt.ylabel("$|S_{21}|$ (dB)")
 plt.grid(True, linestyle='--', alpha=0.7)
