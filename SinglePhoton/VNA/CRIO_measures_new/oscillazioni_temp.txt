@@ -9,3 +9,11 @@ misure a t diverse
 
 
 nb da picco4 100mK in poi abbiamo preso "solo" 1000 punti
+
+
+
+PEAK 1 -> togliere 750 mk 
+PEAK 2 -> togliere 650, 750
+PEAK 3 -> ok
+PEAK 4 -> togliere 750
+PEAK 5 -> ok
