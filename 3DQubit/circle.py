@@ -28,13 +28,13 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "4"
-data_file = "2_10mK_MKID" + n_misura
+n_misura = "900mK"
+data_file = "2_MKID_resonance_" + n_misura
 save_as = "resonance_fit_" + data_file
 
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-data = np.loadtxt("cryo2/"+data_file + ".txt", delimiter="\t")
+data = np.loadtxt("T_dep/"+data_file + ".txt", delimiter="\t")
 frequencies = data[:, 0]  # Frequenze in Hz
 
 real_S21 = data[:, 1]     # Parte reale di S21
