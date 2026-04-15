@@ -8,7 +8,6 @@ from circle_fit import CircleFitter
 import sys
 import os
 
-
 ########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,
@@ -29,14 +28,14 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 
 # Lista delle temperature
 Temps = [
-    #"10mK", 
-    "200mK", 
-    "300mK", 
-    "400mK", 
-    "500mK",
-    "600mK", "700mK", "725mK", "750mK", "775mK",
-    "800mK", "825mK", "850mK", "875mK", "900mK",
-    "925mK", "950mK", "975mK", "1000mK"
+    "10mK", 
+    "200mK_b", 
+    "300mK_b", 
+    "400mK_b",  
+    "500mK_b", "550mK_b", "600mK_b", "650mK_b", "675mK_b", "925mK_b", "875mK_b",
+    "700mK", "725mK", "750mK", "775mK",
+    "800mK", "825mK", "850mK", "900mK",
+    "950mK", "975mK", "1000mK"
 ]
 
 fitter = CircleFitter()
@@ -55,8 +54,10 @@ ax_all.set_ylabel(r"$|S_{21}|$", fontsize=14)
 ax_all.set_title("Resonances at different Temperatures", fontsize=16)
 ax_all.grid(True, alpha=0.3)
 
-# Cartella dove salvare i risultati (creata se non esiste)
+# Cartelle dove salvare i risultati (create se non esistono)
 os.makedirs("T_dep_results", exist_ok=True)
+# NUOVA CARTELLA PER I PLOT INDIVIDUALI
+os.makedirs("T_dep_results/individual_plots", exist_ok=True) 
 
 # ---------------- Ciclo su tutte le Temperature ----------------
 for t in Temps:
@@ -65,7 +66,8 @@ for t in Temps:
     print(f"{'='*40}")
     
     # Rimuovi "mK" dalla stringa per salvare il numero nel file di output
-    T_num = float(t.replace("mK", ""))
+    new_t = t.replace("_b", "")
+    T_num = float(new_t.replace("mK", ""))
     
     # Caricamento del dataset
     file_path = f"T_dep/2_MKID_resonance_{t}.txt"
@@ -96,17 +98,17 @@ for t in Temps:
 
     f_r_guess, Q_r_guess = fitter._fit_lorentz(S21_calibrated, frequencies)
 
-# --- CORREZIONE DEI GUESS INIZIALI ---
-# 1. Riavvolge la fase strettamente tra -pi e pi per evitare sforamenti
+    # --- CORREZIONE DEI GUESS INIZIALI ---
+    # 1. Riavvolge la fase strettamente tra -pi e pi per evitare sforamenti
     theta_0_guess_safe = np.angle(np.exp(1j * phase[np.argmin(signal)]))
 
-# 2. Clampa la stima di Q_r affinché stia strettamente tra 1 e 9.99 milioni (il limite di circle_fit è 1e7)
+    # 2. Clampa la stima di Q_r affinché stia strettamente tra 1 e 9.99 milioni (il limite di circle_fit è 1e7)
     Q_r_guess_safe = max(1.0, min(Q_r_guess, 9.99e6))
 
-# 3. Assicura che la stima della frequenza sia strettamente dentro i margini misurati
+    # 3. Assicura che la stima della frequenza sia strettamente dentro i margini misurati
     f_r_guess_safe = max(frequencies.min() + 1, min(f_r_guess, frequencies.max() - 1))
 
-# Ora eseguiamo il fit della fase in totale sicurezza:
+    # Ora eseguiamo il fit della fase in totale sicurezza:
     theta_0, Q_r, f_r = fitter._fit_phase(S21_centered, frequencies, theta_0_guess_safe, Q_r_guess_safe, f_r_guess_safe)
     beta = (theta_0 + np.pi) 
     P_off = x_c + r_0 * np.cos(beta)  + 1j*(y_c + r_0 * np.sin(beta))
@@ -148,14 +150,43 @@ for t in Temps:
     fr_val.append(f0_fit)
     revQ_val_num.append(Q_i_rev)
     
-    # --- Popoliamo il plot ---
-    # Plot data points with low opacity to reduce clutter
+    # --- Popoliamo il plot GLOBALE ---
     p = ax_all.plot(frequencies/1e9, abs(S), 'o', ms=4, alpha=0.3, label=f"Data {t}")
     color = p[0].get_color() # Recuperiamo il colore assegnato da matplotlib
-    # Sovrapponiamo la linea del fit usando lo stesso colore dei punti
     ax_all.plot(frequencies/1e9, abs(S_fit), '-', lw=2.5, color=color)
 
-# --------- Salvataggio del grafico finale ---------
+    # =========================================================================
+    # --- NUOVO: CREAZIONE E SALVATAGGIO DEL PLOT INDIVIDUALE PER QUESTA T ---
+    # =========================================================================
+    # Creiamo una figura con 2 subplots (sopra Modulo, sotto Fase)
+    fig_indiv, (ax_mag, ax_phase) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
+    
+    # Modulo
+    ax_mag.plot(frequencies/1e9, abs(S), 'o', ms=4, alpha=0.5, color='blue', label='Data')
+    ax_mag.plot(frequencies/1e9, abs(S_fit), '-', lw=2, color='red', label='Fit')
+    ax_mag.set_ylabel(r"$|S_{21}|$", fontsize=14)
+    ax_mag.set_title(f"Resonance Fit - Temperature: {t}", fontsize=15)
+    ax_mag.grid(True, alpha=0.3)
+    ax_mag.legend(loc='lower left')
+
+    # Fase
+    ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), 'o', ms=4, alpha=0.5, color='blue')
+    ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, color='red')
+    ax_phase.set_ylabel(r"Phase [rad]", fontsize=14)
+    ax_phase.set_xlabel(r"$f \ [GHz]$", fontsize=14)
+    ax_phase.grid(True, alpha=0.3)
+
+    fig_indiv.tight_layout()
+    
+    # Salviamo il file PDF nella nuova cartella
+    indiv_plot_name = f"T_dep_fits/Fit_{t}.pdf"
+    fig_indiv.savefig(indiv_plot_name, bbox_inches="tight")
+    
+    # CHIUDIAMO LA FIGURA: vitale per non esaurire la memoria durante il ciclo!
+    plt.close(fig_indiv)
+    # =========================================================================
+
+# --------- Salvataggio del grafico globale finale ---------
 # Sposta la legenda fuori dal grafico per evitare che copra le curve
 ax_all.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9)
 fig_all.tight_layout()
@@ -167,7 +198,7 @@ print(f"\nGrafico collettivo salvato in '{plot_name}'")
 # --------- Salvataggio del .txt (Temperatura vs Frequenza) ---------
 txt_output = "T_dep_results/Resonance_vs_Temperature.txt"
 with open(txt_output, "w") as file_txt:
-    file_txt.write("T_mK\tf_r_Hz\n")
+    #file_txt.write("T_mK\tf_r_Hz\n")
     for t_n, fr_n in zip(T_val_num, fr_val):
         file_txt.write(f"{t_n}\t{fr_n}\n")
 
@@ -181,7 +212,5 @@ with open(txt_output, "w") as file_txt:
 
 print(f"Risultati tabellati salvati in '{txt_output}'\n")
 
-
-
-# Mostra il grafico finale a schermo
+# Mostra il grafico globale finale a schermo
 plt.show()

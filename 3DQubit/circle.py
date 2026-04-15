@@ -28,7 +28,7 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "900mK"
+n_misura = "200mK"
 data_file = "2_MKID_resonance_" + n_misura
 save_as = "resonance_fit_" + data_file
 
