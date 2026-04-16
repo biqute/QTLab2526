@@ -9,8 +9,8 @@ from scipy.optimize import curve_fit
 file_excel = "fr_with_errors.xlsx" 
 
 colonna_temperatura = "temp"      
-colonna_frequenza = "fr_3"              
-colonna_errore_frequenza = "sigma_fr_3" 
+colonna_frequenza = "fr_1"              
+colonna_errore_frequenza = "sigma_fr_1" 
 
 # =========================================================
 # 2. DEFINIZIONE DELLA FUNZIONE DI FIT (Mattis-Bardeen)
@@ -105,7 +105,7 @@ try:
              label=f'Fit Mattis-Bardeen\n$\\alpha$ = {alpha_fit:.2e}\n$\\Delta$ = {Delta_ueV:.1f} $\\mu$eV')
     
     # Formattazione estetica
-    plt.title("Fit Spostamento della Frequenza (Picco 2)", fontsize=14)
+    plt.title("Fit Spostamento della Frequenza (Picco 1)", fontsize=14)
     plt.xlabel(colonna_temperatura, fontsize=12)
     plt.ylabel(colonna_frequenza, fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.7)

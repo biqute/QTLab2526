@@ -9,7 +9,8 @@ import os
 # Inserisci qui i percorsi relativi o assoluti delle 4 cartelle.
 # Se esegui lo script dalla cartella "CRIO_measures_new", 
 # i percorsi relativi dovrebbero essere simili a questi:
-folder_base = "11_95mk"
+folder_base = "10mk"
+folder_11_95 = "11_95mk"
 folder_100  = "100mk"
 folder_200  = "200mk"
 folder_350  = "350mk"
@@ -24,7 +25,8 @@ folder_950  = "950mk"
 
 # Mappiamo le etichette del grafico con il percorso completo dei file
 file_dict = {
-    "11.95 mk": os.path.join(folder_base, "picco3_big_new.csv"),
+    "10 mk": os.path.join(folder_base, "picco3_big_new10mk.csv"),
+    "11.95 mk": os.path.join(folder_11_95, "picco3_big_new.csv"),
     "100 mk": os.path.join(folder_100, "picco3_big_new100mk.csv"),
     "200 mk": os.path.join(folder_200, "picco3_big_new200mk.csv"),
     "350 mk": os.path.join(folder_350, "picco3_big_new350mk.csv"),
