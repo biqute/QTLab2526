@@ -1,11 +1,39 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.special import i0, k0
 
-def model(T, a, b, Delta):
-    # Boltzmann constant in eV/mK: (J/K) * (1/ (J/eV)) * (1 K / 1000 mK)
-    k_B = 8.617333e-5 / 1000  
-    return a + b * np.exp(-Delta / (k_B * T))
+#def model(T, a, b, Delta):
+#    # Boltzmann constant in eV/mK: (J/K) * (1/ (J/eV)) * (1 K / 1000 mK)
+#    k_B = 8.617333e-5 / 1000  
+#    return a + b * np.exp(-Delta / (k_B * T))
+
+# --- COSTANTI FISICHE ---
+k_B = 8.617333262145e-5  # Costante di Boltzmann (eV/K)
+h = 4.135667696e-15      # Costante di Planck (eV s)
+ 
+def inverse_Qi_model(T_mK, inv_Qi_0, alpha, Delta_eV, f_0):
+    """
+    Modello per 1/Qi(T) basato sulla Teoria di Mattis-Bardeen.
+    - inv_Qi_0: Dissipazione residua a T=0 (ovvero 1/Qi(0))
+    - alpha: Frazione di induttanza cinetica
+    - Delta_eV: Parametro di gap in eV
+    """
+    T = T_mK * 1e-3  # Converti la temperatura da mK a Kelvin
+    
+    # Parametro xi = hbar * omega / (2 * k_B * T) = h * f0 / (2 * k_B * T)
+    xi = (h * f_0) / (2 * k_B * T)
+    
+    # Calcolo del rapporto sigma1 / sigma2 dalle Eq. 2.28 e 2.29
+    numeratore = np.exp(-Delta_eV / (k_B * T)) * np.sinh(xi) * k0(xi)
+    denominatore = 1.0 - 2.0 * np.exp(-Delta_eV / (k_B * T)) * np.exp(-xi) * i0(xi)
+    
+    sigma_ratio = (4.0 / np.pi) * (numeratore / denominatore)
+    
+    # Eq. 4.4
+    inv_Qi = inv_Qi_0 + (alpha / 2.0) * sigma_ratio
+    
+    return inv_Qi
 
 # Caricamento dati
 data = np.loadtxt("revQ_vs_Temperature.txt")

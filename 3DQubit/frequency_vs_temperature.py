@@ -149,6 +149,7 @@ for t in Temps:
     T_val_num.append(T_num)
     fr_val.append(f0_fit)
     revQ_val_num.append(Q_i_rev)
+    Qc_val_num.append(Q_c_fit)
     
     # --- Popoliamo il plot GLOBALE ---
     p = ax_all.plot(frequencies/1e9, abs(S), 'o', ms=4, alpha=0.3, label=f"Data {t}")
@@ -209,6 +210,12 @@ txt_output = "T_dep_results/revQ_vs_Temperature.txt"
 with open(txt_output, "w") as file_txt:
     for t_n, revQ_n in zip(T_val_num, revQ_val_num):
         file_txt.write(f"{t_n}\t{revQ_n}\n")
+        
+# --------- Salvataggio del .txt (1/Q vs Frequenza) ---------
+txt_output = "T_dep_results/Qc_vs_Temperature.txt"
+with open(txt_output, "w") as file_txt:
+    for t_n, Qc_n in zip(T_val_num, Qc_val_num):
+        file_txt.write(f"{t_n}\t{Qc_n}\n")
 
 print(f"Risultati tabellati salvati in '{txt_output}'\n")
 
