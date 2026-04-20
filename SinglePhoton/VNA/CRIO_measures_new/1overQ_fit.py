@@ -10,7 +10,7 @@ h = 4.135667696e-15      # Costante di Planck (eV s)
 
 # --- CONFIGURAZIONE ---
 file_path = "quality_factors.csv"         # Inserisci il nome del tuo file
-colonna_da_fittare = "R3"      # Scegli quale colonna fittare (es. "R1", "R2")
+colonna_da_fittare = "R1"      # Scegli quale colonna fittare (es. "R1", "R2")
 
 # IMPORTANTE: Inserisci la frequenza di risonanza del tuo risonatore
 # Qui ho impostato 4 GHz come esempio generico.

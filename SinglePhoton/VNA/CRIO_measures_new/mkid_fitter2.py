@@ -177,7 +177,7 @@ def fit_resonance(freq, S21_raw, fixed_tau=None, show_diagnostics=False):
 # Execution Block
 # -------------------------------------------------------
 if __name__ == "__main__":
-    file_path = "100mk/picco1_big_new100mk.csv" # Metti qui il tuo file
+    file_path = "850mk/picco5_big_new850mk.csv" # Metti qui il tuo file
     
     data = pd.read_csv(file_path)
     freq_data = data["frequency"].values
@@ -189,13 +189,21 @@ if __name__ == "__main__":
     final_params = fit_resonance(
         freq_data, S21_data, 
         fixed_tau=delay_vna, 
-        show_diagnostics=True
+        show_diagnostics=False
     )
     
-    print("\n===== Risultati Finali (Qi FORZATO POSITIVO) =====")
-    print(f"Frequenza (fr)   : {final_params['fr'][0]/1e9:.6f} GHz")
-    print(f"Internal Q (Qi)  : {final_params['Qi'][0]:.5f} ± {final_params['Qi'][1]:.5f}")
-    print(f"Coupling Q (Qc)  : {final_params['Qc_mag'][0]:.0f} ± {final_params['Qc_mag'][1]:.0f}")
-    print(f"Loaded Q (Ql)    : {final_params['Ql'][0]:.0f}")
-    print(f"Mismatch (phi)   : {final_params['phi'][0]:.4f} rad")
-    print(f"Cable delay      : {final_params['tau'][0]*1e9:.4f} ns")
+print("\n===== Risultati Finali (Qi FORZATO POSITIVO) =====")
+
+fr, fr_err = final_params['fr']
+Qi, Qi_err = final_params['Qi']
+Qc, Qc_err = final_params['Qc_mag']
+Ql, _ = final_params['Ql']
+phi, phi_err = final_params['phi']
+tau, tau_err = final_params['tau']
+
+print(f"Frequenza (fr)   : {fr:.0f} ± {fr_err} Hz")
+print(f"Internal Q (Qi)  : {Qi:.5f} ± {Qi_err:.5f}")
+print(f"Coupling Q (Qc)  : {Qc:.0f} ± {Qc_err:.0f}")
+print(f"Loaded Q (Ql)    : {Ql:.0f}")
+print(f"Mismatch (phi)   : {phi:.4f} ± {phi_err:.4f} rad")
+print(f"Cable delay      : {tau*1e9:.4f} ± {tau_err*1e9:.4f} ns")
