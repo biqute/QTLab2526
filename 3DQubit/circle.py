@@ -28,7 +28,7 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "5"
+n_misura = "6"
 data_file = "data_10mK_" + n_misura
 save_as = "fit" + n_misura
 
@@ -156,7 +156,7 @@ Qi_fit = 1/Qi_fit_rev
 
 #print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
 
-print("f_res =", f0_fit)
+print("f_res =", f0_fit/1e9)
 print("Q_i =", Qi_fit)
 print("Q_c_abs =", abs_Qc_fit)
 print("Q_c_real=", Qc_fit.real)
@@ -233,7 +233,7 @@ ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
 save_as += ".pdf"
-fig.savefig(f"../10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
+fig.savefig(f"10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in ../10mK_resonances/plots_10mK/{save_as}")
 
 plt.show() 

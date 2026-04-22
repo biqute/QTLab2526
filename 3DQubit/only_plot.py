@@ -8,11 +8,11 @@ plt.rcParams.update({
 })
 
 # === Lettura dati ===
-n_misura = "500mK"
-data_file = "2_MKID_resonance_" + n_misura
-##save_as = "plot_" + data_file
+n_misura = "amp_range"
+data_file = "data_10mK_" + n_misura
+save_as = "only_plot_" + n_misura
 
-data = np.loadtxt("T_dep/" + data_file + ".txt", delimiter="\t")
+data = np.loadtxt("10mK_resonances/data_10mK/" + data_file + ".txt", delimiter="\t")
 
 # Separa le colonne
 f = data[:, 0]              # Frequenza
@@ -26,16 +26,21 @@ min_f = f[min_idx]
 # === Plot ===
 fig, ax = plt.subplots()
 
-ax.plot(f, y, '.', label="Dati (|S21|)")
-ax.set_xlabel(r"$f\,[\mathrm{Hz}]$")   # cambia in GHz se necessario
-ax.set_ylabel(r"$|S_{21}|$")
-ax.set_title("Magnitude")
-#ax.set_xlim(min_f-5e6, min_f+5e6)
-ax.legend(loc='upper right')
-# === Salvataggio ===
-#save_as += ".pdf"
-#fig.savefig(f"../data0_plots/{save_as}", bbox_inches="tight")
+ax.plot(f/1e9, y, color = 'blue', label = "S21 Data")  # Frequenza in GHz
+ax.set_xlabel("Frequency (GHz)", fontsize = 14)   # cambia in GHz se necessario
+ax.set_ylabel("Transmission (dB)", fontsize = 14)  
+#ax.set_title("Magnitude")
+#ax.set_xlim(5, 9.1)
+#ax.legend(loc='upper right')
+ax.grid(True)
 
-#print(f"Grafico salvato in ../data0_plots/{save_as}")
+# Tick dei valori sugli assi
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+# === Salvataggio ===
+save_as += ".pdf"
+fig.savefig(f"10mK_resonances/plots_Giachero/{save_as}", bbox_inches="tight")
+
+print(f"Grafico salvato in 10mK_resonances/plots_Giachero/{save_as}")
 
 plt.show()
