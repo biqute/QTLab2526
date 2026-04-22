@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft import fft, fftfreq
 
+#PLOTS FOR FFT
+
 # 1. Caricamento dati 
 data_square = np.loadtxt("data/fft_square.txt")
 data_gaus = np.loadtxt("data/fft_gauss.txt")

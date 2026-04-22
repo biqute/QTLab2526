@@ -10,19 +10,20 @@ ip = '193.206.156.3'
 
 f_min = 7.36e9
 f_max = 7.54e9
-f_central = 7.4787e9
-f_span = 75e6
+f_central = 7.49154e9
+f_span = 40e6
 n_points = 10001
 n_means = 1
 power = 0
 ifband = 1e3
 
 
-n_misura = "try"
+n_misura = "10mK_b"
 data_file = "../T_dep/"+"2_MKID_resonance_" + n_misura
 output_file = "../T_dep/"+"2_MKID_plot_" +  n_misura
 
 Sij = "S21"
+set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -32,23 +33,17 @@ try:
     # 1. Identificazione
     print("VNA ID:")
     vna.get_IDN()
-    '''
-    # 2. Configurazione della Misura
-    vna.set_freq_span(f_central, f_span)
-    #vna.set_freq_limits(f_min,f_max)
-    vna.set_sweep_points(n_points)
-    vna.set_n_means(n_means)
-    vna.set_ifband(ifband)
-    vna.set_power(power)
-    #vna._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
-    #vna._VNA.write("INIT:IMM")
-    #phi = np.unwrap(vna.get_phase())
+    if(set==1):
+        #2. Configurazione della Misura
+        vna.set_freq_span(f_central, f_span)
+        #vna.set_freq_limits(f_min,f_max)
+        vna.set_sweep_points(n_points)
+        vna.set_n_means(n_means)
+        vna.set_ifband(ifband)
+        vna.set_power(power)
+        vna.perform_single_sweep()
     
-    
-    vna.perform_single_sweep()
-    '''
     phi = vna.get_phase()
-
     freq = vna.get_freq()
     powe = vna.get_dbm()
     I, Q = vna.get_S_parameters()
@@ -68,7 +63,7 @@ try:
 
     # Salva direttamente nel file txt
     np.savetxt(data_file+".txt", dati_completi, delimiter="\t", comments="")
-
+    print(f"\nDati salvati in {data_file}.txt")
     # Creating window (fig) with 2 axes (ax1, ax2) 
     fig, (ax1, ax2) = plt.subplots(
         nrows=1,        # 1 riga

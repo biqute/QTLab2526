@@ -4,118 +4,115 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 # =========================================================
-# 1. IMPOSTAZIONI DEL FILE E DELLE COLONNE
+# 1. LETTURA CSV (robusta)
 # =========================================================
-file_excel = "fr_with_errors.xlsx" 
+file_csv = "fr_vs_temp.csv"
 
-colonna_temperatura = "temp"      
-colonna_frequenza = "fr_3"              
-colonna_errore_frequenza = "sigma_fr_3" 
+df = pd.read_csv(file_csv, sep=r'\s+|,', engine='python')  # accetta sia spazio che virgola
+
+print("Colonne:", df.columns.tolist())
+
+T_col = "T"
+Terr_col = "Terr"
+f_col = "P5"
+
+# forza numerico (IMPORTANTISSIMO)
+for c in [T_col, Terr_col, f_col]:
+    df[c] = pd.to_numeric(df[c], errors='coerce')
+
+df = df.dropna(subset=[T_col, Terr_col, f_col])
+df = df.sort_values(by=T_col)
+
+T = df[T_col].values
+Terr = df[Terr_col].values
+f = df[f_col].values
+
+print(f"Punti finali usati nel fit: {len(T)}")
 
 # =========================================================
-# 2. DEFINIZIONE DELLA FUNZIONE DI FIT (Mattis-Bardeen)
+# 2. MODELLO
 # =========================================================
-def f_vs_T(T_mK, f0, alpha, Delta_k):
-    """
-    T_mK    : Temperatura in milliKelvin
-    f0      : Frequenza a T = 0 K
-    alpha   : Frazione di induttanza cinetica
-    Delta_k : Gap superconduttivo diviso per k_B (Delta / k_B) espresso in Kelvin
-    """
-    T_K = T_mK / 1000.0  # Convertiamo i mK in K
-    
-    # Preveniamo divisioni per zero se T scende a 0
-    T_K = np.maximum(T_K, 1e-5) 
-    
-    # Termine di Mattis-Bardeen
-    mb_term = (alpha / 2.0) * np.sqrt((np.pi * Delta_k) / (2.0 * T_K)) * np.exp(-Delta_k / T_K)
-    
-    # Assumiamo che la frequenza diminuisca con la temperatura
-    return f0 * (1.0 - mb_term)
+def f_vs_T(T_mK, f0, alpha, Delta_k, c):
+    T_K = np.maximum(T_mK / 1000.0, 1e-6)
 
-# Costante di Boltzmann in eV/K per convertire Delta alla fine
+    mb_term = (alpha / 2.0) * np.sqrt((np.pi * Delta_k) / (2.0 * T_K)) \
+              * np.exp(-Delta_k / T_K)
+
+    return f0 * (1.0 - mb_term) + c
+
 kB_eV = 8.617333262e-5
 
 # =========================================================
-# 3. LETTURA DATI E FIT
+# 3. FIT
 # =========================================================
-try:
-    print(f"Leggendo il file {file_excel}...")
-    df = pd.read_excel(file_excel)
-    df = df.dropna(subset=[colonna_temperatura, colonna_frequenza, colonna_errore_frequenza])
-    df = df.sort_values(by=colonna_temperatura)
+f0_guess = np.max(f)
+guess = [f0_guess, 0.05, 2.0, 0.0]  # f0, alpha, Delta, c
 
-    # Estrazione array numpy
-    temperature = df[colonna_temperatura].values
-    frequenze = df[colonna_frequenza].values
-    errori = df[colonna_errore_frequenza].values
+bounds = (
+    [f0_guess * 0.98, 1e-6, 0.1, -0.000001],
+    [f0_guess * 1.02, 1.0, 10.0, 0.000001]
+)
 
-    # Stime Iniziali (Guess) per aiutare il fit: [f0, alpha, Delta_k]
-    # f0: la frequenza più alta registrata (a T più bassa)
-    # alpha: tipicamente tra 0.01 e 0.1 per i MKID
-    # Delta_k: ~2.0 K (tipico per l'alluminio)
-    guess_iniziale = [np.max(frequenze), 0.05, 2.0]
-    
-    # Limiti per forzare i parametri ad avere un senso fisico
-    # bounds=([f0_min, alpha_min, Delta_min], [f0_max, alpha_max, Delta_max])
-    #limiti = ([np.min(frequenze), 1e-5, 0.1], [np.max(frequenze)*1.1, 1.0, 10.0])
+print("Fit in corso...")
 
-    print("\nEsecuzione del Fit...")
-    popt, pcov = curve_fit(
-        f_vs_T, 
-        temperature, 
-        frequenze, 
-        sigma=errori,          # Pesa il fit usando i tuoi errori sperimentali
-        absolute_sigma=True,   # Indica che gli errori sono valori assoluti (non relativi)
-        p0=guess_iniziale,
-        #bounds=limiti,
-        maxfev=10000
-    )
+popt, pcov = curve_fit(
+    f_vs_T,
+    T,
+    f,
+    sigma=Terr,          # 🔥 ora usa errori reali
+    absolute_sigma=True,
+    p0=guess,
+    bounds=bounds,
+    maxfev=100000
+)
 
-    # Estrazione parametri ed errori
-    f0_fit, alpha_fit, Delta_k_fit = popt
-    f0_err, alpha_err, Delta_k_err = np.sqrt(np.diag(pcov))
+f0, alpha, Delta_k, c = popt
+perr = np.sqrt(np.diag(pcov))
 
-    # Calcolo del Gap in micro-eV (µeV)
-    Delta_ueV = Delta_k_fit * kB_eV * 1e6
-    Delta_ueV_err = Delta_k_err * kB_eV * 1e6
+f0_err, alpha_err, Delta_k_err, c_err = perr
 
-    print("\n===== RISULTATI DEL FIT =====")
-    print(f"f(0)   = {f0_fit:.6f} ± {f0_err:.6f} GHz")
-    print(f"alpha  = {alpha_fit:.4e} ± {alpha_err:.4e}")
-    print(f"Delta/kB = {Delta_k_fit:.4f} ± {Delta_k_err:.4f} K")
-    print(f"--> Delta  = {Delta_ueV:.2f} ± {Delta_ueV_err:.2f} µeV")
+Delta_ueV = Delta_k * kB_eV * 1e6
+Delta_ueV_err = Delta_k_err * kB_eV * 1e6
 
-    # =========================================================
-    # 4. CREAZIONE DEL GRAFICO
-    # =========================================================
-    plt.figure(figsize=(9, 6))
-    
-    # Plot dei Dati Sperimentali
-    plt.errorbar(temperature, frequenze, yerr=errori, 
-                 fmt='o', markersize=6, color='black', 
-                 ecolor='gray', elinewidth=1.5, capsize=4, label='Dati Sperimentali')
-    
-    # Generazione punti per tracciare la curva di Fit molto liscia
-    T_smooth = np.linspace(min(temperature)*0.8, max(temperature)*1.05, 300)
-    f_smooth = f_vs_T(T_smooth, *popt)
-    
-    # Plot della Curva di Fit
-    plt.plot(T_smooth, f_smooth, '-', color='tab:red', linewidth=2.5, 
-             label=f'Fit Mattis-Bardeen\n$\\alpha$ = {alpha_fit:.2e}\n$\\Delta$ = {Delta_ueV:.1f} $\\mu$eV')
-    
-    # Formattazione estetica
-    plt.title("Fit Spostamento della Frequenza (Picco 2)", fontsize=14)
-    plt.xlabel(colonna_temperatura, fontsize=12)
-    plt.ylabel(colonna_frequenza, fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.legend(fontsize=11)
-    plt.tight_layout()
-    plt.show()
+# =========================================================
+# 4. OUTPUT
+# =========================================================
+print("\n===== RISULTATI FIT =====")
+print(f"f0     = {f0:.0f} ± {f0_err:.0f} Hz")
+print(f"alpha  = {alpha:.4e} ± {alpha_err:.4e}")
+print(f"Delta  = {Delta_k:.3f} ± {Delta_k_err:.3f} K")
+print(f"c      = {c:.3f} ± {c_err:.3f}")
+print(f"Delta  = {Delta_ueV:.2f} ± {Delta_ueV_err:.2f} µeV")
 
-except FileNotFoundError:
-    print(f"\nERRORE: Non riesco a trovare il file '{file_excel}'.")
-except KeyError as e:
-    print(f"\nERRORE: La colonna {e} non è presente nel file Excel.")
-except RuntimeError:
-    print("\nERRORE: L'algoritmo di Fit non è riuscito a convergere. Controlla che i dati siano puliti o prova a modificare il `guess_iniziale` nello script.")
+# =========================================================
+# 5. PLOT (CORRETTO)
+# =========================================================
+plt.figure(figsize=(9,6))
+
+# tutti i punti + barre errore T
+plt.errorbar(
+    T, f,
+    xerr=Terr,
+    fmt='o',
+    color='black',
+    ecolor='gray',
+    capsize=3,
+    label="dati sperimentali"
+)
+
+T_smooth = np.linspace(T.min(), T.max(), 400)
+
+plt.plot(
+    T_smooth,
+    f_vs_T(T_smooth, *popt),
+    'r-',
+    lw=2,
+    label="fit Mattis-Bardeen + c"
+)
+
+plt.xlabel("T (mK)")
+plt.ylabel("frequenza")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
