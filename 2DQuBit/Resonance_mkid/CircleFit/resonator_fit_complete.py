@@ -258,7 +258,7 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False)
         ax_resf.set_title('Residual magnitude vs frequency')
         ax_resf.grid(True)
         if save == True:
-            plt.savefig(f"{npz_file}_fit_results.png", dpi=300)
+            '''plt.savefig(f"{npz_file}_fit_results.png", dpi=300)'''
         plt.show()
 
     Qc_fit = abs_Qc_fit * np.exp(1j * phase_Qc_fit)
@@ -282,7 +282,7 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False)
 if __name__ == '__main__':
     # Sostituiamo il parser con valori fissi per bypassare il terminal
     # Solo per scopi dimostrativi, rimuovi questo loop se vuoi usare argparse normalmente
-        file_da_analizzare = "data_mkid7.npz"  # Assicurati che il nome sia esatto
+        file_da_analizzare = "1peak_1100mK.npz"  # Assicurati che il nome sia esatto
         chiave_dati = "0"                      # Di solito è '0'
         finestra_hz = None                     # Puoi mettere un numero se serve (es. 1000000)
 
