@@ -28,13 +28,13 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "200mK"
-data_file = "2_MKID_resonance_" + n_misura
-save_as = "resonance_fit_" + data_file
+n_misura = "5"
+data_file = "data_10mK_" + n_misura
+save_as = "fit" + n_misura
 
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-data = np.loadtxt("T_dep/"+data_file + ".txt", delimiter="\t")
+data = np.loadtxt("10mK_resonances/data_10mK/"+data_file + ".txt", delimiter="\t")
 frequencies = data[:, 0]  # Frequenze in Hz
 
 real_S21 = data[:, 1]     # Parte reale di S21
@@ -53,7 +53,7 @@ S21 = signal * np.exp(1j * phase)
 
 TAU = fitter._guess_delay(frequencies, S21)
 
-print("initial TAU guess:", TAU)
+#print("initial TAU guess:", TAU)
 
 S21_calibrated = fitter._remove_cable_delay(frequencies, S21, TAU)
 
@@ -61,7 +61,7 @@ S21_calibrated = fitter._remove_cable_delay(frequencies, S21, TAU)
 
 tau_true = fitter._fit_delay(frequencies, S21_calibrated)
 
-print("true tau:", tau_true)
+#print("true tau:", tau_true)
 
 S21_calibrated = fitter._remove_cable_delay(frequencies, S21_calibrated, tau_true)
 
@@ -84,7 +84,7 @@ phase_centered = np.unwrap(np.angle(S21_centered))
 
 angles = np.angle((S21_centered ))
 span = np.degrees(np.max(np.unwrap(angles)) - np.min(np.unwrap(angles)))
-print("Arc span =", span, "degrees")
+'''print("Arc span =", span, "degrees")'''
 
 #-----Phase fit to get resonance----------
 f_r_guess, Q_r_guess = fitter._fit_lorentz(S21_calibrated, frequencies)
@@ -92,9 +92,9 @@ theta_0, Q_r, f_r = fitter._fit_phase(S21_centered, frequencies, phase[np.argmin
 
 theta_fit = theta_model(frequencies, theta_0, Q_r, f_r)
 
-print ("f_r=", f_r )
+'''print ("f_r=", f_r )
 print ("theta_0=", theta_0 )
-print ("Q_r=", Q_r )
+print ("Q_r=", Q_r )'''
 
 
 #----Finding P'-----
@@ -103,9 +103,9 @@ P_off = x_c + r_0 * np.cos(beta)  + 1j*(y_c + r_0 * np.sin(beta))
 a_scaling = abs(P_off)  #gives amplitude distortion a
 alpha = np.angle(P_off) #gives phase ditortion exp(ialpha)
 
-print(alpha)
+'''print(alpha)
 
-print(a_scaling)
+print(a_scaling)'''
 
 
 #---Final circle fit of the canonical form---
@@ -125,7 +125,7 @@ Q_i_rev = 1/Q_r - Q_c_rev.real
 
 Q_i = 1/Q_i_rev
 
-print("Q_r =", Q_r)
+'''print("Q_r =", Q_r)
 print("Q_i =", Q_i)
 print("Q_c =", Q_c)
 print("f_r =", f_r)
@@ -133,7 +133,7 @@ print("alpha =", alpha)
 print("a =", a_scaling)
 print("tau =", TAU + tau_true)
 print("abs_Qc =", abs(Q_c))
-print("phase_Qc =", np.angle(Q_c))
+print("phase_Qc =", np.angle(Q_c))'''
 
 
 #---Performing complex fit now-----
@@ -154,9 +154,15 @@ Qi_fit_rev = 1/Ql_fit - Qc_fit_rev.real
 
 Qi_fit = 1/Qi_fit_rev
 
-print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
+#print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
 
-print("cov matrix:", pcov)
+print("f_res =", f0_fit)
+print("Q_i =", Qi_fit)
+print("Q_c_abs =", abs_Qc_fit)
+print("Q_c_real=", Qc_fit.real)
+print("Q_c_imag=", Qc_fit.imag)
+
+#print("cov matrix:", pcov)
 
 
 S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit) #/a_fit * np.exp(+1j* 2*np.pi*(TAU+tau_fit)*frequencies)*np.exp(-1j*alpha_fit)
@@ -227,7 +233,7 @@ ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
 save_as += ".pdf"
-fig.savefig(f"cryo2/{save_as}", bbox_inches="tight")
-print(f"Grafico salvato in ../data0_plots/{save_as}")
+fig.savefig(f"../10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
+print(f"Grafico salvato in ../10mK_resonances/plots_10mK/{save_as}")
 
-plt.show()
+plt.show() 
