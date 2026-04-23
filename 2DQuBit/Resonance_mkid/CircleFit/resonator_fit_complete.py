@@ -1,7 +1,3 @@
-"""
-Per runnare:
-    python resonator_fit_complete.py --file data.npz
-"""
 
 import argparse
 import math
@@ -282,7 +278,7 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False)
 if __name__ == '__main__':
     # Sostituiamo il parser con valori fissi per bypassare il terminal
     # Solo per scopi dimostrativi, rimuovi questo loop se vuoi usare argparse normalmente
-        file_da_analizzare = "1peak_1100mK.npz"  # Assicurati che il nome sia esatto
+        file_da_analizzare = "Resonance_mkid/all_peaks_13mK/data_1st_peak.npz"  # Assicurati che il nome sia esatto
         chiave_dati = "0"                      # Di solito è '0'
         finestra_hz = None                     # Puoi mettere un numero se serve (es. 1000000)
 
