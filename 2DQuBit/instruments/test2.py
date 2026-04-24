@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import warnings
 import time
 
-dict_par = dict(A = 1, f = 3e7, mu = 0.0, sig = 1e-7,n_sigma = 3, name = 'singleshot', plot = False, N_cycles = 1)
+dict_par = dict(A = 1, f = 1e7, mu = 0.0, sig = 1e-7,n_sigma = 3, name = 'singleshot', plot = False, N_cycles = 1)
 
 '''my_lo = classes2.LO(name='COM9')
 print(my_lo.get_IDN())

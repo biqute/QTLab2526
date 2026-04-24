@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-file_list = ['7Hzpeak_1100mK.npz', '7GHzpeak_1050mK_1000pt.npz', '7GHzpeak_1000mK_2000pt.npz', '7GHzpeak_950mK_2000pt.npz', '7GHzpeak_900mK_3000pt.npz', '7GHzpeak_850mK.npz', '7GHzpeak_820mK.npz', '7GHzpeak_750mK.npz', '7GHzpeak_700mK.npz', '7GHzpeak_600mK.npz', '7GHzpeak_500mK.npz', '7GHzpeak_400mK_10kpt.npz', '7GHzpeak_300mK_10kpt.npz', '7GHzpeak_200mK_10kpt.npz', '7GHzpeak_100mK_10kpt.npz']
-#file_list = ['8GHzpeak_1100mK.npz', '8GHzpeak_1050mK.npz', '8GHzpeak_1000mK_2000pt.npz', '8GHzpeak_950mK_2000pt.npz', '8GHzpeak_900mK_3000pt.npz', '8GHzpeak_850mK.npz', '8GHzpeak_800mK.npz', '8GHzpeak_750mK.npz', '8GHzpeak_700mK.npz', '8GHzpeak_600mK.npz', '8GHzpeak_500mK.npz', '8GHzpeak_400mK_10kpt.npz', '8GHzpeak_300mK_10kpt.npz']
+#file_list = ['7Hzpeak_1100mK.npz', '7GHzpeak_1050mK_1000pt.npz', '7GHzpeak_1000mK_2000pt.npz', '7GHzpeak_950mK_2000pt.npz', '7GHzpeak_900mK_3000pt.npz', '7GHzpeak_850mK.npz', '7GHzpeak_820mK.npz', '7GHzpeak_750mK.npz', '7GHzpeak_700mK.npz', '7GHzpeak_600mK.npz', '7GHzpeak_500mK.npz', '7GHzpeak_400mK_10kpt.npz', '7GHzpeak_300mK_10kpt.npz', '7GHzpeak_200mK_10kpt.npz', '7GHzpeak_100mK_10kpt.npz']
+file_list = ['8GHzpeak_1100mK.npz', '8GHzpeak_1050mK.npz', '8GHzpeak_1000mK_2000pt.npz', '8GHzpeak_950mK_2000pt.npz', '8GHzpeak_900mK_3000pt.npz', '8GHzpeak_850mK.npz', '8GHzpeak_800mK.npz', '8GHzpeak_750mK.npz', '8GHzpeak_700mK.npz', '8GHzpeak_600mK.npz', '8GHzpeak_500mK.npz', '8GHzpeak_400mK_10kpt.npz', '8GHzpeak_300mK_10kpt.npz']
 
 temperature = [1100,1050,1000,950,900,875,820,750,700,600,500,400,300,200,100]  # in mK
 
@@ -41,7 +41,7 @@ ax1.set_title('Evoluzione delle Risonanze in funzione della Temperatura')
 ax1.set_xlabel('Frequenza (GHz)')
 ax1.set_ylabel('|S21|')
 ax1.grid(True, linestyle='--', alpha=0.7)
-ax1.set_yscale("log")
+#ax1.set_yscale("log")
 
 # Aggiunta della legenda per riconoscere le temperature
 # Se hai molti file, puoi anche omettere la label e usare una colorbar.

@@ -80,7 +80,7 @@ class CircleEstimator:
             raise ZeroDivisionError("Cannot compute radius: A=0")
         x_center = -0.5 * B / A
         y_center = -0.5 * C / A
-        radius = 0.5 * 1 / abs(A)
+        radius = 0.5 * np.sqrt(B**2 + C**2 - 4*A*D) / abs(A)
         return x_center, y_center, radius
     
     # Unisce tutto il procedimento per il fit algebrico del cerchio tramite le funzioni definite sopra
@@ -110,9 +110,7 @@ class CircleEstimator:
     # Utilizza una regressione lineare per stimare tau: slope = -2*pi*tau
     def estimate_delay(self, freq, z):
         phases = np.unwrap(np.angle(z))
-        weights = np.abs(z)  # Usa l'ampiezza come peso
-        p = np.polyfit(freq, phases, 1, w=weights)
-        slope = p[0]
+        slope, _, _, _, _ = stats.linregress(freq, phases)
         return -slope / (2 * np.pi)
     
     # Rimozione del delay
@@ -138,4 +136,3 @@ class CircleEstimator:
 
     def canonize_data(self, freq, z, scale, rotation, delay):
         return 1/scale * np.exp(-1j * rotation) * self.remove_delay(freq, z, delay)
-    
