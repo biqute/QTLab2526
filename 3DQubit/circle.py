@@ -28,7 +28,7 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "6"
+n_misura = "0"
 data_file = "data_10mK_" + n_misura
 save_as = "fit" + n_misura
 
@@ -201,14 +201,17 @@ ax_mag   = fig.add_subplot(gs[0, 1])  # top-right
 ax_phase = fig.add_subplot(gs[1, 1])  # bottom-right
 
 # ---- IQ plot ----
-ax_iq.plot(S.real, S.imag, marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_iq.plot(S.real, S.imag, 
+           marker='o', linestyle='', 
+           markeredgecolor='blue', markerfacecolor='white', 
+           ms=8, label='Data')
 ax_iq.plot(S_fit.real, S_fit.imag, '-', ms=1.5, label='Fit')
 #ax_iq.plot(xcirc, ycirc, '-', ms=1.5, label='ideal circ')
 ax_iq.set_aspect('equal', 'box')
 ax_iq.axhline(0, color='gray', linewidth=0.8)   # real axis (horizontal)
 ax_iq.axvline(0, color='gray', linewidth=0.8)   # imaginary axis (vertical)
-ax_iq.set_xlabel(r"$Q$")          
-ax_iq.set_ylabel(r"$I$")
+ax_iq.set_xlabel(r"$Q$", fontsize=12)          
+ax_iq.set_ylabel(r"$I$", fontsize=12)
 #ax_iq.plot([P_off.real], [P_off.imag], "ro", ms = 8, label = "P(1,0)") 
 ax_iq.plot([], [], ' ', label=fr"$Q_l = {Ql_fit:.1f}$") 
 ax_iq.plot([], [], ' ', label=fr"$Q_i = {Qi_fit:.1f}$")         
@@ -216,18 +219,18 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(frequencies/1e9, abs(S),marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_mag.plot(frequencies/1e9, abs(S),marker='o', linestyle='', linewidth = 2 ,markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
 ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
-ax_mag.set_xlabel(r"$f[GHz]$")
-ax_mag.set_ylabel(r"$|S_{21}|$")
+ax_mag.set_xlabel("Frequency (GHz)", fontsize=12)
+ax_mag.set_ylabel(r"$|S_{21}|$", fontsize=12)
 ax_mag.grid(True, alpha=0.3)
 ax_mag.set_title("Magnitude")
 ax_mag.legend(loc ="best")
 #----Phase plot-------
-ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Raw Data')
+ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), marker='o', linestyle='', linewidth = 2, markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
 ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='Fit')
-ax_phase.set_xlabel(r"$f [GHz]$")
-ax_phase.set_ylabel(r"$\phi [rad]$")
+ax_phase.set_xlabel("Frequency (GHz)", fontsize=12)
+ax_phase.set_ylabel(r"$\phi$ (rad)", fontsize=12)
 ax_phase.grid(True, alpha=0.3)
 ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
@@ -236,4 +239,63 @@ save_as += ".pdf"
 fig.savefig(f"10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in ../10mK_resonances/plots_10mK/{save_as}")
 
+'''
+# =============================================================================
+# --- Plot Separati ---
+# =============================================================================
+
+# Otteniamo il nome base senza l'estensione .pdf appena aggiunta
+base_save_name = save_as.replace(".pdf", "")
+save_path_dir = "10mK_resonances/plots_10mK"
+
+# 1. IQ Plot Separato
+fig_iq = plt.figure(figsize=(6, 6))
+ax_iq_sep = fig_iq.add_subplot(111)
+ax_iq_sep.plot(S.real, S.imag, marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
+ax_iq_sep.plot(S_fit.real, S_fit.imag, '-', ms=1.5, label='Fit')
+ax_iq_sep.set_aspect('equal', 'box')
+ax_iq_sep.axhline(0, color='gray', linewidth=0.8)
+ax_iq_sep.axvline(0, color='gray', linewidth=0.8)
+ax_iq_sep.set_xlabel(r"$Q$")
+ax_iq_sep.set_ylabel(r"$I$")
+ax_iq_sep.plot([], [], ' ', label=fr"$Q_l = {Ql_fit:.1f}$") 
+ax_iq_sep.plot([], [], ' ', label=fr"$Q_i = {Qi_fit:.1f}$")         
+ax_iq_sep.legend(loc='best')
+ax_iq_sep.set_title(r"I-Q Plot")
+
+name_iq = f"{base_save_name}_IQ.pdf"
+fig_iq.savefig(f"{save_path_dir}/{name_iq}", bbox_inches="tight")
+print(f"Grafico IQ salvato in {save_path_dir}/{name_iq}")
+
+# 2. Magnitude Plot Separato
+fig_mag = plt.figure(figsize=(7, 5))
+ax_mag_sep = fig_mag.add_subplot(111)
+ax_mag_sep.plot(frequencies/1e9, abs(S), marker='o', linestyle='', linewidth=2, markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
+ax_mag_sep.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
+ax_mag_sep.set_xlabel("Frequency (GHz)")
+ax_mag_sep.set_ylabel(r"$|S_{21}|$")
+ax_mag_sep.grid(True, alpha=0.3)
+ax_mag_sep.set_title("Magnitude")
+ax_mag_sep.legend(loc="best")
+
+name_mag = f"{base_save_name}_mag.pdf"
+fig_mag.savefig(f"{save_path_dir}/{name_mag}", bbox_inches="tight")
+print(f"Grafico Magnitudine salvato in {save_path_dir}/{name_mag}")
+
+# 3. Phase Plot Separato
+fig_phase = plt.figure(figsize=(7, 5))
+ax_phase_sep = fig_phase.add_subplot(111)
+ax_phase_sep.plot(frequencies/1e9, np.unwrap(np.angle(S)), marker='o', linestyle='', linewidth=2, markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
+ax_phase_sep.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='Fit')
+ax_phase_sep.set_xlabel("Frequency (GHz)")
+ax_phase_sep.set_ylabel(r"$\phi$ (rad)")
+ax_phase_sep.grid(True, alpha=0.3)
+ax_phase_sep.set_title("Phase")
+ax_phase_sep.legend(loc="best")
+
+name_phase = f"{base_save_name}_phase.pdf"
+fig_phase.savefig(f"{save_path_dir}/{name_phase}", bbox_inches="tight")
+print(f"Grafico Fase salvato in {save_path_dir}/{name_phase}")
+'''
 plt.show() 
+

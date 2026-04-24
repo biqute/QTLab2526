@@ -8,7 +8,7 @@ plt.rcParams.update({
 })
 
 # === Lettura dati ===
-n_misura = "amp_range"
+n_misura = "ALL"
 data_file = "data_10mK_" + n_misura
 save_as = "only_plot_" + n_misura
 
@@ -39,8 +39,8 @@ plt.xticks(fontsize=12)
 plt.yticks(fontsize=12)
 # === Salvataggio ===
 save_as += ".pdf"
-fig.savefig(f"10mK_resonances/plots_Giachero/{save_as}", bbox_inches="tight")
+fig.savefig(f"10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
 
-print(f"Grafico salvato in 10mK_resonances/plots_Giachero/{save_as}")
+print(f"Grafico salvato in 10mK_resonances/plots_10mK/{save_as}")
 
 plt.show()
