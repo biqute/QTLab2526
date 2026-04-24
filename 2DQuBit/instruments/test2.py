@@ -1,19 +1,24 @@
 import numpy as np
 import pyvisa
-from classes import SDG, TDS, VNA
 import classes2
 import matplotlib.pyplot as plt
 import warnings
 import time
 
-dict_par = dict(A = 1, f = 1e7, mu = 0.0, sig = 1e-7,n_sigma = 3, name = 'singleshot', plot = True, N_cycles = 1e5)
-my_lo = classes2.LO(name='COM9')
-print(my_lo.get_IDN())
-my_lo.turn_on()
-my_lo.set_freq(5000000000)
+dict_par = dict(A = 1, f = 3e7, mu = 0.0, sig = 1e-7,n_sigma = 3, name = 'singleshot', plot = False, N_cycles = 1)
 
-#classes2.acquire_singleshot(dict_par)
+'''my_lo = classes2.LO(name='COM9')
+print(my_lo.get_IDN())
+'''#classes2.acquire_singleshot(dict_par)
+
 classes2.acquire_IQ(dict_par)
+
+
+
+
+
+
+
 '''
 tds = classes2.TDS('3')
 pars_1 = tds.acquire_all()

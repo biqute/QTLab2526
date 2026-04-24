@@ -10,10 +10,11 @@ for p in ports:
 
 
 my_lo = LO(name='COM9')
-my_lo.turn_on()
+my_lo.turn_off()
 my_lo.set_freq(5000000000)
-my_lo.set_pow(30)
+my_lo.set_pow(15)
 #my_lo.turn_on()
+
 
 
 

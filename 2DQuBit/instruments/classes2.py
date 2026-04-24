@@ -165,6 +165,8 @@ class SDG() :
         
         self._SDG.write("C1:OUTP ON") 
         self._SDG.write("C1:BTWV MTRIG")
+        a=self._SDG.query("*OPC?")
+        return a
     
     def stop_burst(self):
         self._SDG.write("C1:BTWV STATE,OFF")
@@ -354,11 +356,10 @@ class TDS() :
         self._TDS.write(f'HORizontal:MAIn:SCAle {y}')
 
     def prepare_for_trigger(self):
-        self._TDS.write("ACQ:STOPAFTER SEQUENCE") # Si ferma dopo un singolo evento         
-        self._TDS.write("ACQ:STATE ON")        # Avvia l'ascolto
-        self._TDS.write("TRIGger:A:MODe NORMAL") # Modalità di trigger normale\
-        # Aspetta un istante per garantire che il comando sia recepito
-        time.sleep(0.1) 
+        #self._TDS.write("ACQ:STOPAFTER SEQUENCE") # Si ferma dopo un singolo evento         
+        self._TDS.write("TRIGger:A:MODe NORM") # Modalità di trigger normale
+        self._TDS.write("ACQ:STATE ON")        # Avvia l'ascolto del trigger
+        self._TDS.write("ACQ:STATE RUN")        # Avvia l'ascolto del trigger
     
     
 
@@ -378,7 +379,7 @@ class TDS() :
         return result
     
     def plot_acquisition(self, mode):
-        start, stop = 0, 5000
+        start, stop = 0, 500
         X = self.acquisition(1, start, stop)
         print(X['sample_rate'], len(X['data']))
         if mode == 1:
@@ -477,7 +478,11 @@ class LO():
         print(type(self.query("FREQ?")), self.query("FREQ?"))              
 
         if int(self.query("FREQ?")) != f_millis: 
-            raise Exception(f"Could not set 'freq' to {f}.")     
+            raise Exception(f"Could not set 'freq' to {f}.")  
+    def set_pow(self, pow):
+        self.write(f"POW {pow}dBm")
+        time.sleep(0.005)
+        self.pow = pow 
 
 #------------------function to acquire a singleshot------------------------------
 def acquire_singleshot(dict_par):
@@ -498,38 +503,28 @@ def acquire_singleshot(dict_par):
     # 6 Acquisizione dati
     X, Y = tds.plot_acquisition(0)
    
-
-
 def acquire_IQ(dict_par):
-        # 1 Caricare la waveform sul generatore
+    # 1 Caricare la waveform sul generatore
     my_sdg = SDG('193.206.156.10')
     my_sdg.upload_waveform(dict_par)
+    time.sleep(5) 
     # 2 Configurare SDG in modalità burst
     my_sdg.burst_mode(dict_par)
     # 3 Preparare l'oscilloscopio per il trigger
     tds = TDS('3')
     tds.set_hor_scale(dict_par['sig'])
+    time.sleep(5)
     tds.prepare_for_trigger()
-    time.sleep(1)
+    time.sleep(5)
     # 4 Inviare l'impulso dal generatore
     my_sdg.manual_trig()
-    # 5spengi sdg
+    time.sleep(10*dict_par['sig']) # Aspetta un po' prima di inviare il trigger per assicurarsi che l'oscilloscopio sia pronto
+    # 5spengi tutto
+    tds.set_acquire_state2('OFF')
     my_sdg.stop_all()
     # 6 Acquisizione dati
+     # Aspetta un po' prima di inviare il trigger per assicurarsi che l'oscilloscopio sia pronto
     I, Q = tds.plot_acquisition(1)
-    phi = []
-    for i in range(len(Q['data'])):
-        phi_point = np.arctan2(Q['data'][i],I['data'][i])
-        phi.append(phi_point)
-    fig, ax = plt.subplots(figsize=(10,5))
-    X_phi = np.linspace(0, len(phi)/I['sample_rate'], len(phi))
-    z = np.ones(len(X_phi))*np.pi/2
-    z_2 = np.ones(len(X_phi))*-np.pi/2
-    plt.plot(X_phi, z_2, color='red', linestyle='--')
-    plt.plot(X_phi, z, color='red', linestyle='--')
-    plt.plot(X_phi, phi)
-    plt.plot()
-    plt.show()
 
 
 

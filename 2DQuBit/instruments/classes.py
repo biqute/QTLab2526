@@ -247,7 +247,6 @@ class TDS() :
         self._TDS.write("ACQ:STATE ON")           # Avvia l'ascolto
 
         # Aspetta un istante per garantire che il comando sia recepito
-        time.sleep(0.1) 
         # 2. Invia l'impulso dal generatore
         # L'oscilloscopio catturerà l'onda istantaneamente via hardware
     '''
