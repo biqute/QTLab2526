@@ -241,12 +241,14 @@ class VNA():
         
         return self._VNA.query("*OPC?")
     
+    def one_sweep(self):
+        self._VNA.write("INIT:IMM")
+        
     def get_data(self, Sij="S21"):
         
         self._VNA.write(f"CALC:PAR:DEF {Sij}")
         self._VNA.write("FORM ASC")
-        self._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
-        self._VNA.write("INIT:IMM")      # Fa partire uno sweep singolo
+        #self._VNA.write("INIT:CONT OFF") # Disabilita lo sweep continuo
         self._VNA.query("*OPC?")
 
         #self._VNA.wait

@@ -3,6 +3,17 @@ misure a t diverse
 2) 100 mK -> oscillazione di 0.5 mK
 3) 200 mK -> oscillazione di 1 mK
 4) 300 mK -> oscillazione di 2 mK
+5) 350 mK -> oscillazione di 4 mK
+6) 450 mK -> oscillazione di 5 mK 
+7) 550 mK -> ocillazione di 5 mK
 
 
 nb da picco4 100mK in poi abbiamo preso "solo" 1000 punti
+
+
+
+PEAK 1 -> togliere 750 mk 
+PEAK 2 -> togliere 650, 750
+PEAK 3 -> ok
+PEAK 4 -> togliere 750
+PEAK 5 -> ok

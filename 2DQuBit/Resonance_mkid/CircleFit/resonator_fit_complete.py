@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 """
 Per runnare:
     python resonator_fit_complete.py --file data.npz
 """
+=======
+>>>>>>> 1d75c6c2b437d570b97378fd7d62a232d8efc509
 
 import argparse
 import math
@@ -91,7 +94,11 @@ def S21_notch_real_stacked(freqs, Ql, abs_Qc, phase_Qc, fr, amp, alpha, tau):
 
 # ----------------------------- Main pipeline --------------------------------
 
+<<<<<<< HEAD
 def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True):
+=======
+def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False):
+>>>>>>> 1d75c6c2b437d570b97378fd7d62a232d8efc509
     """Esegue tutto il workflow: caricamento, calibrazione, fits, e plotting."""
 
     # ---------------- Load data -------------------------------------------------
@@ -105,6 +112,7 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True):
     if check_nan_inf(freqs, mag, ph, S21):
         raise ValueError('I dati contengono NaN o Inf — controlla il file')
 
+<<<<<<< HEAD
     # ---------------- Estimate and remove cable delay -------------------------
     fitter = CircleEstimator()
     tau_guess = fitter.estimate_delay(freqs, S21)
@@ -115,6 +123,31 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True):
     print(f"Refined delay (tau_refined) = {tau_refined:.6e} s")
 
     S21_cal = fitter.remove_delay(freqs, S21_no_delay, tau_refined)
+=======
+    
+    # ---------------- Estimate and remove cable delay -------------------------
+    fitter = CircleEstimator()
+    tau_guess = 0.0    # <--- Inizializza a 0
+    tau_refined = 0.0  # <--- Inizializza a 0
+    
+    # Calcoliamo la rotazione totale della fase per capire se c'è un delay
+    total_phase_rotation = np.abs(np.unwrap(np.angle(S21))[-1] - np.unwrap(np.angle(S21))[0])
+    
+    # Se la rotazione è minore di un certo valore (es. 0.5 rad), 
+    # probabilmente il delay è già rimosso o trascurabile.
+    if total_phase_rotation < 0.5:
+        print("INFO: Fase quasi piatta rilevata. Salto la rimozione del delay.")
+        tau_final = 0.0
+        S21_cal = S21
+    else:
+        tau_guess = fitter.estimate_delay(freqs, S21)
+        S21_no_delay = fitter.remove_delay(freqs, S21, tau_guess)
+        tau_refined = fitter.fit_with_delay(freqs, S21_no_delay)
+        tau_final = tau_guess + tau_refined
+        S21_cal = fitter.remove_delay(freqs, S21, tau_final)
+        print(f"INFO: Delay rimosso. Tau finale = {tau_final:.6e} s")
+
+>>>>>>> 1d75c6c2b437d570b97378fd7d62a232d8efc509
 
     # ---------------- Circle fit (calibrated data) ----------------------------
     x_c, y_c, r = fitter.fit_from_complex(S21_cal)
@@ -205,7 +238,11 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True):
         ax_iq = fig.add_subplot(gs[:, 0])
         ax_iq.plot(S21.real, S21.imag, '.', ms=4, label='data')
         ax_iq.plot(S21_fitted_full.real, S21_fitted_full.imag, '-', lw=1, label='notch fit')
+<<<<<<< HEAD
         ax_iq.set_title('IQ plane')
+=======
+        ax_iq.set_title(f'IQ plane {npz_file}')
+>>>>>>> 1d75c6c2b437d570b97378fd7d62a232d8efc509
         ax_iq.set_xlabel('Re(S21)')
         ax_iq.set_ylabel('Im(S21)')
         ax_iq.legend()
@@ -244,7 +281,12 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True):
         ax_resf.set_ylabel('|res|')
         ax_resf.set_title('Residual magnitude vs frequency')
         ax_resf.grid(True)
+<<<<<<< HEAD
 
+=======
+        if save == True:
+            '''plt.savefig(f"{npz_file}_fit_results.png", dpi=300)'''
+>>>>>>> 1d75c6c2b437d570b97378fd7d62a232d8efc509
         plt.show()
 
     Qc_fit = abs_Qc_fit * np.exp(1j * phase_Qc_fit)
@@ -266,6 +308,7 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True):
 # ----------------------------- CLI -----------------------------------------
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     parser = argparse.ArgumentParser(description='Resonator fitting pipeline')
     parser.add_argument('--file', '-f', required=True, help='Path to .npz data file')
     parser.add_argument('--key', '-k', default='0', help='Key inside the npz (default: 0)')
@@ -274,3 +317,19 @@ if __name__ == '__main__':
 
     results = run_pipeline(args.file, key=args.key, window_hz=args.window)
     print('Done. Results returned in dictionary.\n')
+=======
+    # Sostituiamo il parser con valori fissi per bypassare il terminal
+    # Solo per scopi dimostrativi, rimuovi questo loop se vuoi usare argparse normalmente
+        file_da_analizzare = "Resonance_mkid/all_peaks_13mK/data_1st_peak.npz"  # Assicurati che il nome sia esatto
+        chiave_dati = "0"                      # Di solito è '0'
+        finestra_hz = None                     # Puoi mettere un numero se serve (es. 1000000)
+
+        print(f"--- Avvio analisi su: {file_da_analizzare} ---")
+        
+        # Lanciamo la pipeline direttamente
+        try:
+            results = run_pipeline(file_da_analizzare, key=chiave_dati, window_hz=finestra_hz, save = True, show_plots=True)
+            print("Analisi completata con successo!")
+        except Exception as e:
+            print(f"Errore durante l'esecuzione: {e}")
+>>>>>>> 1d75c6c2b437d570b97378fd7d62a232d8efc509

@@ -1,0 +1,54 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+
+file_list = ['7Hzpeak_1100mK.npz', '7GHzpeak_1050mK_1000pt.npz', '7GHzpeak_1000mK_2000pt.npz', '7GHzpeak_950mK_2000pt.npz', '7GHzpeak_900mK_3000pt.npz', '7GHzpeak_850mK.npz', '7GHzpeak_820mK.npz', '7GHzpeak_750mK.npz', '7GHzpeak_700mK.npz', '7GHzpeak_600mK.npz', '7GHzpeak_500mK.npz', '7GHzpeak_400mK_10kpt.npz', '7GHzpeak_300mK_10kpt.npz', '7GHzpeak_200mK_10kpt.npz', '7GHzpeak_100mK_10kpt.npz']
+#file_list = ['8GHzpeak_1100mK.npz', '8GHzpeak_1050mK.npz', '8GHzpeak_1000mK_2000pt.npz', '8GHzpeak_950mK_2000pt.npz', '8GHzpeak_900mK_3000pt.npz', '8GHzpeak_850mK.npz', '8GHzpeak_800mK.npz', '8GHzpeak_750mK.npz', '8GHzpeak_700mK.npz', '8GHzpeak_600mK.npz', '8GHzpeak_500mK.npz', '8GHzpeak_400mK_10kpt.npz', '8GHzpeak_300mK_10kpt.npz']
+
+temperature = [1100,1050,1000,950,900,875,820,750,700,600,500,400,300,200,100]  # in mK
+
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+cmap = cm.get_cmap('plasma') 
+T_min, T_max = min(temperature), max(temperature)
+
+for nome_file, T in zip(file_list, temperature):
+    try:
+        data = np.load(nome_file, allow_pickle=True)
+        
+        struttura = data['0']
+        freqs = struttura['freq']
+        mag = struttura['signal']
+        phase = struttura['phase']
+        
+        # magari serve
+        phase_unwrapped = np.unwrap(phase)
+        
+        # Calcolo del colore
+        color_val = (T - T_min) / (T_max - T_min) if T_max > T_min else 0.5
+        colore = cmap(color_val)
+        
+        # Plot dei dati sul grafico comune
+        # Usa '-' al posto di '.' se vuoi una linea continua tra i punti
+        ax1.plot(freqs / 1e9, mag, '.', markersize=3, color=colore, label=f'{T} mK')
+        
+    except Exception as e:
+        print(f"Errore nel processare il file {nome_file}: {e}")
+
+# 4. Formattazione del grafico
+ax1.set_title('Evoluzione delle Risonanze in funzione della Temperatura')
+ax1.set_xlabel('Frequenza (GHz)')
+ax1.set_ylabel('|S21|')
+ax1.grid(True, linestyle='--', alpha=0.7)
+ax1.set_yscale("log")
+
+# Aggiunta della legenda per riconoscere le temperature
+# Se hai molti file, puoi anche omettere la label e usare una colorbar.
+ax1.legend(title='Temperatura', loc='best', fontsize=9)
+
+plt.tight_layout()
+plt.show()
+
+
+
