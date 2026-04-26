@@ -8,12 +8,13 @@ plt.rcParams.update({
 })
 
 # === Lettura dati ===
-n_misura = "ALL"
+'''n_misura = "ALL"
 data_file = "data_10mK_" + n_misura
 save_as = "only_plot_" + n_misura
 
 data = np.loadtxt("10mK_resonances/data_10mK/" + data_file + ".txt", delimiter="\t")
-
+'''
+data = np.loadtxt("data/SynthData_data.txt")
 # Separa le colonne
 f = data[:, 0]              # Frequenza
 real = data[:, 1]

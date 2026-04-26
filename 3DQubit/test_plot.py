@@ -1,32 +1,43 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft import fft, fftfreq
+from scipy.optimize import curve_fit
 
-#PLOTS FOR FFT
+
+def sin_func(x, A, omega, phi, B):
+    return B + A*np.sin(omega*x+phi)
+
+########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica",
+    "axes.labelsize": 14,        # Dimensione label assi x e y
+    "axes.titlesize": 18,        # Dimensione titolo
+    "xtick.labelsize": 12,       # Dimensione tick x
+    "ytick.labelsize": 12,       # Dimensione tick y
+    "legend.fontsize": 14,       # Dimensione legenda
+    "lines.linewidth": 2         # Spessore delle linee di default
+})
 
 # 1. Caricamento dati 
-data_square = np.loadtxt("data/fft_square.txt")
-data_gaus = np.loadtxt("data/fft_gauss.txt")
+data = np.loadtxt("data/acquisizione.txt")
 
-t_s = data_square[:, 0]  # Tempo square
-y_s = data_square[:, 1]  # Ampiezza square
+f = data[:,0]/1e9
+amp = data[:,1]
 
-t_g = data_gaus[:,0]     # Tempo gaussiano
-y_g = data_gaus[:, 1]    # Ampiezza gaussiana
-
-
-plt.plot(t_s, y_s, label='Square', alpha=0.7)
-plt.plot(t_g, y_g, label='Gauss', alpha=0.7, lw=2)
-plt.title("Fast Fourier Transform")
-plt.xlabel("Frequency (us)")
-plt.ylabel("Amplitude")
-plt.xlim(0, 100e3)
-plt.legend()
-  
-plt.legend()
+popt, pcov = curve_fit(sin_func, f, amp)
+print(popt)
+x_fit = np.linspace(f.min(),f.max(),1000)
+y_fit = sin_func(x_fit, *popt)
+plt.plot(x_fit, y_fit)
+plt.plot(f, amp, label='Data Synth', color='navy',  alpha=0.85,lw=1.5)
+plt.xlabel(r"Frequency (GHz)")
+plt.ylabel(r"Transmission (dBm)")
+plt.grid(True, which='both', linestyle='--', alpha=0.6)
+#plt.legend()
 
 plt.tight_layout()
 
-nome_grafico = "fft_Final.pdf"
-plt.savefig(f"data0_plots/{nome_grafico}")
+#nome_grafico = "synth_plot.pdf"
+#plt.savefig(f"data0_plots/{nome_grafico}")
 plt.show()

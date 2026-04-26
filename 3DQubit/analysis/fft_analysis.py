@@ -94,6 +94,7 @@ ax1.legend(loc="upper right")
 fig1.tight_layout()
 fig1.savefig("../data0_plots/time_domain_PICO.pdf")
 
+
 # ---------------- GRAFICO 2: FREQUENZA ----------------
 fig2, ax2 = plt.subplots(figsize=(8, 6))
 
