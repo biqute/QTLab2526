@@ -28,6 +28,7 @@ Usage:
 """
 
 import sys
+import json
 import warnings
 import numpy as np
 import pandas as pd
@@ -35,6 +36,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.special import kv, iv
 from pathlib import Path
+from datetime import datetime
 
 # ── Physical constants ────────────────────────────────────────────────────────
 k_B  = 1.380649e-23   # J / K
@@ -43,19 +45,31 @@ eV   = 1.602176634e-19 # J / eV
 meV  = eV * 1e-3       # J / meV
 
 # ── Configuration – edit these if needed ─────────────────────────────────────
-DEFAULT_CSV  = "p5.csv"          # fallback filename
+DEFAULT_CSV  = "data/p1_all.csv"          # fallback filename
 CSV_SEP      = ","                 # column separator
-# Column name aliases (case-insensitive).  First match wins.
-COL_F_NAMES  = ["f", "freq", "frequency", "f0", "f_res"]
-COL_T_NAMES  = ["t", "temp", "temperature"]
-COL_QI_NAMES = ["qi", "q_i", "qint", "q_int"]
+# Fixed CSV column names (exact, case-insensitive)
+COL_F   = "f"
+COL_T   = "t"
+COL_QI  = "Q_i"
+
+# Pixel identification: resonant frequency [GHz] → pixel label
+# Each entry covers ± PIXEL_TOL_GHz around the listed centre frequency.
+PIXEL_FREQS = {
+    1: 7.49,
+    2: 7.81,
+    3: 7.99,
+    4: 8.39,
+    5: 8.63,
+}
+PIXEL_TOL_GHz = 0.10   # tolerance window around each centre [GHz]
+Q_MAX = 1e6
 
 # Initial guess ranges for the fit parameters
-alfa_sim       = 0.1    # simulated kinetic inductance fraction (0 < α < 1)
-alfa_min = alfa_sim * 0.10 # lower bound
-alfa_max = alfa_sim * 5 # upper bound
+alfa_sim       = 0.734    # simulated kinetic inductance fraction (0 < α < 1)
+alfa_min = alfa_sim * 0.90 # lower bound
+alfa_max = min(alfa_sim * 1.2, 0.99) # upper bound
 # Δ is expressed in meV throughout the fitting to keep numbers ~O(1).
-DELTA_INIT_MEV = 0.15   # initial guess for energy gap  [meV]
+DELTA_INIT_MEV = 0.40   # initial guess for energy gap  [meV]
 ALPHA_INIT     = alfa_sim    # kinetic inductance fraction (0 < α < 1)
 QI0_INV_INIT   = 1e-6   # initial 1/Qi(0)  (very small positive number)
 B_INIT         = 1e-5   # Kondo coefficient b
@@ -142,47 +156,43 @@ def model_TLS(X, Qi0_inv, alpha, Delta_meV, a):
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def _find_col(df: pd.DataFrame, aliases: list[str]) -> str:
-    """Return the first column name that matches any alias (case-insensitive)."""
-    lower_map = {c.lower(): c for c in df.columns}
-    for alias in aliases:
-        if alias.lower() in lower_map:
-            return lower_map[alias.lower()]
-    raise KeyError(
-        f"Could not find a column matching {aliases}. "
-        f"Available columns: {list(df.columns)}"
-    )
+def identify_pixel(f_GHz: float) -> str:
+    """Return 'Pixel N' for the first matching entry, or 'Unknown pixel'."""
+    for px, centre in PIXEL_FREQS.items():
+        if abs(f_GHz - centre) <= PIXEL_TOL_GHz:
+            return f"Pixel {px}"
+    return f"Unknown pixel  (f_r = {f_GHz:.4f} GHz)"
 
 
 def load_data(path: str):
-    """
-    Load CSV and return arrays (T [K], f [Hz], Qi_inv [dimensionless]).
-    Auto-detects mK→K and GHz→Hz conversions.
-    """
     df = pd.read_csv(path, sep=CSV_SEP)
     df.columns = [c.strip() for c in df.columns]
 
-    col_f  = _find_col(df, COL_F_NAMES)
-    col_T  = _find_col(df, COL_T_NAMES)
-    col_qi = _find_col(df, COL_QI_NAMES)
+    lower_map = {c.lower(): c for c in df.columns}
+    try:
+        T_arr  = df[lower_map[COL_T.lower()]].to_numpy(dtype=float)
+        f_arr  = df[lower_map[COL_F.lower()]].to_numpy(dtype=float)
+        Qi_arr = df[lower_map[COL_QI.lower()]].to_numpy(dtype=float)
+    except KeyError as e:
+        raise KeyError(
+            f"Expected column {e} not found.  "
+            f"Available columns: {list(df.columns)}"
+        )
 
-    f_arr  = df[col_f].to_numpy(dtype=float)
-    T_arr  = df[col_T].to_numpy(dtype=float)
-    Qi_arr = df[col_qi].to_numpy(dtype=float)
+    T_arr /= 1e3                        # mK → K  (always)
 
-    # Auto-scale units
-    """
-    if np.median(T_arr) > 10:          # probably mK
-        print(f"  [info] Temperature median={np.median(T_arr):.1f} → assuming mK, converting to K")
-        T_arr /= 1e3
-    if np.median(f_arr) < 1e6:         # probably GHz
-        print(f"  [info] Frequency median={np.median(f_arr):.3f} → assuming GHz, converting to Hz")
+    # Auto-detect frequency unit: if median > 1e6 the column is already in Hz
+    if np.median(f_arr) > 1e6:
+        print(f"  [info] f median = {np.median(f_arr):.3e} → assuming Hz")
+    else:
+        print(f"  [info] f median = {np.median(f_arr):.4f} → assuming GHz, converting to Hz")
         f_arr *= 1e9
-    """
-    T_arr /= 1e3
+
+    f_GHz = float(np.median(f_arr)) / 1e9   # always derived after normalisation
+
+    pixel_label = identify_pixel(f_GHz)
     Qi_inv = 1.0 / Qi_arr
-    #Qi_inv = Qi_arr
-    return T_arr, f_arr, Qi_arr, Qi_inv
+    return T_arr, f_arr, Qi_arr, Qi_inv, pixel_label
 
 
 def chi_squared(y_obs, y_fit, n_params):
@@ -197,12 +207,19 @@ def chi_squared(y_obs, y_fit, n_params):
     return chi2 / max(dof, 1), residuals
 
 
-def print_result(label, popt, perr, param_names, chi2_red):
+def print_result(label, popt, perr, param_names, chi2_red, Qi_min_measured):
     print(f"\n{'='*55}")
     print(f"  {label}")
     print(f"{'='*55}")
     for name, val, err in zip(param_names, popt, perr):
-        print(f"  {name:<15s} = {val:+.6g}  ±  {err:.3g}")
+        if name == "1/Qi(0)":
+            # Convert to Q(0) and propagate uncertainty: σ_Q = σ_(1/Q) / (1/Q)²
+            Q0     = 1.0 / val
+            dQ0    = err / (val ** 2)
+            status = "✓ OK" if Q0 > Qi_min_measured else "✗ UNPHYSICAL (Q(0) < Q(T_min))"
+            print(f"  {'Q(0)':<15s} = {Q0:.0f}  ±  {dQ0:.0f}    {status}")
+        else:
+            print(f"  {name:<15s} = {val:+.6g}  ±  {err:.3g}")
     print(f"  {'χ²_red':<15s} = {chi2_red:.4f}")
 
 
@@ -212,21 +229,27 @@ def main():
     csv_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CSV
     print(f"\nLoading data from: {csv_path}")
 
-    T, f, Qi, Qi_inv = load_data(csv_path)
+    T, f, Qi, Qi_inv, pixel_label = load_data(csv_path)
+
+    # Q_i at the lowest measured temperature — used to sanity-check Q(0)
+    Qi_at_Tmin = float(Qi[np.argmin(T)])
+    Q_MIN = Qi_at_Tmin * 0.99
 
     N = len(T)
     print(f"  {N} data points loaded")
-    print(f"  T range : {T.min()*1e3:.1f} – {T.max()*1e3:.1f} mK")
-    print(f"  f range : {f.min()/1e9:.4f} – {f.max()/1e9:.4f} GHz")
-    print(f"  Qi range: {Qi.min():.2e} – {Qi.max():.2e}")
+    print(f"  Pixel      : {pixel_label}")
+    print(f"  T range    : {T.min()*1e3:.1f} – {T.max()*1e3:.1f} mK")
+    print(f"  f range    : {f.min()/1e9:.4f} – {f.max()/1e9:.4f} GHz")
+    print(f"  Qi range   : {Qi.min():.2e} – {Qi.max():.2e}")
+    print(f"  Qi(T_min)  : {Qi_at_Tmin:.0f}  (Q(0) must exceed this)")
 
     X = (T, f)
 
-    # ── Fit 1: plain Mattis-Bardeen, no Kondo ────────────────────────────────
+    # ── Fit 1: plain Mattis-Bardeen ────────────────────────────────
     p0_plain   = [QI0_INV_INIT, ALPHA_INIT, DELTA_INIT_MEV]
     bounds_plain = (
-        [0,    alfa_min,    0.01],   # lower bounds
-        [1e-2, alfa_max, 10.0 ],   # upper bounds
+        [1/Q_MAX,    alfa_min,    0.01],
+        [1/Q_MIN, alfa_max, 10.0],   # Q(0) must be > Q(T_min)
     )
     try:
         popt1, pcov1 = curve_fit(
@@ -238,12 +261,11 @@ def main():
         fit1    = model_plain(X, *popt1)
         chi2_1, res1 = chi_squared(Qi_inv, fit1, len(p0_plain))
         print_result(
-            "Model 1 – Mattis-Bardeen (no Kondo)",
+            "Model 1 – Mattis-Bardeen ",
             popt1, perr1,
             ["1/Qi(0)", "alpha", "Delta (meV)"],
-            chi2_1,
+            chi2_1, Qi_at_Tmin,
         )
-        # Derive Tc via BCS:  2Δ ≈ 3.52 kB Tc
         Tc_bcs = (2.0 * popt1[2] * meV) / (3.52 * k_B)
         dTc    = (2.0 * perr1[2] * meV) / (3.52 * k_B)
         print(f"  {'Tc (BCS)':<15s} = {Tc_bcs:.4f}  ±  {dTc:.4f} K")
@@ -256,8 +278,8 @@ def main():
     # ── Fit 2: Mattis-Bardeen + Kondo logarithm ───────────────────────────────
     p0_kondo   = [QI0_INV_INIT, ALPHA_INIT, DELTA_INIT_MEV, B_INIT, TK_INIT]
     bounds_kondo = (
-        [0,    alfa_min,    0.01, 0,    1e-4],
-        [1e-2, alfa_max, 10.0,  1e-2, 10.0],
+        [1/Q_MAX,    alfa_min,    0.01, 0,    1e-4],
+        [1/Q_MIN, alfa_max, 10.0, 1e-2, 10.0],
     )
     try:
         popt2, pcov2 = curve_fit(
@@ -272,7 +294,7 @@ def main():
             "Model 2 – Mattis-Bardeen + Kondo",
             popt2, perr2,
             ["1/Qi(0)", "alpha", "Delta (meV)", "b", "T_K (K)"],
-            chi2_2,
+            chi2_2, Qi_at_Tmin,
         )
         Tc_bcs2 = (2.0 * popt2[2] * meV) / (3.52 * k_B)
         dTc2    = (2.0 * perr2[2] * meV) / (3.52 * k_B)
@@ -283,12 +305,11 @@ def main():
         fit2_ok = False
         popt2 = perr2 = fit2 = res2 = None
 
-
-        # ── Fit 3: Mattis-Bardeen + Two Level System ───────────────────────────────
+    # ── Fit 3: Mattis-Bardeen + Two Level System ──────────────────────────────
     p0_tls   = [QI0_INV_INIT, ALPHA_INIT, DELTA_INIT_MEV, A_INIT]
     bounds_tls = (
-        [0,    alfa_min,    0.01, 0],
-        [1e-2, alfa_max, 10.0,  1e-2],
+        [1/Q_MAX,    alfa_min,    0.01, 0],
+        [1/Q_MIN, alfa_max, 10.0, 1e-2],
     )
     try:
         popt3, pcov3 = curve_fit(
@@ -303,7 +324,7 @@ def main():
             "Model 3 – Mattis-Bardeen + Two Level System",
             popt3, perr3,
             ["1/Qi(0)", "alpha", "Delta (meV)", "a"],
-            chi2_3,
+            chi2_3, Qi_at_Tmin,
         )
         Tc_bcs3 = (2.0 * popt3[2] * meV) / (3.52 * k_B)
         dTc3    = (2.0 * perr3[2] * meV) / (3.52 * k_B)
@@ -314,10 +335,46 @@ def main():
         fit3_ok = False
         popt3 = perr3 = fit3 = res3 = None
 
+    # ── Save results to JSON ──────────────────────────────────────────────────
+    stem     = Path(csv_path).stem
+    json_path = Path(csv_path).parent / (stem + "_fit_results.json")
+
+    def _pack(popt, perr, names, chi2):
+        """Build a tidy dict for one model, converting 1/Q(0) → Q(0)."""
+        d = {"chi2_red": round(float(chi2), 5)}
+        for name, val, err in zip(names, popt, perr):
+            if name == "1/Qi(0)":
+                d["Q0"]      = round(1.0 / float(val), 1)
+                d["Q0_err"]  = round(float(err) / float(val)**2, 1)
+            else:
+                d[name]          = float(val)
+                d[name + "_err"] = float(err)
+        return d
+
+    results = {
+        "file":   csv_path,
+        "pixel":  pixel_label,
+        "Qi_at_Tmin": round(Qi_at_Tmin, 1),
+    }
+    if fit1_ok:
+        results["model_MB"] = _pack(
+            popt1, perr1, ["1/Qi(0)", "alpha", "Delta (meV)"], chi2_1)
+    if fit2_ok:
+        results["model_MB_Kondo"] = _pack(
+            popt2, perr2, ["1/Qi(0)", "alpha", "Delta (meV)", "b", "T_K (K)"], chi2_2)
+    if fit3_ok:
+        results["model_MB_TLS"] = _pack(
+            popt3, perr3, ["1/Qi(0)", "alpha", "Delta (meV)", "a"], chi2_3)
+
+    with open(json_path, "w") as jf:
+        json.dump(results, jf, indent=2)
+    print(f"\nFit results saved → {json_path}")
+
     # ── Plot ─────────────────────────────────────────────────────────────────
-    T_sort = np.argsort(T)
-    T_s    = T[T_sort]
-    Qi_inv_s = Qi_inv[T_sort]
+    SCALE = 1e4          # y-axis multiplier: display 1/Qi × 10⁴
+    T_sort   = np.argsort(T)
+    T_s      = T[T_sort]
+    Qi_inv_s = Qi_inv[T_sort] * SCALE
 
     fig, axes = plt.subplots(
         2, 1,
@@ -327,7 +384,6 @@ def main():
     )
     ax_main, ax_res = axes
 
-    # Data
     ax_main.plot(
         T_s * 1e3, Qi_inv_s,
         "o", ms=4, color="steelblue", alpha=0.7,
@@ -336,49 +392,52 @@ def main():
 
     colors = ["crimson", "darkorange", "green"]
     labels = [
-        f"MB, no Kondo  (Δ={popt1[2]:.3f} meV)" if fit1_ok else "MB, no Kondo (failed)",
-        f"MB + Kondo    (Δ={popt2[2]:.3f} meV)" if fit2_ok else "MB + Kondo (failed)",
-        f"MB + TLS    (Δ={popt3[2]:.3f} meV)" if fit3_ok else "MB + TLS (failed)",
+        f"MB  (Δ={popt1[2]:.3f} meV, α={popt1[1]:.3f})"        if fit1_ok else "MB (failed)",
+        f"MB + Kondo  (Δ={popt2[2]:.3f} meV, α={popt2[1]:.3f})" if fit2_ok else "MB + Kondo (failed)",
+        f"MB + TLS    (Δ={popt3[2]:.3f} meV, α={popt3[1]:.3f})" if fit3_ok else "MB + TLS (failed)",
     ]
 
     if fit1_ok:
-        ax_main.plot(T_s * 1e3, fit1[T_sort], "-", lw=2,
+        ax_main.plot(T_s * 1e3, fit1[T_sort] * SCALE, "-", lw=2,
                      color=colors[0], label=labels[0])
-        ax_res.plot(T_s * 1e3, res1[T_sort], "-o", ms=3,
+        ax_res.plot(T_s * 1e3, res1[T_sort] * SCALE, "-o", ms=3,
                     lw=1, color=colors[0], alpha=0.8,
-                    label=f"Residuals (no Kondo),  χ²_red={chi2_1:.3f}")
+                    label=f"Residuals,  χ²_red={chi2_1:.3f}")
 
     if fit2_ok:
-        ax_main.plot(T_s * 1e3, fit2[T_sort], "--", lw=2,
+        ax_main.plot(T_s * 1e3, fit2[T_sort] * SCALE, "--", lw=2,
                      color=colors[1], label=labels[1])
-        ax_res.plot(T_s * 1e3, res2[T_sort], "--o", ms=3,
+        ax_res.plot(T_s * 1e3, res2[T_sort] * SCALE, "--o", ms=3,
                     lw=1, color=colors[1], alpha=0.8,
                     label=f"Residuals (+ Kondo),    χ²_red={chi2_2:.3f}")
-                
+
     if fit3_ok:
-        ax_main.plot(T_s * 1e3, fit3[T_sort], "--", lw=2,
+        ax_main.plot(T_s * 1e3, fit3[T_sort] * SCALE, "--", lw=2,
                      color=colors[2], label=labels[2])
-        ax_res.plot(T_s * 1e3, res3[T_sort], "--o", ms=3,
+        ax_res.plot(T_s * 1e3, res3[T_sort] * SCALE, "--o", ms=3,
                     lw=1, color=colors[2], alpha=0.8,
-                    label=f"Residuals (+ TLS),    χ²_red={chi2_3:.3f}")
+                    label=f"Residuals (+ TLS),      χ²_red={chi2_3:.3f}")
 
     ax_res.axhline(0, color="gray", lw=0.8, ls=":")
 
-    ax_main.set_ylabel(r"$1/Q_i$", fontsize=13)
+    ax_main.set_ylabel(r"$1/Q_i \; (\times 10^{-4})$", fontsize=13)
     ax_main.legend(fontsize=10, framealpha=0.9)
     ax_main.grid(True, alpha=0.3)
-    ax_main.set_title("MKID Internal Quality Factor vs Temperature", fontsize=13)
+    ax_main.set_title(
+        f"MKID Internal Quality Factor vs Temperature  –  {pixel_label}", fontsize=13)
 
     ax_res.set_xlabel("Temperature  (mK)", fontsize=13)
-    ax_res.set_ylabel(r"Residuals  $\Delta(1/Q_i)$", fontsize=11)
+    ax_res.set_ylabel(r"Residuals  $(\times 10^{-4})$", fontsize=11)
     ax_res.legend(fontsize=9, framealpha=0.9)
     ax_res.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    csv_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_CSV
-    out_fig = Path(csv_path).stem + "_fit.png"
-    plt.savefig(f"/Users/Rajmund/Desktop/MKID/{out_fig}", dpi=150, bbox_inches="tight")
-    print(f"\nPlot saved → {out_fig}")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_fig   = f"{stem}_{timestamp}_fit.png"
+    #out_fig  = stem + "_fit.png"
+    fig_dir  = Path("/Users/Rajmund/Desktop/MKID/figures")
+    plt.savefig(fig_dir / out_fig, dpi=150, bbox_inches="tight")
+    print(f"Plot saved       → {fig_dir / out_fig}")
     plt.show()
 
 
