@@ -4,8 +4,8 @@ from numpy.fft import fft, fftfreq
 from scipy.optimize import curve_fit
 
 
-def sin_func(x, A, omega, phi, B):
-    return B + A*np.sin(omega*x+phi)
+def cos_func(x, A, freq, phi, B):
+    return B + A*np.cos(2*np.pi*freq*x+phi)
 
 ########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
 plt.rcParams.update({
@@ -22,22 +22,46 @@ plt.rcParams.update({
 # 1. Caricamento dati 
 data = np.loadtxt("data/acquisizione.txt")
 
-f = data[:,0]/1e9
-amp = data[:,1]
+# 1. Definisci i parametri temporali
+fs = 10000             # Frequenza di campionamento (Hz)
+n = len(data)           # Numero di punti
 
-popt, pcov = curve_fit(sin_func, f, amp)
-print(popt)
-x_fit = np.linspace(f.min(),f.max(),1000)
-y_fit = sin_func(x_fit, *popt)
-plt.plot(x_fit, y_fit)
-plt.plot(f, amp, label='Data Synth', color='navy',  alpha=0.85,lw=1.5)
-plt.xlabel(r"Frequency (GHz)")
-plt.ylabel(r"Transmission (dBm)")
+# 2. Calcola la FFT
+fft_values = fft(data)
+freqs = fftfreq(n, 1/fs)
+
+# 3. Ottieni la magnitudo (ampiezza) e normalizza
+# Usiamo solo la prima metà (frequenze positive)
+mag = np.abs(fft_values[:n//2]) * (2.0 / n)
+f_plot = freqs[:n//2]
+
+# 4. Visualizza
+plt.plot(f_plot, mag)
+plt.xlabel("Frequenza (Hz)")
+plt.ylabel("Ampiezza")
+plt.show()
+'''
+time_us = data[:,0]/1e3
+amp = data[:,1]
+p0 = [-150, 1/(13), 0, 0]
+# A: -500 to 0, freq: 0.01 to 1, phi: -π to π, B: -100 to 100
+bounds = ([-160, 0.01, -0.01, -10], 
+          [-150, 0.1, 0.01, 10])
+popt, pcov = curve_fit(cos_func, time_us, amp, p0=p0, bounds=bounds)
+A, f, phi, B = popt
+print(f"Fitted parameters: A={A:.2f}, f={f:.2f} Hz, phi={phi:.2f} rad, B={B:.2f}")
+x_fit = np.linspace(time_us.min(),time_us.max(),1000)
+y_fit = cos_func(x_fit, *popt)
+plt.plot(x_fit, y_fit, label = 'fit')
+plt.plot(time_us, amp, label='Data', color='navy',  alpha=0.85,lw=1.5)
+plt.xlabel(r"Time (us)")
+plt.ylabel(r"Amplitude (a.u.)")
 plt.grid(True, which='both', linestyle='--', alpha=0.6)
-#plt.legend()
+plt.legend()
 
 plt.tight_layout()
 
 #nome_grafico = "synth_plot.pdf"
 #plt.savefig(f"data0_plots/{nome_grafico}")
 plt.show()
+'''

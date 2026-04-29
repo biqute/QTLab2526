@@ -8,6 +8,11 @@ from circle_fit import CircleFitter
 import sys
 import os
 
+'''
+Fits every data file in T_dep_data folder, extracts 
+resonance frequency and Q values, and plots them as 
+a function of temperature.
+'''
 ########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,
@@ -70,7 +75,7 @@ for t in Temps:
     T_num = float(new_t.replace("mK", ""))
     
     # Caricamento del dataset
-    file_path = f"T_dep/2_MKID_resonance_{t}.txt"
+    file_path = f"T_dep_data/2_MKID_resonance_{t}.txt"
     try:
         data = np.loadtxt(file_path, delimiter="\t")
     except FileNotFoundError:
