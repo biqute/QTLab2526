@@ -154,6 +154,8 @@ Qi_fit_rev = 1/Ql_fit - Qc_fit_rev.real
 
 Qi_fit = 1/Qi_fit_rev
 
+print ("\n\n\n ###PARAMS ERRORS###\n",np.sqrt(np.diag(pcov)))
+print ("\n\n\n")
 #print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
 
 print("f_res =", f0_fit/1e9)
