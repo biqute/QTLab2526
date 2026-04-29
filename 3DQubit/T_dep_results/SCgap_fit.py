@@ -11,8 +11,10 @@ from scipy.special import i0, k0
 # --- COSTANTI FISICHE ---
 k_B = 8.617333262145e-5  # Costante di Boltzmann (eV/K)
 h = 4.135667696e-15      # Costante di Planck (eV s)
- 
-def inverse_Qi_model(T_mK, inv_Qi_0, alpha, Delta_eV, f_0):
+alpha = 0.738766675
+f_0 = 7.49e9
+
+def model(T_mK, inv_Qi_0, Delta_eV):
     """
     Modello per 1/Qi(T) basato sulla Teoria di Mattis-Bardeen.
     - inv_Qi_0: Dissipazione residua a T=0 (ovvero 1/Qi(0))
@@ -40,22 +42,24 @@ data = np.loadtxt("revQ_vs_Temperature.txt")
 temp = data[:,0]
 revQ = data[:,1]
 
-p0 = [0.001, 1000, 0.001]
-
+p0 = [revQ[0], 0.002]
 # === Fit ===
 # Aggiungiamo i bounds per evitare l'overflow (Delta deve essere positivo)
 popt, pcov = curve_fit(model, temp, revQ, p0=p0)
-a_fit, b_fit, Delta_fit = popt
+inv_Q0_fit, Delta_fit = popt
 
 # Calcolo dell'errore (opzionale ma utile)
 perr = np.sqrt(np.diag(pcov))
-Delta_err = perr[2]
+Delta_err = perr[1]
 
+T_c = Delta_fit/(1.764 * k_B)
+
+print(f"Critical temperature T_c = {T_c:.4f} K")
 print(f"Superconducting Gap = {Delta_fit*1e3:.4f} meV")
 
 # Prepara i dati per il plot del fit
 x_fit = np.linspace(np.min(temp), np.max(temp), 100)
-f_fit = model(x_fit, a_fit, b_fit, Delta_fit)
+f_fit = model(x_fit,inv_Q0_fit, Delta_fit)
 
 plt.figure(figsize=(8, 6))
 plt.plot(temp, revQ, label="Data", marker="o", linestyle="", color="black", alpha=0.6)
