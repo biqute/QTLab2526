@@ -71,7 +71,7 @@ alfa_max = min(alfa_sim * 1.2, 0.99) # upper bound
 # Δ is expressed in meV throughout the fitting to keep numbers ~O(1).
 DELTA_INIT_MEV = 0.40   # initial guess for energy gap  [meV]
 ALPHA_INIT     = alfa_sim    # kinetic inductance fraction (0 < α < 1)
-QI0_INV_INIT   = 1e-6   # initial 1/Qi(0)  (very small positive number)
+#QI0_INV_INIT   = 1e-6   # initial 1/Qi(0)  (very small positive number)
 B_INIT         = 1e-5   # Kondo coefficient b
 TK_INIT        = 0.05   # Kondo temperature T_K  [K]
 A_INIT         = 1e-5   # Two Level System
@@ -234,6 +234,7 @@ def main():
     # Q_i at the lowest measured temperature — used to sanity-check Q(0)
     Qi_at_Tmin = float(Qi[np.argmin(T)])
     Q_MIN = Qi_at_Tmin * 0.99
+    QI0_INV_INIT = 1/Qi_at_Tmin
 
     N = len(T)
     print(f"  {N} data points loaded")
