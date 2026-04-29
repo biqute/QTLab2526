@@ -15,9 +15,9 @@ class GapFinder():
     def __init__(
         self, 
         filename, 
-        omega = 3.03*1e9, 
-        inv_q_0 = 4.791014e-5, 
-        alpha = 0.86766, # found from Sonnet simulation
+        omega = 7.49e9, 
+        inv_q_0 = 4.4472015880796505e-06, 
+        alpha =0.2, # found from Sonnet simulation
         fit_type = "standard"
     ):
         self.fit_result = None
@@ -61,10 +61,10 @@ class GapFinder():
 
         with open(filename, encoding = 'utf-8') as file:
             for line in file:
-                splitted = [float(x) for x in line.split(' ')]
+                splitted = [float(x) for x in line.split()]
                 temps.append(splitted[0])
                 q_inv.append(splitted[1])
-                err_q_inv.append(splitted[2])
+                err_q_inv.append(splitted[2] if len(splitted) > 2 else 1.0)
 
         self._temps = np.array(temps, dtype = 'float64')
         self._q_inv = np.array(q_inv, dtype = 'float64')
