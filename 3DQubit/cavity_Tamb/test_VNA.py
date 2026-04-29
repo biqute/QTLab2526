@@ -8,27 +8,24 @@ import pyvisa
 
 ## code to characterize cavity 
 
-#ip = '193.206.156.99'
-#ip = '192.168.40.10'
+
 ip = '193.206.156.3'
-#ip = '192.168.3.47'
-#ip = '193.206.156.1'
-#ip = '212.189.204.254'
 
 f_min = 1e9
 f_max = 15e9
-f_central = 13.642e9
-f_span = 180e6
-n_points = 1001
-n_means = 20
+f_central = 10.335e9
+f_span = 300e6
+n_points = 4001
+n_means = 1
 power = 0
-ifband = 10000
+ifband = 1000
 
-n_misura = "13_642GHz"
-data_file = "cavity_" + n_misura
-output_file = "cavity_plot" +  n_misura
+n_misura = "0"
+data_file = "new_cavity_" + n_misura
+output_file = "new_cavity_plot" +  n_misura
 
 Sij = "S21"
+set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -38,18 +35,17 @@ try:
     # 1. Identificazione
     print("VNA ID:")
     vna.get_IDN()
-
-    # 2. Configurazione della Misura
-    vna.set_freq_span(f_central, f_span)
-    #vna.set_freq_limits(f_min,f_max)
-    vna.set_sweep_points(n_points)
-    vna.set_n_means(n_means)
-    vna.set_ifband(ifband)
-    vna.set_power(power)
-
-    #phi = np.unwrap(vna.get_phase())
+    if(set==1):
+        #2. Configurazione della Misura
+        vna.set_freq_span(f_central, f_span)
+        #vna.set_freq_limits(f_min,f_max)
+        vna.set_sweep_points(n_points)
+        vna.set_n_means(n_means)
+        vna.set_ifband(ifband)
+        vna.set_power(power)
+        vna.perform_single_sweep()
+    
     phi = vna.get_phase()
-
     freq = vna.get_freq()
     powe = vna.get_dbm()
     I, Q = vna.get_S_parameters()
@@ -57,11 +53,19 @@ try:
     #data.plot(freq, powe)
     #data.plot(freq, phi)
 
-    data = Data(freq, I, Q)
-    data.save_txt(file_to_save=data_file
-                  #, commento="freq, I e Q"
-                  )
+    #data = Data(freq, I, Q)
+    #data.save_txt(file_to_save=data_file
+    #              #, commento="freq, I e Q"
+    #              )
+    
+    import numpy as np
 
+    # Raggruppa le variabili in colonne
+    dati_completi = np.column_stack((freq, I, Q))
+    amp = 20*np.log(I**2+Q**2)
+    # Salva direttamente nel file txt
+    np.savetxt("Tamb_data/"+data_file+".txt", dati_completi, delimiter="\t", comments="")
+    print(f"\nDati salvati in {data_file}.txt")
     # Creating window (fig) with 2 axes (ax1, ax2) 
     fig, (ax1, ax2) = plt.subplots(
         nrows=1,        # 1 riga
@@ -70,7 +74,7 @@ try:
     )
 
     # --- Plot 1: Ampiezza ---
-    ax1.plot(freq, powe, color='blue')
+    ax1.plot(freq, amp, color='blue')
     ax1.set_title(f"Ampiezza {Sij}")
     ax1.set_xlabel("Frequenza (Hz)")
     ax1.set_ylabel("Ampiezza (dBm)")
@@ -86,6 +90,7 @@ try:
     # Mostra la finestra con entrambi i grafici
     plt.suptitle(f"Misura VNA ({Sij})") # Titolo generale
     plt.tight_layout() # Ottimizza gli spazi
+    plt.savefig("Tamb_plots/"+output_file+".pdf")
     plt.show()
 
 except pyvisa.errors.VisaIOError:
@@ -93,3 +98,4 @@ except pyvisa.errors.VisaIOError:
     print("Controlla l'indirizzo IP, la connessione di rete e che il VNA sia acceso.")
 except Exception as e:
         print(f"\nSi è verificato un errore: {e}")
+

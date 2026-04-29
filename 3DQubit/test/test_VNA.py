@@ -18,12 +18,12 @@ power = 0
 ifband = 1e3
 
 
-n_misura = "10mK_b"
+n_misura = ""
 data_file = "../T_dep/"+"2_MKID_resonance_" + n_misura
 output_file = "../T_dep/"+"2_MKID_plot_" +  n_misura
 
 Sij = "S21"
-set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
+set = 1 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
