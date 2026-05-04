@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graph_file version="15">
+    <Window ClassName="SGraphWin" DocID="2251860689472" ShellIndex="0" TabIndex="4" ActiveView="true">
+        <geometry>01d9d0cb0003000000000000000000000000077b000003bc00000000000000000000077b000003bc0000000000000000078000000000000000000000077b000003bc</geometry>
+        <state>000000ff00000000fd00000002000000000000008500000370fc0200000003fb0000000c004c006500670065006e00640100000031000001480000005d00fffffffb00000018005400650072006d0069006e006100740069006f006e0073010000017d000000db0000005d00fffffffb0000000e00530065007300730069006f006e010000025c000001450000005d00ffffff000000030000077c0000010ffc0100000001fb0000000800540075006e006500000000000000077c0000000000000000000006f30000037000000004000000040000000800000008fc0000000100000002000000040000001600460069006c00650054006f006f006c0042006100720100000000ffffffff00000000000000000000001600560069006500770054006f006f006c0042006100720100000098ffffffff000000000000000000000018004700720061007000680054006f006f006c004200610072010000016fffffffff00000000000000000000001a004c00610075006e006300680054006f006f006c00420061007201000002b3000002ac0000000000000000</state>
+        <Guts>
+            <graph_info version="15" tab_label="Graph1">
+                <window_specific/>
+                <terminations>R 50.00000
+
+</terminations>
+                <source_files>
+                    <source id="0">
+                        <file>../../../../../../../Downloads/Photon_count_2_V5_2D_2_5CELL_mod_3ports_DEF.son</file>
+                    </source>
+                </source_files>
+                <plot type="SGraphWin" plotover="0" graph_title="Photon_count_2_V5_2D_2_5CELL_mod_3ports_DEF">
+                    <graph_properties show_grid="1" show_symbols="1" grid_weight="1" axis_weight="1"/>
+                    <graph_units>
+                        <length unit="microns"/>
+                        <resistance unit="Ohms"/>
+                        <inductance unit="nH"/>
+                        <capacitance unit="pF"/>
+                        <frequency unit="GHz"/>
+                        <conductivity unit="S/m"/>
+                        <resistivity unit="Ohm-cm"/>
+                        <sheet_resistance unit="Ohms/sq"/>
+                    </graph_units>
+                    <axes>
+                        <x_axis min="-2" max="14" autoscale="1" enabled="1" interval="2" tick_labels="1" log="0" custom="0">
+                            <title>Frequency (GHz)</title>
+                        </x_axis>
+                        <y_axis_left min="-40" max="60" autoscale="1" enabled="1" interval="20" tick_labels="1" log="0" custom="0">
+                            <title>Magnitude (dB)</title>
+                        </y_axis_left>
+                        <y_axis_right min="-200" max="1000" autoscale="1" enabled="0" interval="200" tick_labels="1" log="0" custom="0">
+                            <title></title>
+                        </y_axis_right>
+                    </axes>
+                    <curves>
+                        <curvegroup name="Group 1">
+                            <curve id="13" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="0">
+                                        <Data value0="Lk=1"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#d50000"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="15" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="1">
+                                        <Data value0="Lk=3"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#000075"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="17" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="2">
+                                        <Data value0="Lk=5"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#31953d"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="19" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="3">
+                                        <Data value0="Lk=7"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#ff8533"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="21" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="4">
+                                        <Data value0="Lk=9"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#911eb4"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="23" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="5">
+                                        <Data value0="Lk=11"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#00b7d3"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="25" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="6">
+                                        <Data value0="Lk=13"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#9a6324"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="27" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="7">
+                                        <Data value0="Lk=15"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#e5d604"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="29" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="8">
+                                        <Data value0="Lk=15.5"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#f032e6"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="31" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="9">
+                                        <Data value0="Lk=15.6"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#000000"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="33" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="10">
+                                        <Data value0="Lk=15.7"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#a1cf09"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="35" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="11">
+                                        <Data value0="Lk=15.8"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#e66969"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="37" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="12">
+                                        <Data value0="Lk=15.9"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#008080"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="39" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="13">
+                                        <Data value0="Lk=16"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#a579e2"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="41" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="14">
+                                        <Data value0="Lk=16.1"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#800000"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="43" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="15">
+                                        <Data value0="Lk=16.2"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#76b888"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="45" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="16">
+                                        <Data value0="Lk=16.3"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#4363d8"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="47" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="17">
+                                        <Data value0="Lk=16.4"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#808000"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="49" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="18">
+                                        <Data value0="Lk=16.5"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#dda178"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="51" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="19">
+                                        <Data value0="Lk=17"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#808080"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="53" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="20">
+                                        <Data value0="Lk=19"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#d50000"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                            <curve id="55" measurement_name="Z-Parameters" measurement_id="3" plotover="0">
+                                <Axis name="Axis" value="0"/>
+                                <Format name="Format" value="0"/>
+                                <Data_Source name="Data Source">
+                                    <File name="File" value="0"/>
+                                    <De-embedded name="De-embedded" value="0"/>
+                                    <Interpolated name="Interpolated" value="0"/>
+                                    <Parameters name="Parameters" value="21">
+                                        <Data value0="Lk=20"/>
+                                    </Parameters>
+                                </Data_Source>
+                                <Ports name="Ports">
+                                    <To_Port name="To Port" value="3"/>
+                                    <From_Port name="From Port" value="3"/>
+                                </Ports>
+                                <Style name="Style">
+                                    <Color name="Color" value="#000075"/>
+                                    <Symbol name="Symbol" value="0"/>
+                                    <Line_Style name="Line Style" value="1"/>
+                                    <Line_Width name="Line Width" value="1"/>
+                                </Style>
+                            </curve>
+                        </curvegroup>
+                    </curves>
+                    <marker_properties>
+                        <data_marker_properties color="#004c97" weight="12" symbol="2" display_annotation="1"/>
+                        <curve_marker_properties color="#004c97" show_parameters="0" hide_label="0"/>
+                        <note_marker_properties color="#004c97"/>
+                        <delta_marker_properties color="#004c97"/>
+                        <line_marker_properties color="#004c97" weight="2" style="2" display_annotation="1"/>
+                        <line_segment_marker_properties color="#004c97" weight="2" style="2" symbol="0" symbol_size="12"/>
+                        <general_properties text_size="10" label_precision="4"/>
+                    </marker_properties>
+                    <markers>
+                        <data_markers/>
+                        <curve_markers/>
+                        <note_markers/>
+                        <hline_markers/>
+                        <vline_markers/>
+                        <delta_markers/>
+                        <line_segment_markers/>
+                    </markers>
+                    <zoom_rect valid="1" x1="-2" x2="14" y1="-40" y2="60"/>
+                </plot>
+            </graph_info>
+        </Guts>
+    </Window>
+</graph_file>
