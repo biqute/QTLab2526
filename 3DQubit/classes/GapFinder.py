@@ -17,7 +17,7 @@ class GapFinder():
         filename, 
         omega = 7.49e9, 
         inv_q_0 = 4.4472015880796505e-06, 
-        alpha =0.2, # found from Sonnet simulation
+        alpha = 0.7387666754662097, # found from Sonnet simulation
         fit_type = "standard"
     ):
         self.fit_result = None
