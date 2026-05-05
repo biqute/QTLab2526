@@ -11,7 +11,7 @@ from scipy.special import i0, k0
 # --- COSTANTI FISICHE ---
 k_B = 8.617333262145e-5  # Costante di Boltzmann (eV/K)
 h = 4.135667696e-15      # Costante di Planck (eV s)
-alpha = 0.738766675
+alpha = 0.7354
 f_0 = 7.49e9
 
 def model(T_mK, inv_Qi_0, Delta_eV):
@@ -42,10 +42,14 @@ data = np.loadtxt("revQ_vs_Temperature.txt")
 temp = data[:,0]
 revQ = data[:,1]
 
-p0 = [revQ[0], 0.002]
+p0 = [revQ[0], 0.002]  # Stima iniziale per [inv_Qi_0, Delta_eV]
+lower = [0, 0]     # Limiti inferiori per i parametri
+upper = [1e-3, 1]  # Limiti superiori per i parametri
 # === Fit ===
 # Aggiungiamo i bounds per evitare l'overflow (Delta deve essere positivo)
-popt, pcov = curve_fit(model, temp, revQ, p0=p0)
+popt, pcov = curve_fit(model, temp, revQ, p0=p0
+                       , bounds=(lower, upper)
+                       )
 inv_Q0_fit, Delta_fit = popt
 
 # Calcolo dell'errore (opzionale ma utile)

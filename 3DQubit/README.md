@@ -5,7 +5,6 @@
 ## Cavity modes
 1. Rifare misure con cavità bella!!
 2. Se abbiamo voglia anche analisi statistica sui residui
-
 ## Down Conversion
 1. Fare analisi dati con FFT per verificare che le frequenze tornino. Vanno riprese le MISURE!!
 

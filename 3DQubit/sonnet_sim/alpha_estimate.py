@@ -27,10 +27,15 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "0alpha" 
+n_misura = "0" 
 
 # Carica il file CSV
-data = np.genfromtxt('sonnet_data/PC2_1_1_test.csv', delimiter=',', skip_header=1)
+#data = np.genfromtxt('sonnet_data/Lk_' + n_misura + '.csv', delimiter=','
+ #                    ,skip_header=1, invalid_raise=False
+#                     )
+data = np.genfromtxt('sonnet_data/PC2_1_1_test.csv', delimiter=','
+                    ,skip_header=1, invalid_raise=False
+                     )
 
 f_min = 13.5
 f_max = 16.0
@@ -204,7 +209,7 @@ print(f"Grafico salvato in sonnet_plots/{save_as}")
 # --- DATA ANALYSIS ---
 
 f_meas = 7.49
-f_sim = 14.551
+f_sim = 14.56
 
 alpha = 1 - (f_meas/f_sim)**2
 

@@ -188,9 +188,9 @@ class CircleFitter:
 
         p0 = [Ql_guess , abs_Qc_guess, phase_Qc_guess, fr_guess, a_guess, alpha_guess, tau_guess]
 
-        lower = [1,   1e1,   -np.pi, f_data.min() , 1e-7, -np.pi, -1e7]
-        upper = [1e8 ,  1e8,   np.pi, f_data.max(),  1e7,  np.pi,  1e7 ]
-
+        lower = [0,   0,   -np.pi*1e6, f_data.min() , 1e-7, -np.pi*1e6, -1e7]
+        upper = [1e10 ,  1e10,   np.pi*1e6, f_data.max(),  1e7,  np.pi*1e6,  1e7 ]
+        
         popt, pcov = optimize.curve_fit(S21_notch_real, f_data, ydata, p0=p0, bounds=(lower, upper), maxfev = 10000)
 
         return popt, pcov

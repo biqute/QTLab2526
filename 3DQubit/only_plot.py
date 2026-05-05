@@ -1,47 +1,53 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-########## SCRIPT 4 LATEX #####
+# Opzionale: impostazioni per il font
 plt.rcParams.update({
-    "text.usetex": True,
+    "text.usetex": False, # Metti True se hai LaTeX configurato nel tuo ambiente
     "font.family": "Helvetica"
 })
 
-# === Lettura dati ===
-'''n_misura = "ALL"
-data_file = "data_10mK_" + n_misura
-save_as = "only_plot_" + n_misura
+# 1. Caricamento dati
+# Usiamo invalid_raise=False per ignorare automaticamente le fastidiose 
+# righe di testo in fondo al CSV di Sonnet
+data = np.genfromtxt('sonnet_sim/sonnet_data/Lk_0.csv', delimiter=',', invalid_raise=False)
 
-data = np.loadtxt("10mK_resonances/data_10mK/" + data_file + ".txt", delimiter="\t")
-'''
-data = np.loadtxt("data/SynthData_data.txt")
-# Separa le colonne
-f = data[:, 0]              # Frequenza
-real = data[:, 1]
-imag = data[:, 2]
+# Rimuoviamo eventuali righe vuote o header lette come NaN
+data = data[~np.isnan(data[:, 0])]
 
-# Calcola modulo
-y = 20*np.log10(np.sqrt(real**2 + imag**2))  # in dB, se vuoi in lineare rimuovi 20*np.log10
-min_idx = np.argmin(y)
-min_f = f[min_idx]
-# === Plot ===
-fig, ax = plt.subplots()
+frequencies = data[:, 0]  # Frequenze
+real_S21 = data[:, 5]     # Parte reale di S21
+imag_S21 = data[:, 6]     # Parte immaginaria di S21
 
-ax.plot(f/1e9, y, color = 'blue', label = "S21 Data")  # Frequenza in GHz
-ax.set_xlabel("Frequency (GHz)", fontsize = 14)   # cambia in GHz se necessario
-ax.set_ylabel("Transmission (dB)", fontsize = 14)  
-#ax.set_title("Magnitude")
-#ax.set_xlim(5, 9.1)
-#ax.legend(loc='upper right')
-ax.grid(True)
+# Calcolo dell'ampiezza (in lineare, ma se preferisci i dB fai: 20 * np.log10(signal))
+signal = np.abs(real_S21 + 1j * imag_S21)
 
-# Tick dei valori sugli assi
-plt.xticks(fontsize=12)
-plt.yticks(fontsize=12)
-# === Salvataggio ===
-save_as += ".pdf"
-fig.savefig(f"10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
+# 2. Identificazione e separazione degli sweep
+# np.diff calcola la differenza tra elementi consecutivi. 
+# Quando la frequenza torna indietro (inizia un nuovo L_k), np.diff < 0.
+split_indices = np.where(np.diff(frequencies) < 0)[0] + 1
 
-print(f"Grafico salvato in 10mK_resonances/plots_10mK/{save_as}")
+# Suddividiamo gli array in base ai "salti" di frequenza trovati
+freq_sweeps = np.split(frequencies, split_indices)
+signal_sweeps = np.split(signal, split_indices)
 
+# 3. Creazione del grafico
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# Creiamo una palette di colori (colormap) per le 15 curve, da blu a giallo
+colors = plt.cm.viridis(np.linspace(0, 1, len(freq_sweeps)))
+
+for i, (f_swp, s_swp) in enumerate(zip(freq_sweeps, signal_sweeps)):
+    # Plot di ogni singola risonanza
+    ax.plot(f_swp, s_swp, '-', linewidth=2, color=colors[i], label=f'Sweep {i+1}')
+
+ax.set_xlabel('Frequency (GHz)', fontsize=12)
+ax.set_ylabel('$|S_{21}|$', fontsize=12)
+ax.set_title('Risposta del Risonatore al variare dell\'Induttanza Cinetica $L_k$', fontsize=14)
+ax.grid(True, alpha=0.3)
+
+# Spostiamo la legenda fuori dal grafico per non coprire i dati
+ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', title="Valori $L_k$")
+
+plt.tight_layout()
 plt.show()
