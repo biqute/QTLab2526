@@ -7,10 +7,16 @@ import os
 def LC_model(Lk, a, b, c):
     return a + b * 1/np.sqrt(Lk+c)
 
-# Opzionale: impostazioni per il font
+########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
 plt.rcParams.update({
-    "text.usetex": False, # Metti True se hai LaTeX configurato
-    "font.family": "Helvetica"
+    "text.usetex": True,
+    "font.family": "Helvetica",
+    "axes.labelsize": 16,        # Dimensione label assi x e y
+    "axes.titlesize": 18,        # Dimensione titolo
+    "xtick.labelsize": 12,       # Dimensione tick x
+    "ytick.labelsize": 12,       # Dimensione tick y
+    "legend.fontsize": 14,       # Dimensione legenda
+    "lines.linewidth": 2         # Spessore delle linee di default
 })
 
 # Creazione cartella di output se non esiste (evita errori al salvataggio)
@@ -60,10 +66,10 @@ ax.axvline(x=Lk_target, color='red', linestyle='--', linewidth=2, alpha=0.8,
 ax.plot(Lk_target, f_target, '*', ms=14, zorder=5)
 
 # Estetica del grafico (coerente con l'altro script)
-ax.set_xlabel(r"Kinetic Inductance (pH/sq)", fontsize=12)
-ax.set_ylabel(r"Resonance Frequency (GHz)", fontsize=12)
+ax.set_xlabel(r"Kinetic Inductance (pH/sq)")
+ax.set_ylabel(r"Resonance Frequency (GHz)",)
 ax.grid(True, which='both', linestyle='--', alpha=0.6)
-ax.legend(loc="best", fontsize=11)
+ax.legend(loc="best", fontsize=14)
 
 fig.tight_layout()
 

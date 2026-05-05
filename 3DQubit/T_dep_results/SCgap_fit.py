@@ -3,6 +3,18 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.special import i0, k0
 
+########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica",
+    "axes.labelsize": 16,        # Dimensione label assi x e y
+    "axes.titlesize": 18,        # Dimensione titolo
+    "xtick.labelsize": 12,       # Dimensione tick x
+    "ytick.labelsize": 12,       # Dimensione tick y
+    "legend.fontsize": 14,       # Dimensione legenda
+    "lines.linewidth": 2         # Spessore delle linee di default
+})
+
 #def model(T, a, b, Delta):
 #    # Boltzmann constant in eV/mK: (J/K) * (1/ (J/eV)) * (1 K / 1000 mK)
 #    k_B = 8.617333e-5 / 1000  
@@ -65,23 +77,27 @@ print(f"Superconducting Gap = {Delta_fit*1e3:.4f} meV")
 x_fit = np.linspace(np.min(temp), np.max(temp), 100)
 f_fit = model(x_fit,inv_Q0_fit, Delta_fit)
 
+lw_style = 2     # Spessore standard
+alpha_style = 0.7   # Leggera trasparenza per chiarezza visiva
+zorder_style = 1
+
 plt.figure(figsize=(8, 6))
-plt.plot(temp, revQ, label="Data", marker="o", linestyle="", color="black", alpha=0.6)
+plt.plot(temp, revQ, 'o', label="Data",  color='navy', alpha=0.85, ms=5)
 
 # Inseriamo il valore del Delta nella label del Fit
 plt.plot(x_fit, f_fit, 
-         label=f"Fit: $\Delta$ = {Delta_fit*1e3:.3f} ± {Delta_err*1e3:.3f} meV", 
-         linewidth=2, color="red")
+         label=f"Fit: $\Delta$ = {Delta_fit*1e3:.3f} ± {Delta_err*1e3:.3f} meV", color='darkorange', alpha=0.9, lw=2.4)
 
 # In alternativa, puoi stamparlo come testo fisso nel grafico:
 # plt.text(0.05, 0.95, f"$\Delta$ = {Delta_fit*1e3:.3f} meV", 
 #          transform=plt.gca().transAxes, verticalalignment='top', 
 #          bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
 
-plt.xlabel("Temperature (mK)")
-plt.ylabel("1/Q")
-plt.title("Fit of Superconducting Gap")
+plt.xlabel(r"Temperature (mK)")
+plt.ylabel(r"$1/Q_i$")
+#plt.title("Fit of Superconducting Gap")
 plt.grid(True, linestyle='--', alpha=0.7)
 plt.legend()
 plt.savefig("SCgap_fit.png", dpi=300)
+plt.savefig("SCgap_fit.pdf")
 plt.show()

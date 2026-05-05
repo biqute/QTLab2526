@@ -3,10 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl  # Aggiunto per gestire la colorbar
 
-########## SCRIPT 4 LATEX #####
+########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "Helvetica"
+    "font.family": "Helvetica",
+    "axes.labelsize": 14,        # Dimensione label assi x e y
+    "axes.titlesize": 18,        # Dimensione titolo
+    "xtick.labelsize": 12,       # Dimensione tick x
+    "ytick.labelsize": 12,       # Dimensione tick y
+    "legend.fontsize": 14,       # Dimensione legenda
+    "lines.linewidth": 2         # Spessore delle linee di default
 })
 
 # === Plot ===
@@ -59,8 +65,8 @@ for i, t in enumerate(Temps):
     # Non passiamo più 'label' perché useremo la colorbar
     ax.plot(f_t/1e9, module_t, '-', color=color)
 
-ax.set_xlabel("Frequency [GHz]", fontsize = 14)
-ax.set_ylabel(r"Transmission [dB]", fontsize=14)
+ax.set_xlabel(r"Frequency (GHz)", fontsize = 14)
+ax.set_ylabel(r"Transmission (dB)", fontsize=14)
 ax.grid(True, alpha=0.3)
 ax.set_xlim(7.445, 7.51)
 
@@ -68,7 +74,7 @@ ax.set_xlim(7.445, 7.51)
 sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
 sm.set_array([])  # Necessario per i ScalarMappable senza un plot 2D associato
 cbar = fig.colorbar(sm, ax=ax)
-cbar.set_label(r'Temperature [mK]', fontsize=14)
+cbar.set_label(r'Temperature (mK)', fontsize=14)
 
 save_as = "moving_resonances_plot_final"
 fig.savefig(f"../T_dep_results/{save_as}.png", bbox_inches="tight")

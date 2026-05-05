@@ -34,7 +34,7 @@ module_sweeps = np.split(module_S21, split_indices)
 Lk_nums = np.linspace(0, 15, len(freq_sweeps)) 
 
 # === Plot ===
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(8, 6))
 
 # Creiamo la normalizzazione e scegliamo la colormap (es. jet)
 cmap_name = 'jet'  
@@ -46,7 +46,7 @@ for i, (f_swp, mod_swp) in enumerate(zip(freq_sweeps, module_sweeps)):
     # Calcoliamo il colore esatto associato al valore di L_k
     color = cmap(norm(Lk_nums[i]))
 
-    lw_style = 1.4      # Spessore standard
+    lw_style = 2     # Spessore standard
     alpha_style = 0.7   # Leggera trasparenza per chiarezza visiva
     zorder_style = 1
 
@@ -56,7 +56,7 @@ for i, (f_swp, mod_swp) in enumerate(zip(freq_sweeps, module_sweeps)):
             alpha=alpha_style, 
             zorder=zorder_style)
 
-ax.set_xlabel("Frequency (GHz)", fontsize=14)
+ax.set_xlabel(r"Frequency (GHz)", fontsize=14)
 ax.set_ylabel(r"Transmission (dB)", fontsize=14)
 ax.grid(True, alpha=0.3)
 # ax.set_xlim(...) # Decommenta se vuoi restringere la visualizzazione
