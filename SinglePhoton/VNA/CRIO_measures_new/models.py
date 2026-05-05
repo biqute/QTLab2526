@@ -45,7 +45,7 @@ eV   = 1.602176634e-19 # J / eV
 meV  = eV * 1e-3       # J / meV
 
 # ── Configuration – edit these if needed ─────────────────────────────────────
-DEFAULT_CSV  = "data/p1_all.csv"          # fallback filename
+DEFAULT_CSV  = "p5.csv"          # fallback filename
 CSV_SEP      = ","                 # column separator
 # Fixed CSV column names (exact, case-insensitive)
 COL_F   = "f"
@@ -62,7 +62,7 @@ PIXEL_FREQS = {
     5: 8.63,
 }
 PIXEL_TOL_GHz = 0.10   # tolerance window around each centre [GHz]
-Q_MAX = 1e6
+Q_MAX = 0.3e6
 
 # Initial guess ranges for the fit parameters
 alfa_sim       = 0.734    # simulated kinetic inductance fraction (0 < α < 1)
@@ -170,9 +170,9 @@ def load_data(path: str):
 
     lower_map = {c.lower(): c for c in df.columns}
     try:
-        T_arr  = df[lower_map[COL_T.lower()]].to_numpy(dtype=float)
-        f_arr  = df[lower_map[COL_F.lower()]].to_numpy(dtype=float)
-        Qi_arr = df[lower_map[COL_QI.lower()]].to_numpy(dtype=float)
+        T_arr  = df[lower_map[COL_T.lower()]].to_numpy(dtype=float).copy()
+        f_arr  = df[lower_map[COL_F.lower()]].to_numpy(dtype=float).copy()
+        Qi_arr = df[lower_map[COL_QI.lower()]].to_numpy(dtype=float).copy()
     except KeyError as e:
         raise KeyError(
             f"Expected column {e} not found.  "
@@ -436,7 +436,7 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     out_fig   = f"{stem}_{timestamp}_fit.png"
     #out_fig  = stem + "_fit.png"
-    fig_dir  = Path("/Users/Rajmund/Desktop/MKID/figures")
+    fig_dir  = Path("/Users/oper/labQT/Lab2025/QTLab2526/SinglePhoton/VNA/CRIO_measures_new")
     plt.savefig(fig_dir / out_fig, dpi=150, bbox_inches="tight")
     print(f"Plot saved       → {fig_dir / out_fig}")
     plt.show()
