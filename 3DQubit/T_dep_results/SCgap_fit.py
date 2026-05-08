@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.special import i0, k0
 from iminuit import Minuit
+from iminuit.cost import LeastSquares
 from iminuit.util import describe
 
 ########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
@@ -52,43 +53,46 @@ def model(T_mK, inv_Qi_0, Delta_eV):
     return inv_Qi
 
 # Caricamento dati
-data = np.loadtxt("revQ_vs_Temperature.txt")
+data = np.loadtxt("revQ_vs_Temperature.txt", skiprows=1)
 temp = data[:,0]
 revQ = data[:,1]
+revQ_err = data[:,2]
 
 p0 = [revQ[0], 0.002]  # Stima iniziale per [inv_Qi_0, Delta_eV]
 lower = [0, 0]     # Limiti inferiori per i parametri
 upper = [1e-3, 1]  # Limiti superiori per i parametri
-# 1. Definiamo la funzione di costo (Least Squares)
-# Assumiamo che 'model' sia la tua funzione model(temp, inv_Q0, Delta)
-# Se non hai gli errori sperimentali (yerr), iminuit li assumerà unitari
-cost_func = LeastSquares(temp, revQ, yerr=None, model=model)
+from iminuit import Minuit
+from iminuit.cost import LeastSquares
+
+# Assicurati che model sia definita come: model(x, inv_Qi_0, Delta)
+# 1. Definiamo la funzione di costo corretta
+# Usiamo 'y_errors' al posto di 'yerr'
+cost_func = LeastSquares(temp, revQ, revQ_err, model)
 
 # 2. Inizializziamo Minuit
-# Passiamo i valori iniziali p0 spacchettati
-m = Minuit(cost_func, inv_Q0=p0[0], Delta=p0[1])
+# Nota: i nomi dei parametri (inv_Qi_0, Delta) devono coincidere 
+# esattamente con quelli usati nella definizione di 'model'
+m = Minuit(cost_func, inv_Qi_0=p0[0], Delta_eV=p0[1])
 
-# 3. Impostiamo i limiti (bounds)
-m.limits["inv_Q0"] = (lower[0], upper[0])
-m.limits["Delta"] = (lower[1], upper[1])
+# 3. Impostiamo i limiti
+m.limits["inv_Qi_0"] = (lower[0], upper[0])
+m.limits["Delta_eV"] = (lower[1], upper[1])
 
-# 4. Eseguiamo la minimizzazione (Migrad)
-m.migrad()
+# 4. Fit
+m.migrad()  # Trova il minimo
+m.hesse()   # Calcola gli errori parabolici
 
-# 5. Calcolo accurato delle incertezze (Hesse)
-m.hesse()
-
-# --- Estrazione Risultati ---
-inv_Q0_fit = m.values["inv_Q0"]
-Delta_fit = m.values["Delta"]
-Delta_err = m.errors["Delta"]
+# 5. Estrazione risultati
+inv_Q0_fit = m.values["inv_Qi_0"]
+Delta_fit = m.values["Delta_eV"]
+Delta_err = m.errors["Delta_eV"]
 
 print(m)
 
 T_c = Delta_fit/(1.764 * k_B)
 
 print(f"Critical temperature T_c = {T_c:.4f} K")
-print(f"Superconducting Gap = {Delta_fit*1e3:.4f} meV")
+print(f"Superconducting Gap = {Delta_fit*1e3:.4f} pm  meV")
 
 # Prepara i dati per il plot del fit
 x_fit = np.linspace(np.min(temp), np.max(temp), 100)
