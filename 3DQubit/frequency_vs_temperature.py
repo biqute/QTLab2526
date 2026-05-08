@@ -9,8 +9,8 @@ import sys
 import os
 
 '''
-Fits every data file in T_dep_data folder, extracts 
-resonance frequency and Q values, and plots them as 
+Fits every data file in T_dep_data folder, extracts
+resonance frequency and Q values, and plots them as
 a function of temperature.
 '''
 ########## SCRIPT 4 LATEX #####
@@ -33,24 +33,32 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 
 # Lista delle temperature
 Temps = [
-    "10mK", 
-    "200mK_b", 
-    "300mK_b", 
+    "10mK",
+    "200mK_b",
+    "300mK_b",
     "400mK_b",  
-    "500mK_b", "550mK_b", "600mK_b", "650mK_b", "675mK_b", 
+    "500mK_b", "550mK_b", "600mK_b", "650mK_b", "675mK_b",
     "700mK", "725mK", "750mK", "775mK",
     "800mK", "825mK", "850mK", "875mK_b","900mK","925mK_b",
-    "950mK", "975mK", "1000mK", 
+    "950mK", "975mK", "1000mK",
 ]
 
 fitter = CircleFitter()
 
-# Array per conservare i risultati finali
+# Array per conservare i risultati finali e i relativi errori
 revQ_val_num = []
+err_revQ_val = []
+
 Ql_val_num = []
+
 Qc_val_num = []
+err_abs_Qc_val = []
+err_phase_Qc_val = []
+
 T_val_num = []
+
 fr_val = []
+err_fr_val = []
 
 # --- Preparazione Grafico globale (Mag vs Freq per tutte le T) ---
 fig_all, ax_all = plt.subplots(figsize=(10, 6))
@@ -61,8 +69,7 @@ ax_all.grid(True, alpha=0.3)
 
 # Cartelle dove salvare i risultati (create se non esistono)
 os.makedirs("T_dep_results", exist_ok=True)
-# NUOVA CARTELLA PER I PLOT INDIVIDUALI
-os.makedirs("T_dep_results/individual_plots", exist_ok=True) 
+os.makedirs("T_dep_results/individual_plots", exist_ok=True)
 
 # ---------------- Ciclo su tutte le Temperature ----------------
 for t in Temps:
@@ -107,18 +114,18 @@ for t in Temps:
     # 1. Riavvolge la fase strettamente tra -pi e pi per evitare sforamenti
     theta_0_guess_safe = np.angle(np.exp(1j * phase[np.argmin(signal)]))
 
-    # 2. Clampa la stima di Q_r affinché stia strettamente tra 1 e 9.99 milioni (il limite di circle_fit è 1e7)
+    # 2. Clampa la stima di Q_r affinché stia strettamente tra 1 e 9.99 milioni
     Q_r_guess_safe = max(1.0, min(Q_r_guess, 9.99e6))
 
     # 3. Assicura che la stima della frequenza sia strettamente dentro i margini misurati
-    f_r_guess_safe = max(frequencies.min() + 1, min(f_r_guess, frequencies.max() - 1))
+    f_r_guess_safe = max(frequencies.min() + 1e-6, min(f_r_guess, frequencies.max() - 1e-6))
 
-    # Ora eseguiamo il fit della fase in totale sicurezza:
+    # Fit della fase in totale sicurezza:
     theta_0, Q_r, f_r = fitter._fit_phase(S21_centered, frequencies, theta_0_guess_safe, Q_r_guess_safe, f_r_guess_safe)
-    beta = (theta_0 + np.pi) 
+    beta = (theta_0 + np.pi)
     P_off = x_c + r_0 * np.cos(beta)  + 1j*(y_c + r_0 * np.sin(beta))
     a_scaling = abs(P_off)  
-    alpha = np.angle(P_off) 
+    alpha = np.angle(P_off)
 
     x_can, y_can, r_0_can = fitter._fit_from_complex(fitter._canonize(frequencies, S21, a_scaling, alpha, TAU + tau_true))
 
@@ -132,39 +139,67 @@ for t in Temps:
     # --- Fit complesso ---
     S = signal * np.exp(1j * phase)
     
-    # Blocco try-except inserito perché a T molto alte la risonanza 
-    # potrebbe "sparire" e mandare in crash la minimizzazione del fit
+    # Blocco try-except inserito per T molto alte
     try:
         params, pcov = fitter._fit_notch(S, frequencies, Q_r, Q_c, f_r, a_scaling, alpha, TAU + tau_true)
         Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit = params
         S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit)
+        
+        # --- ESTRAZIONE ERRORI DALLA COVARIANZA ---
+        perr = np.sqrt(np.diag(pcov))
+        err_Ql = perr[0]
+        err_abs_Qc = perr[1]
+        err_phase_Qc = perr[2]
+        err_f0 = perr[3]
+        
+        # Propagazione errore per 1/Qi = 1/Ql - cos(phase_Qc)/abs_Qc
+        J_revQi = np.array([
+            -1.0 / Ql_fit**2,
+            np.cos(phase_Qc_fit) / abs_Qc_fit**2,
+            np.sin(phase_Qc_fit) / abs_Qc_fit
+        ])
+        sub_pcov = pcov[0:3, 0:3]
+        err_revQi = np.sqrt(np.abs(np.dot(J_revQi, np.dot(sub_pcov, J_revQi))))
+
     except Exception as e:
         print(f"Fit complesso fallito per {t}: {e}\nUso f_r dallo step di fit in fase.")
         f0_fit = f_r
-        # Creiamo un S_fit approssimato dai risultati iniziali per permettere comunque il plot
         S_fit = S21_notch(frequencies, Q_r, abs(Q_c), np.angle(Q_c), f_r, a_scaling, alpha, TAU + tau_true)
         
-    print(f" -> Trovata f_r = {f0_fit:.6f} GHz")
+        # Gestione fallback per gli errori
+        err_f0 = 0.0
+        err_revQi = 0.0
+        err_abs_Qc = 0.0
+        err_phase_Qc = 0.0
+
+    print(f" -> Trovata f_r = {f0_fit:.6f} GHz ± {err_f0:.2e}")
     
     # --- Calcolo del Q valore
     Q_c_fit = abs_Qc_fit * np.exp(1j * phase_Qc_fit)
     Q_c_rev = 1/Q_c_fit
     Q_i_rev = 1/Ql_fit - Q_c_rev.real
-    # --- Salvataggio dati ---
+    
+    # --- Salvataggio dati e propagazione errori finali ---
     T_val_num.append(T_num)
+    
     fr_val.append(f0_fit)
+    err_fr_val.append(err_f0)
+    
     revQ_val_num.append(Q_i_rev)
+    err_revQ_val.append(err_revQi)
+    
     Qc_val_num.append(Q_c_fit)
+    err_abs_Qc_val.append(err_abs_Qc)
+    err_phase_Qc_val.append(err_phase_Qc)
     
     # --- Popoliamo il plot GLOBALE ---
     p = ax_all.plot(frequencies, abs(S), 'o', ms=4, alpha=0.3, label=f"Data {t}")
-    color = p[0].get_color() # Recuperiamo il colore assegnato da matplotlib
+    color = p[0].get_color()
     ax_all.plot(frequencies, abs(S_fit), '-', lw=2.5, color=color)
 
     # =========================================================================
-    # --- NUOVO: CREAZIONE E SALVATAGGIO DEL PLOT INDIVIDUALE PER QUESTA T ---
+    # --- PLOT INDIVIDUALE PER QUESTA T ---
     # =========================================================================
-    # Creiamo una figura con 2 subplots (sopra Modulo, sotto Fase)
     fig_indiv, (ax_mag, ax_phase) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     
     # Modulo
@@ -185,15 +220,14 @@ for t in Temps:
     fig_indiv.tight_layout()
     
     # Salviamo il file PDF nella nuova cartella
-    indiv_plot_name = f"T_dep_fits/Fit_{t}.pdf"
+    indiv_plot_name = f"T_dep_results/individual_plots/Fit_{t}.pdf"
     fig_indiv.savefig(indiv_plot_name, bbox_inches="tight")
     
-    # CHIUDIAMO LA FIGURA: vitale per non esaurire la memoria durante il ciclo!
+    # CHIUDIAMO LA FIGURA
     plt.close(fig_indiv)
     # =========================================================================
 
 # --------- Salvataggio del grafico globale finale ---------
-# Sposta la legenda fuori dal grafico per evitare che copra le curve
 ax_all.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=9)
 fig_all.tight_layout()
 
@@ -201,26 +235,28 @@ plot_name = "T_dep_results/All_Resonances_Fit.pdf"
 fig_all.savefig(plot_name, bbox_inches="tight")
 print(f"\nGrafico collettivo salvato in '{plot_name}'")
 
-# --------- Salvataggio del .txt (Temperatura vs Frequenza) ---------
+# --------- Salvataggio del .txt (Temperatura vs Frequenza con Errori) ---------
 txt_output = "T_dep_results/Resonance_vs_Temperature.txt"
 with open(txt_output, "w") as file_txt:
-    #file_txt.write("T_mK\tf_r_Hz\n")
-    for t_n, fr_n in zip(T_val_num, fr_val):
-        file_txt.write(f"{t_n}\t{fr_n}\n")
+    file_txt.write("T_mK\tf_r_GHz\terr_f_r\n")
+    for t_n, fr_n, err_fr_n in zip(T_val_num, fr_val, err_fr_val):
+        file_txt.write(f"{t_n}\t{fr_n}\t{err_fr_n}\n")
 
 print(f"Risultati tabellati salvati in '{txt_output}'\n")
 
-# --------- Salvataggio del .txt (1/Q vs Frequenza) ---------
+# --------- Salvataggio del .txt (1/Q vs Temperature con Errori) ---------
 txt_output = "T_dep_results/revQ_vs_Temperature.txt"
 with open(txt_output, "w") as file_txt:
-    for t_n, revQ_n in zip(T_val_num, revQ_val_num):
-        file_txt.write(f"{t_n}\t{revQ_n}\n")
-        
-# --------- Salvataggio del .txt (1/Q vs Frequenza) ---------
+    file_txt.write("T_mK\trevQ_i\terr_revQ_i\n")
+    for t_n, revQ_n, err_revQ_n in zip(T_val_num, revQ_val_num, err_revQ_val):
+        file_txt.write(f"{t_n}\t{revQ_n}\t{err_revQ_n}\n")
+
+# --------- Salvataggio del .txt (Qc vs Temperature con Errori Modulo/Fase) ---------
 txt_output = "T_dep_results/Qc_vs_Temperature.txt"
 with open(txt_output, "w") as file_txt:
-    for t_n, Qc_n in zip(T_val_num, Qc_val_num):
-        file_txt.write(f"{t_n}\t{Qc_n}\n")
+    file_txt.write("T_mK\tQ_c_complex\t|Q_c|\terr_|Q_c|\tPhase_Q_c\terr_Phase\n")
+    for t_n, Qc_n, err_abs, err_ph in zip(T_val_num, Qc_val_num, err_abs_Qc_val, err_phase_Qc_val):
+        file_txt.write(f"{t_n}\t{Qc_n}\t{np.abs(Qc_n)}\t{err_abs}\t{np.angle(Qc_n)}\t{err_ph}\n")
 
 print(f"Risultati tabellati salvati in '{txt_output}'\n")
 
