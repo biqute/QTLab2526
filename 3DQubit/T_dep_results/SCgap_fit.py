@@ -103,7 +103,7 @@ alpha_style = 0.7   # Leggera trasparenza per chiarezza visiva
 zorder_style = 1
 
 plt.figure(figsize=(8, 6))
-plt.errorbar(temp, revQ, yerr=revQ_err, fmt='o', label="Data", 
+plt.errorbar(temp, revQ, yerr=revQ_err*20, fmt='o', label="Data (erros bars x20)", 
              color='navy', alpha=0.85, ms=5, capsize=3, elinewidth=1.5)
 
 # Inseriamo il valore del Delta nella label del Fit

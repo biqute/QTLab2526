@@ -23,13 +23,40 @@ plt.rcParams.update({
 os.makedirs('sonnet_plots', exist_ok=True)
 
 # --- Caricamento dati ---
-data = np.loadtxt('sonnet_data/Resonance_vs_Lk.txt', skiprows=1)
+data = np.loadtxt('Lk_results/Resonance_vs_Lk.txt', skiprows=1)
 Lk_values = data[:, 0]         # Lk in pH/sq
-frequencies = data[:, 1]/1e9   # Frequenze in GHz
+frequencies = data[:, 1]
+freq_err = data[:, 2]          # Errori sulle frequenze in GHz
 
 # --- Fit dei dati al modello LC ---
-popt, pcov = curve_fit(LC_model, Lk_values, frequencies)
-a_fit, b_fit, c_fit = popt
+from iminuit import Minuit
+from iminuit.cost import LeastSquares
+
+# Assicurati che model sia definita come: model(x, inv_Qi_0, Delta)
+# 1. Definiamo la funzione di costo corretta
+# Usiamo 'y_errors' al posto di 'yerr'
+cost_func = LeastSquares(Lk_values, frequencies, freq_err, LC_model)
+p0 = [0.03, 32.6, 5.02]  # Stima iniziale per [a, b, c]
+# 2. Inizializziamo Minuit
+# esattamente con quelli usati nella definizione di 'model'
+m = Minuit(cost_func, a=p0[0], b=p0[1], c=p0[2])
+
+# 3. Impostiamo i limiti
+
+
+# 4. Fit
+m.migrad()  # Trova il minimo
+m.hesse()   # Calcola gli errori parabolici
+
+# 5. Estrazione risultati
+a_fit = m.values["a"]
+b_fit = m.values["b"]
+c_fit = m.values["c"]
+a_err = m.errors["a"]
+b_err = m.errors["b"]
+c_err = m.errors["c"]
+
+print(m)
 
 # =====================================================================
 # --- ESTRAZIONE INDUTTANZA CINETICA (Target = 7.49 GHz) ---
@@ -46,7 +73,7 @@ print(f"----------------------------\n")
 
 # --- Dati per la linea continua del fit ---
 Lk_fit = np.linspace(min(Lk_values)-0.5, max(Lk_values)+0.5, 200)
-frequencies_fit = LC_model(Lk_fit, *popt)
+frequencies_fit = LC_model(Lk_fit, a_fit, b_fit, c_fit)
 
 # =====================================================================
 # --- GRAFICO FREQUENZA VS Lk ---
@@ -55,7 +82,7 @@ fig, ax = plt.subplots(figsize=(8, 6))
 
 # Plot dei dati simulati e della curva di fit
 ax.plot(Lk_fit, frequencies_fit, '-', label='Fit', color='darkorange', alpha=0.9, lw=2.4)
-ax.plot(Lk_values, frequencies, 'o', label='Simulated Data', color='navy', alpha=0.85, ms=5)
+ax.errorbar(Lk_values, frequencies, yerr = freq_err*10, fmt='o', label='Simulated Data', color='navy', alpha=0.85, ms=5)
 
 # Plot delle linee target (Croce di intersezione)
 #ax.axhline(y=f_target, color='gray', linestyle='--', linewidth=1.5, alpha=0.7)

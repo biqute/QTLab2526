@@ -43,6 +43,7 @@ fitter = CircleFitter()
 # Array per conservare i risultati finali
 Lk_val_num = []
 fr_val = []
+f_err_val = []
 
 # --- Preparazione Grafico globale (Mag vs Freq per tutti gli Lk) ---
 fig_all, ax_all = plt.subplots(figsize=(10, 6))
@@ -86,7 +87,7 @@ for i in range(max_iter):
     print(f"--- Analyzing Lk: {Lk} pH/sq ---")
     print(f"{'='*40}")
     
-    frequencies = data[:, 0] * 1e9
+    frequencies = data[:, 0]
     real_S21 = data[:, 5]     
     imag_S21 = data[:, 6]     
 
@@ -95,7 +96,7 @@ for i in range(max_iter):
     S21 = signal * np.exp(1j * phase)
     
     # Inizializziamo il plot globale per i dati RAW, così li vediamo sempre
-    p = ax_all.plot(frequencies/1e9, abs(S21), 'o', ms=4, alpha=0.3, label=f"Lk = {Lk}")
+    p = ax_all.plot(frequencies, abs(S21), 'o', ms=4, alpha=0.3, label=f"Lk = {Lk}")
     color = p[0].get_color()
 
     # --------- Analisi ed Estrazione dei Parametri ---------
@@ -150,6 +151,7 @@ for i in range(max_iter):
             Q_c_fit = abs_Qc_fit * np.exp(1j * phase_Qc_fit)
             Q_c_rev = 1/Q_c_fit
             Q_i_rev = 1/Ql_fit - Q_c_rev.real
+            f_r_err = np.sqrt(pcov[3, 3])
         except Exception as e:
             print(f" -> ATTENZIONE: Fit complesso fallito: {e}")
             f0_fit = f_r
@@ -157,29 +159,29 @@ for i in range(max_iter):
             Q_c_fit = Q_c
             Q_i_rev = 1/Q_i
             
-        print(f" -> Trovata f_r = {f0_fit/1e9:.6f} GHz")
+        print(f" -> Trovata f_r = {f0_fit:.6f} GHz")
         
         # --- Salvataggio dati SOLO se il fit è sopravvissuto ---
         Lk_val_num.append(Lk)
         fr_val.append(f0_fit)
-        
+        f_err_val.append(f_r_err)
         # Plot della curva fittata sul grafico globale
-        ax_all.plot(frequencies/1e9, abs(S_fit), '-', lw=2.5, color=color)
+        ax_all.plot(frequencies, abs(S_fit), '-', lw=2.5, color=color)
 
         # =========================================================================
         # --- CREAZIONE E SALVATAGGIO DEL PLOT INDIVIDUALE ---
         # =========================================================================
         fig_indiv, (ax_mag, ax_phase) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
         
-        ax_mag.plot(frequencies/1e9, abs(S), 'o', ms=4, alpha=0.5, color='blue', label='Data')
-        ax_mag.plot(frequencies/1e9, abs(S_fit), '-', lw=2, color='red', label='Fit')
+        ax_mag.plot(frequencies, abs(S), 'o', ms=4, alpha=0.5, color='blue', label='Data')
+        ax_mag.plot(frequencies, abs(S_fit), '-', lw=2, color='red', label='Fit')
         ax_mag.set_ylabel(r"$|S_{21}|$", fontsize=14)
         ax_mag.set_title(f"Resonance Fit - Kinetic Inductance: {Lk} pH/sq", fontsize=15)
         ax_mag.grid(True, alpha=0.3)
         ax_mag.legend(loc='lower left')
 
-        ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), 'o', ms=4, alpha=0.5, color='blue')
-        ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, color='red')
+        ax_phase.plot(frequencies, np.unwrap(np.angle(S)), 'o', ms=4, alpha=0.5, color='blue')
+        ax_phase.plot(frequencies, np.unwrap(np.angle(S_fit)), '-', lw=2, color='red')
         ax_phase.set_ylabel(r"Phase [rad]", fontsize=14)
         ax_phase.set_xlabel(r"$f \ [GHz]$", fontsize=14)
         ax_phase.grid(True, alpha=0.3)
@@ -208,9 +210,9 @@ print(f"\nGrafico collettivo salvato in '{plot_name}'")
 # Lk vs Frequenza
 txt_output_fr = "Lk_results/Resonance_vs_Lk.txt"
 with open(txt_output_fr, "w") as file_txt:
-    file_txt.write("Lk\tf_r_Hz\n")
-    for lk_n, fr_n in zip(Lk_val_num, fr_val):
-        file_txt.write(f"{lk_n}\t{fr_n}\n")
+    file_txt.write("Lk\tf_r_Hz\tf_r_err_GHz\n")
+    for lk_n, fr_n, f_err_n in zip(Lk_val_num, fr_val, f_err_val):
+        file_txt.write(f"{lk_n}\t{fr_n}\t{f_err_n}\n")
 print(f"Frequenze di risonanza salvate in '{txt_output_fr}'")
 
 
