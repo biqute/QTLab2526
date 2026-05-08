@@ -82,7 +82,7 @@ for t in Temps:
         print(f"ATTENZIONE: File {file_path} non trovato. Salto questa temperatura...")
         continue
 
-    frequencies = data[:, 0]  # Frequenze in Hz
+    frequencies = data[:, 0]/1e9  # Frequenze in GHz
     real_S21 = data[:, 1]     # Parte reale di S21
     imag_S21 = data[:, 2]     # Parte immaginaria di S21
 
@@ -144,7 +144,7 @@ for t in Temps:
         # Creiamo un S_fit approssimato dai risultati iniziali per permettere comunque il plot
         S_fit = S21_notch(frequencies, Q_r, abs(Q_c), np.angle(Q_c), f_r, a_scaling, alpha, TAU + tau_true)
         
-    print(f" -> Trovata f_r = {f0_fit/1e9:.6f} GHz")
+    print(f" -> Trovata f_r = {f0_fit:.6f} GHz")
     
     # --- Calcolo del Q valore
     Q_c_fit = abs_Qc_fit * np.exp(1j * phase_Qc_fit)
@@ -157,9 +157,9 @@ for t in Temps:
     Qc_val_num.append(Q_c_fit)
     
     # --- Popoliamo il plot GLOBALE ---
-    p = ax_all.plot(frequencies/1e9, abs(S), 'o', ms=4, alpha=0.3, label=f"Data {t}")
+    p = ax_all.plot(frequencies, abs(S), 'o', ms=4, alpha=0.3, label=f"Data {t}")
     color = p[0].get_color() # Recuperiamo il colore assegnato da matplotlib
-    ax_all.plot(frequencies/1e9, abs(S_fit), '-', lw=2.5, color=color)
+    ax_all.plot(frequencies, abs(S_fit), '-', lw=2.5, color=color)
 
     # =========================================================================
     # --- NUOVO: CREAZIONE E SALVATAGGIO DEL PLOT INDIVIDUALE PER QUESTA T ---
@@ -168,16 +168,16 @@ for t in Temps:
     fig_indiv, (ax_mag, ax_phase) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
     
     # Modulo
-    ax_mag.plot(frequencies/1e9, abs(S), 'o', ms=4, alpha=0.5, color='blue', label='Data')
-    ax_mag.plot(frequencies/1e9, abs(S_fit), '-', lw=2, color='red', label='Fit')
+    ax_mag.plot(frequencies, abs(S), 'o', ms=4, alpha=0.5, color='blue', label='Data')
+    ax_mag.plot(frequencies, abs(S_fit), '-', lw=2, color='red', label='Fit')
     ax_mag.set_ylabel(r"$|S_{21}|$", fontsize=14)
     ax_mag.set_title(f"Resonance Fit - Temperature: {t}", fontsize=15)
     ax_mag.grid(True, alpha=0.3)
     ax_mag.legend(loc='lower left')
 
     # Fase
-    ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), 'o', ms=4, alpha=0.5, color='blue')
-    ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, color='red')
+    ax_phase.plot(frequencies, np.unwrap(np.angle(S)), 'o', ms=4, alpha=0.5, color='blue')
+    ax_phase.plot(frequencies, np.unwrap(np.angle(S_fit)), '-', lw=2, color='red')
     ax_phase.set_ylabel(r"Phase [rad]", fontsize=14)
     ax_phase.set_xlabel(r"$f \ [GHz]$", fontsize=14)
     ax_phase.grid(True, alpha=0.3)

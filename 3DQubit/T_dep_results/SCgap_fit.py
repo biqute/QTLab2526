@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.special import i0, k0
+from iminuit import Minuit
+from iminuit.util import describe
 
 ########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
 plt.rcParams.update({
@@ -57,16 +59,31 @@ revQ = data[:,1]
 p0 = [revQ[0], 0.002]  # Stima iniziale per [inv_Qi_0, Delta_eV]
 lower = [0, 0]     # Limiti inferiori per i parametri
 upper = [1e-3, 1]  # Limiti superiori per i parametri
-# === Fit ===
-# Aggiungiamo i bounds per evitare l'overflow (Delta deve essere positivo)
-popt, pcov = curve_fit(model, temp, revQ, p0=p0
-                       , bounds=(lower, upper)
-                       )
-inv_Q0_fit, Delta_fit = popt
+# 1. Definiamo la funzione di costo (Least Squares)
+# Assumiamo che 'model' sia la tua funzione model(temp, inv_Q0, Delta)
+# Se non hai gli errori sperimentali (yerr), iminuit li assumerà unitari
+cost_func = LeastSquares(temp, revQ, yerr=None, model=model)
 
-# Calcolo dell'errore (opzionale ma utile)
-perr = np.sqrt(np.diag(pcov))
-Delta_err = perr[1]
+# 2. Inizializziamo Minuit
+# Passiamo i valori iniziali p0 spacchettati
+m = Minuit(cost_func, inv_Q0=p0[0], Delta=p0[1])
+
+# 3. Impostiamo i limiti (bounds)
+m.limits["inv_Q0"] = (lower[0], upper[0])
+m.limits["Delta"] = (lower[1], upper[1])
+
+# 4. Eseguiamo la minimizzazione (Migrad)
+m.migrad()
+
+# 5. Calcolo accurato delle incertezze (Hesse)
+m.hesse()
+
+# --- Estrazione Risultati ---
+inv_Q0_fit = m.values["inv_Q0"]
+Delta_fit = m.values["Delta"]
+Delta_err = m.errors["Delta"]
+
+print(m)
 
 T_c = Delta_fit/(1.764 * k_B)
 

@@ -122,7 +122,8 @@ ydata = np.hstack([S.real, S.imag])
 
 params, pcov = fitter._fit_notch(S, frequencies, Q_r, Q_c, f_r, a_scaling, alpha, TAU + tau_true)
 
-Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit = params
+Ql_fit, abs_Qc_fit, phase_Qc_fit, f_sim, a_fit, alpha_fit, tau_fit = params
+f_sim_err = np.sqrt(pcov[3, 3])
 
 Qc_fit= abs_Qc_fit * np.exp(-1j * phase_Qc_fit)
 
@@ -133,15 +134,26 @@ Qi_fit_rev = 1/Ql_fit - Qc_fit_rev.real
 Qi_fit = 1/Qi_fit_rev
 
 #print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
-print("f_res =", f0_fit)
+print("f_res =", f_sim)
+print("f_res_err =", f_sim_err)
 '''
-print("Q_i =", Qi_fit)
+print("Q_i =", Qi_fit)]]]]
 print("Q_c_abs =", abs_Qc_fit)
 print("Q_c_real=", Qc_fit.real)
 print("Q_c_imag=", Qc_fit.imag)
 '''
-S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit) #/a_fit * np.exp(+1j* 2*np.pi*(TAU+tau_fit)*frequencies)*np.exp(-1j*alpha_fit)
+S_fit = S21_notch(frequencies, Ql_fit, abs_Qc_fit, phase_Qc_fit, f_sim, a_fit, alpha_fit, tau_fit) #/a_fit * np.exp(+1j* 2*np.pi*(TAU+tau_fit)*frequencies)*np.exp(-1j*alpha_fit)
 S_canonized = fitter._canonize(frequencies, S, a_fit, alpha_fit, TAU+tau_fit)
+
+# --- DATA ANALYSIS ---
+
+f_meas = 7.49
+f_meas_err = 4.7901550510144e-07
+
+alpha = 1 - (f_meas/f_sim)**2
+alpha_err = (f_meas/f_sim)*np.sqrt( 2*( (f_meas_err)**2 + (f_sim_err)**2 ) )
+
+print(f"alpha = {alpha} ± {alpha_err}")
 
 #------Residuals-------
 
@@ -181,7 +193,7 @@ ax_iq.set_ylabel(r"$I$", fontsize=12)
 #ax_iq.plot([P_off.real], [P_off.imag], "ro", ms = 8, label = "P(1,0)") 
 ax_iq.plot([], [], ' ', label=fr"$Q_l = {Ql_fit:.1f}$") 
 ax_iq.plot([], [], ' ', label=fr"$Q_i = {Qi_fit:.1f}$")   
-ax_iq.plot([], [], ' ', label=r"$f_{sim} = " + fr"{f0_fit:.2f}" + r"$ GHz")   
+ax_iq.plot([], [], ' ', label=r"$f_{sim} = " + fr"{f_sim:.2f}" + r"$ GHz")   
 ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
@@ -206,14 +218,7 @@ save_as = "sonnet_sim_plot" + n_misura + ".pdf"
 fig.savefig(f"sonnet_plots/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in sonnet_plots/{save_as}")
 
-# --- DATA ANALYSIS ---
 
-f_meas = 7.49
-f_sim = 14.56
-
-alpha = 1 - (f_meas/f_sim)**2
-
-print(f"alpha = {alpha}")
 
 plt.show() 
 

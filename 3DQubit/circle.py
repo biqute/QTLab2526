@@ -35,7 +35,7 @@ save_as = "fit" + n_misura
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
 data = np.loadtxt("10mK_resonances/data_10mK/"+data_file + ".txt", delimiter="\t")
-frequencies = data[:, 0]  # Frequenze in Hz
+frequencies = data[:, 0]/1e9  # Frequenze in GHz
 
 real_S21 = data[:, 1]     # Parte reale di S21
 imag_S21 = data[:, 2]     # Parte immaginaria di S21
@@ -143,7 +143,6 @@ ydata = np.hstack([S.real, S.imag])
 
 params, pcov = fitter._fit_notch(S, frequencies, Q_r, Q_c, f_r, a_scaling, alpha, TAU + tau_true)
 
-
 Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit = params
 
 Qc_fit= abs_Qc_fit * np.exp(-1j * phase_Qc_fit)
@@ -157,8 +156,9 @@ Qi_fit = 1/Qi_fit_rev
 print ("\n\n\n ###PARAMS ERRORS###\n",np.sqrt(np.diag(pcov)))
 print ("\n\n\n")
 #print("Ql_fit, abs_Qc_fit, phase_Qc_fit, f0_fit, a_fit, alpha_fit, tau_fit =", params)
-
-print("f_res =", f0_fit/1e9)
+f0_fit_err = np.sqrt(pcov[3, 3])
+print("f_res =", f0_fit, "GHz")
+print("f_res_err =", f0_fit_err, "GHz")
 print("Q_i =", Qi_fit)
 print("Q_c_abs =", abs_Qc_fit)
 print("Q_c_real=", Qc_fit.real)
@@ -221,16 +221,16 @@ ax_iq.legend(loc='best')
 ax_iq.set_title(r"I-Q Plot")
 
 #----Signal plot-----
-ax_mag.plot(frequencies/1e9, abs(S),marker='o', linestyle='', linewidth = 2 ,markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
-ax_mag.plot(frequencies/1e9, abs(S_fit), '-', ms=1.5, label='Fit')
+ax_mag.plot(frequencies, abs(S),marker='o', linestyle='', linewidth = 2 ,markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
+ax_mag.plot(frequencies, abs(S_fit), '-', ms=1.5, label='Fit')
 ax_mag.set_xlabel("Frequency (GHz)", fontsize=12)
 ax_mag.set_ylabel(r"$|S_{21}|$", fontsize=12)
 ax_mag.grid(True, alpha=0.3)
 ax_mag.set_title("Magnitude")
 ax_mag.legend(loc ="best")
 #----Phase plot-------
-ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S)), marker='o', linestyle='', linewidth = 2, markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
-ax_phase.plot(frequencies/1e9, np.unwrap(np.angle(S_fit)), '-', lw=2, label='Fit')
+ax_phase.plot(frequencies, np.unwrap(np.angle(S)), marker='o', linestyle='', linewidth = 2, markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
+ax_phase.plot(frequencies, np.unwrap(np.angle(S_fit)), '-', lw=2, label='Fit')
 ax_phase.set_xlabel("Frequency (GHz)", fontsize=12)
 ax_phase.set_ylabel(r"$\phi$ (rad)", fontsize=12)
 ax_phase.grid(True, alpha=0.3)
