@@ -103,11 +103,13 @@ alpha_style = 0.7   # Leggera trasparenza per chiarezza visiva
 zorder_style = 1
 
 plt.figure(figsize=(8, 6))
-plt.plot(temp, revQ, 'o', label="Data",  color='navy', alpha=0.85, ms=5)
+plt.errorbar(temp, revQ, yerr=revQ_err, fmt='o', label="Data", 
+             color='navy', alpha=0.85, ms=5, capsize=3, elinewidth=1.5)
 
 # Inseriamo il valore del Delta nella label del Fit
 plt.plot(x_fit, f_fit, 
-         label=f"Fit: $\Delta$ = {Delta_fit*1e3:.3f} ± {Delta_err*1e3:.3f} meV", color='darkorange', alpha=0.9, lw=2.4)
+         label=f"Fit: $\Delta$ = {Delta_fit*1e3:.4f} ± {Delta_err*1e3:.4f} meV", 
+         color='darkorange', alpha=0.9, lw=2.4)
 
 # In alternativa, puoi stamparlo come testo fisso nel grafico:
 # plt.text(0.05, 0.95, f"$\Delta$ = {Delta_fit*1e3:.3f} meV", 
