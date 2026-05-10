@@ -3,6 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec 
 
+'''
+Lorentzian fit with power and linear tilt for cavity resonance data. 
+The model includes a Lorentzian term to capture the resonance, 
+a linear term to account for any background slope, and a constant offset. 
+The script reads the data from a specified file, performs the fit, 
+and plots the results in both the IQ plane and as magnitude and phase vs frequency. 
+The fitted parameters are printed to the console, 
+and the resulting plot is saved as a PDF.
+'''
+
 ########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,

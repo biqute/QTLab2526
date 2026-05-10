@@ -49,13 +49,15 @@ m.migrad()  # Trova il minimo
 m.hesse()   # Calcola gli errori parabolici
 
 # 5. Estrazione risultati
-a_fit = m.values["a"]
-b_fit = m.values["b"]
-c_fit = m.values["c"]
+a = m.values["a"]
+b = m.values["b"]
+c = m.values["c"]
 a_err = m.errors["a"]
 b_err = m.errors["b"]
 c_err = m.errors["c"]
-
+ab_err = m.covariance[0][1]
+ac_err = m.covariance[0][2]
+bc_err = m.covariance[1][2]
 print(m)
 
 # =====================================================================
@@ -64,16 +66,21 @@ print(m)
 f_target = 7.49
 
 # Formula inversa: Lk = (b / (f_target - a))^2 - c
-Lk_target = (b_fit / (f_target - a_fit))**2 - c_fit
+Lk_target = (b / (f_target - a))**2 - c
+# Propagazione errori per Lk_target
+sigma_Lk = np.sqrt((4 * b**4 / (f_target - a)**6) * 
+                   a_err**2 + (4 * b**2 / (f_target - a)**4) * b_err**2 + c_err**2 - 
+                   (2 * b / (f_target - a)**2) * bc_err**2 - (4 * b**3 / (f_target - a)**5) * 
+                   ab_err**2 + (2 * b**2 / (f_target - a)**3) * ac_err**2)
 
 print(f"\n--- RISULTATO ESTRAZIONE ---")
 print(f"Frequenza Target: {f_target} GHz")
-print(f"Induttanza Cinetica estratta (Lk): {Lk_target:.3f} pH/sq")
+print(f"Induttanza Cinetica estratta (Lk): {Lk_target:.3f} ± {sigma_Lk:.3f} pH/sq")
 print(f"----------------------------\n")
 
 # --- Dati per la linea continua del fit ---
 Lk_fit = np.linspace(min(Lk_values)-0.5, max(Lk_values)+0.5, 200)
-frequencies_fit = LC_model(Lk_fit, a_fit, b_fit, c_fit)
+frequencies_fit = LC_model(Lk_fit, a, b, c)
 
 # =====================================================================
 # --- GRAFICO FREQUENZA VS Lk ---

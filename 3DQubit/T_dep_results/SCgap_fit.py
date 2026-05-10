@@ -92,7 +92,7 @@ print(m)
 T_c = Delta_fit/(1.764 * k_B)
 
 print(f"Critical temperature T_c = {T_c:.4f} K")
-print(f"Superconducting Gap = {Delta_fit*1e3:.4f} pm  meV")
+print(f"Superconducting Gap = {Delta_fit*1e3:.4f}  meV")
 
 # Prepara i dati per il plot del fit
 x_fit = np.linspace(np.min(temp), np.max(temp), 100)

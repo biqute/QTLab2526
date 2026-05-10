@@ -7,6 +7,12 @@ from matplotlib.gridspec import GridSpec
 import sys
 sys.path.append("../")
 from circle_fit import CircleFitter
+
+'''
+This script performs a fit of resonance data to extract the kinetic 
+inductance fraction alpha. Data is simulated using Sonnet.
+'''
+
 ########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,

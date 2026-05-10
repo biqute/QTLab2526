@@ -4,6 +4,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec 
 
+'''
+Fit of the attenuation of a cable as a function of frequency. 
+The model includes an exponential decay term to capture the overall attenuation, 
+a sinusoidal term to account for any periodic variations, and a constant offset. 
+The fitted parameters are printed to the console, 
+and the resulting plot is saved as a PDF. 
+The use of the Savitzky-Golay filter helps to smooth data 
+and improve the quality of the fit.
+'''
+
 ########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,
