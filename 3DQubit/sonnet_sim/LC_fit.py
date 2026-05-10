@@ -3,6 +3,14 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
 
+'''
+This script performs a fit of resonance frequency as a function of 
+kinetic inductance (Lk) using a LC model in order to extract the 
+kinetic inductance model. Then, it uses the fitted model to find 
+the value of Lk that corresponds to the measured resonance frequency of 7.49 GHz, 
+and propagates the errors.
+'''
+
 # --- Modello Matematico ---
 def LC_model(Lk, a, b, c):
     return a + b * 1/np.sqrt(Lk+c)

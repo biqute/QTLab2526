@@ -28,7 +28,7 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "0"
+n_misura = "2"
 data_file = "data_10mK_" + n_misura
 save_as = "fit" + n_misura
 
