@@ -4,9 +4,11 @@
 
 ## Cavity modes
 1. Rifare misure con cavità bella!!
-2. Se abbiamo voglia anche analisi statistica sui residui
+2. Confronto con simulazione
+
 ## Down Conversion
-1. Fare analisi dati con FFT per verificare che le frequenze tornino. Vanno riprese le MISURE!!
+1. Abbiamo perso i dati, vanno ripresi generando due segnali con frequenze vicine e poi leggendo l'ouput del mixer con picoscope.
+2. Fare analisi dati con FFT per verificare che le frequenze tornino. 
 
 ## IQ mixer calibration
 Fare fit con ellisse dei dati  `attenuazione.txt `
