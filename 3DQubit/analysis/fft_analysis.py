@@ -15,8 +15,12 @@ plt.rcParams.update({
 })
 
 # 1. Caricamento dati 
-data_square = np.loadtxt("../data/square_env_data_new.txt")
-data_gaus = np.loadtxt("../data/gaus_env_data_new.txt")
+'''data_square = np.loadtxt("../data/square_env_data_new.txt")
+data_gaus = np.loadtxt("../data/gaus_env_data_new.txt")'''
+
+data_square = np.loadtxt("../signalGen/square_env_data.txt")
+data_gaus = np.loadtxt("../signalGen/gaus_env_data.txt")
+
 
 t_s = data_square[:, 0]  # Tempo square
 y_s = data_square[:, 1]  # Ampiezza square (mV)
@@ -71,10 +75,10 @@ amp_gaus = (2.0 / n_g) * np.abs(X_gaus[:half_n_g])
 
 # Salvataggio dati FFT in Hz
 data_to_save_s = np.column_stack((freq_plot_s, amp_square))
-np.savetxt("../data/fft_square.txt", data_to_save_s, fmt='%.6f', header="Freq(Hz)\tAmp(mV)", delimiter='\t')
+np.savetxt("../signalGen/fft_square.txt", data_to_save_s, fmt='%.6f', header="Freq(Hz)\tAmp(mV)", delimiter='\t')
 
 data_to_save_g = np.column_stack((freq_plot_g, amp_gaus))
-np.savetxt("../data/fft_gauss.txt", data_to_save_g, fmt='%.6f', header="Freq(Hz)\tAmp(mV)", delimiter='\t')
+np.savetxt("../signalGen/fft_gauss.txt", data_to_save_g, fmt='%.6f', header="Freq(Hz)\tAmp(mV)", delimiter='\t')
 
 # ==========================================
 # 4. VISUALIZZAZIONE E SALVATAGGIO GRAFICI
@@ -92,14 +96,14 @@ ax1.grid(True, which='major', linestyle='--', alpha=0.6)
 ax1.legend(loc="upper right")
 
 fig1.tight_layout()
-fig1.savefig("../data0_plots/time_domain_PICO.pdf")
+fig1.savefig("../signalGen/time_domain_PICO.pdf")
 
 
 # ---------------- GRAFICO 2: FREQUENZA ----------------
 fig2, ax2 = plt.subplots(figsize=(8, 6))
 
 # Divido per 1e6 per mostrare la frequenza in MHz (esteticamente più pulito)
-freq_MHz_s = freq_plot_s / 1e3 - 3.5
+freq_MHz_s = freq_plot_s / 1e3 
 freq_MHz_g = freq_plot_g / 1e3
 
 ax2.plot(freq_MHz_s, amp_square, label='Square Spectrum', color='navy', alpha=0.85, lw=1.5)
@@ -116,6 +120,6 @@ limit_x_MHz = (min(fs_s, fs_g) / 20) / 1e3
 ax2.set_xlim(0, limit_x_MHz)
 #ax2.set_yscale('log')
 fig2.tight_layout()
-fig2.savefig("../data0_plots/fft_domain_PICO.pdf")
+fig2.savefig("../signalGen/fft_domain_PICO.pdf")
 
 plt.show()

@@ -7,33 +7,6 @@ import matplotlib.pyplot as plt
 from picosdk.ps5000a import ps5000a as ps
 from picosdk.functions import assert_pico_ok, adc2mV, mV2adc
 
-
-
-def generate_gaussian_sinusoid(samples, n_cycles, sigma=1.0):
-    """
-    Genera un'onda sinusoidale modulata da una gaussiana.
-    
-    :param samples: Numero di punti totali (WAVEFORM_SAMPLES)
-    :param n_cycles: Quante oscillazioni della sinusoide ci sono nell'impulso
-    :param sigma: Larghezza della campana (più è alto, più l'impulso è largo)
-    """
-    # 1. Creiamo un asse temporale relativo (es. da -3 a 3)
-    # Usiamo un range che faccia tendere la gaussiana a zero agli estremi
-    limit = 3.5 
-    t = np.linspace(-limit, limit, samples)
-    
-    # 2. Calcoliamo l'inviluppo gaussiano: e^(-(t^2) / (2*sigma^2))
-    envelope = np.exp(-0.5 * (t / sigma)**2)
-    
-    # 3. Calcoliamo la portante sinusoidale
-    # Moltiplichiamo per n_cycles per decidere quante creste vedere
-    carrier = np.sin(2 * np.pi * (n_cycles / (limit * 2)) * t)
-    
-    # 4. Modulazione (Prodotto)
-    signal = envelope * carrier
-    
-    return signal
-
 # ============================================================
 # 1) Caricamento DLL
 # ============================================================
@@ -67,6 +40,43 @@ AMPLITUDE_VPP_V   = 1        # Volt picco-picco
 OFFSET_V          = 0
 WAVEFORM_SAMPLES  = 30000         # punti tabella AWG
 
+def generate_drag_pulse(samples, n_cycles, limit=3.0, beta=0.5):
+    """
+    Genera un impulso DRAG (Gaussiana + Derivata in quadratura) modulato su una portante.
+    
+    samples: numero di campioni totali nel buffer
+    n_cycles: numero di cicli della portante
+    limit: estensione temporale in unità di sigma (es. +/- 3 sigma per troncare la gaussiana)
+    beta: parametro DRAG (scala l'ampiezza della derivata).
+    """
+    # Asse temporale normalizzato t/sigma (da -limit a +limit)
+    t_rel = np.linspace(-limit, limit, samples)
+    
+    # Inviluppo I (In-Phase): Gaussiana standard
+    I_env = np.exp(-0.5 * t_rel**2)
+    
+    # Inviluppo Q (Quadrature): Derivata della Gaussiana moltiplicata per beta
+    # La derivata di exp(-t^2 / 2) rispetto a t è -t * exp(-t^2 / 2)
+    Q_env = -beta * t_rel * I_env
+    
+    # Asse per la portante (da 0 a 1, per fare n_cycles interi)
+    t_carrier = np.linspace(0, 1, samples)
+    
+    # Portanti ortogonali
+    carrier_I = np.cos(2 * np.pi * n_cycles * t_carrier)
+    carrier_Q = np.sin(2 * np.pi * n_cycles * t_carrier)
+    
+    # Miscelazione IQ (Up-conversion digitale)
+    signal = I_env * carrier_I + Q_env * carrier_Q
+    
+    # Normalizzazione FONDAMENTALE per l'AWG:
+    # L'AWG del PicoScope vuole valori tra -1.0 e 1.0 prima della moltiplicazione per max_val.
+    # Poiché I e Q si sommano, il picco potrebbe superare 1.0.
+    max_amp = np.max(np.abs(signal))
+    if max_amp > 0:
+        signal = signal / max_amp
+        
+    return signal
 
 # ============================================================
 
@@ -116,17 +126,24 @@ def main():
 
         # ... (codice precedente: apertura unit, arbMinMax, ecc.)
 
-# ============================================================
-# 3) Setup AWG (Generatore di Funzioni) - VERSIONE GAUSSIANA
-# ============================================================
-        f_real = 15e3 ## frequenza in Hz
-        N_OSCILLAZIONI = f_real/FREQUENCY_HZ  # Numero di cicli della sinusoide dentro la campana
-        print(f'Frequency of signal = {f_real} Hz')
-        LARGHEZZA_SIGMA = 1
-        signal_float = generate_gaussian_sinusoid(WAVEFORM_SAMPLES, N_OSCILLAZIONI, LARGHEZZA_SIGMA)
+# --- Setup AWG ---
+        min_val, max_val = ctypes.c_int16(), ctypes.c_int16()
+        ps.ps5000aSigGenArbitraryMinMaxValues(chandle, ctypes.byref(min_val), ctypes.byref(max_val), None, None)
+
+        f_real = 15e3  # Portante a 15 kHz 
+        N_OSCILLAZIONI = f_real / FREQUENCY_HZ
+        
+        # NUOVO: Parametro DRAG (inizia con un valore piccolo, ad es. 0.3 o 0.5)
+        BETA_DRAG = 0.5 
+        LIMIT_SIGMA = 3.0 # Tronca la gaussiana a +/- 3 sigma
+
+        # Generazione impulso DRAG
+        signal_float = generate_drag_pulse(WAVEFORM_SAMPLES, N_OSCILLAZIONI, LIMIT_SIGMA, BETA_DRAG)
+        
         waveform = (signal_float * max_val.value).astype(np.int16)
+        awg_buffer_ptr = waveform.ctypes.data_as(ctypes.POINTER(ctypes.c_int16))
 # Visualizziamo i parametri per debug
-        print("\n=== INFO AWG (GAUSSIANA) ===")
+        print("\n=== INFO AWG (DRAG) ===")
         print(f"Frequenza Target: {FREQUENCY_HZ} Hz")
         print(f"Punti buffer: {WAVEFORM_SAMPLES}")
 
@@ -247,7 +264,7 @@ def main():
         # --- SALVATAGGIO DATI SU FILE TXT ---
         # Creiamo una matrice con due colonne: Tempo e Tensione
         data_to_save = np.column_stack((time_axis/1000, data_mV))
-        filename_txt = "../signalGen/gaus_env_data.txt"
+        filename_txt = "../signalGen/drag_env_data.txt"
         np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Time(us) Voltage(mV)", delimiter='\t')
         print(f"Dati salvati in: {filename_txt}")
         plt.figure(figsize=(10, 6))
@@ -257,9 +274,9 @@ def main():
         plt.title(f"PICO signal generation - {f_real} Hz")
         plt.grid(True)
         
-        nome_grafico = "gaus_env_plot.pdf"
+        nome_grafico = "drag_env_plot.pdf"
         plt.savefig(f"../signalGen/{nome_grafico}")
-        print(f"Grafico salvato in: data0_plots/{nome_grafico}")
+        print(f"Grafico salvato in: ../signalGen/{nome_grafico}")
         
         plt.show()
         

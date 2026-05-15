@@ -5,7 +5,7 @@ import time
 
 myLO1 = LO("COM11")
 myLO2 = LO("COM12")
-delta = 1.7e3
+delta = 100e6 # 100 MHz
 myLO1.freq = 5e9 
 myLO2.freq = myLO1.freq + delta
 
