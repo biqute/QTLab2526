@@ -1,8 +1,3 @@
-"""
-Per runnare:
-    python resonator_fit_complete.py --file data.npz
-"""
-
 import argparse
 import math
 import numpy as np
@@ -10,6 +5,8 @@ from scipy.optimize import least_squares, curve_fit
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from gap_finder_class import GapFinder
+import os
 
 from ResonatorFitter import CircleEstimator 
 
@@ -91,7 +88,7 @@ def S21_notch_real_stacked(freqs, Ql, abs_Qc, phase_Qc, fr, amp, alpha, tau):
 
 # ----------------------------- Main pipeline --------------------------------
 
-def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False, name=None):
+def run_pipeline(npz_file, key='0', window_hz=None, show_plots=False, save=False, name=None):
     """Esegue tutto il workflow: caricamento, calibrazione, fits, e plotting."""
 
     # ---------------- Load data -------------------------------------------------
@@ -263,7 +260,7 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False,
         ax_resf.grid(True)
         if save == True:
             plt.savefig(f"{npz_file}_fit_results.png", dpi=300)
-        plt.show()
+        #plt.show()
     
     inv_Qc_complex = 1.0 / (abs_Qc_fit * np.exp(1j * phase_Qc_fit))
     inv_Qi = (1.0 / Ql_fit) - inv_Qc_complex.real
@@ -286,6 +283,64 @@ def run_pipeline(npz_file, key='0', window_hz=None, show_plots=True, save=False,
         'fr_fit': fr_fit2
     }
 
+def calcola_gap_superconduttivo(Temperature, Q_internal, err_inv_Qi, f_risonanza, T_limit=260, fit_type='kondo'):
+    """
+    Usa i dati estratti da main_fit.py per calcolare l'energia di gap con GapFinder.
+    """
+    print(f"\n--- Avvio Fit Gap ({fit_type.upper()}) ---")
+    
+    # 1. Calcoliamo 1/Qi dai Q_internal estratti
+    Temperature = np.array(Temperature)
+    inv_Qi = 1.0 / np.array(Q_internal)
+    err_inv_Qi = np.array(err_inv_Qi)
+    
+    # 2. Creiamo il file temporaneo richiesto da GapFinder
+    data_to_save = np.column_stack([Temperature, inv_Qi, err_inv_Qi])
+    filename = "qi_vs_t_temp.txt"
+    np.savetxt(filename, data_to_save, fmt=['%d', '%.6E', '%.6E'])
+    
+    # Usiamo la media delle frequenze di risonanza come f0 (omega)
+    omega0 = np.mean(f_risonanza) 
+    
+    # 3. Inizializziamo GapFinder
+    gap_obj = GapFinder(filename, omega=omega0, fit_type=fit_type)
+    gap_obj.set_T_limit(T_limit)
+    
+    # 4. Eseguiamo il fit e plottiamo
+    # (Nella classe GapFinder, plot_fit() chiama internamente il fit)
+    gap_obj.plot_fit()
+    
+    # 5. Estraiamo i risultati
+    delta0_scaled = gap_obj.fit_result.values[0]
+    deltaErr_scaled = gap_obj.fit_result.errors[0]
+    
+    delta0 = delta0_scaled * 1e-23
+    deltaErr = deltaErr_scaled * 1e-23
+    
+    k_B = 1.38e-23 # Costante di Boltzmann
+    tc = delta0 * (2 / 3.52) / k_B
+    tcErr = deltaErr * (2 / 3.52) / k_B
+    chi2 = round(gap_obj.chi2(), 3)
+    
+    # 6. Stampiamo a schermo in modo leggibile
+    print(f"\n--- Risultati Fit Gap ---")
+    print(f"Tc     = {tc*1000:.2f} ± {tcErr*1000:.2f} mK")
+    print(f"Delta0 = {delta0:.3e} ± {deltaErr:.3e} J")
+    print(f"Chi2   = {chi2}")
+    
+    FitResult = {
+        'Tc_K': tc, 'TcErr_K': tcErr, 
+        'Delta0_J': delta0, 'Delta0Err_J': deltaErr, 
+        'chi2': chi2
+    }
+    
+    if fit_type == 'kondo':
+        FitResult['TK'] = gap_obj.fit_result.values[1]
+        FitResult['TKErr'] = gap_obj.fit_result.errors[1]
+        print(f"T_K    = {FitResult['TK']:.2f} ± {FitResult['TKErr']:.2f} mK")
+        
+    return FitResult
+
 # ----------------------------- CLI -----------------------------------------
 
 if __name__ == '__main__':
@@ -298,18 +353,19 @@ if __name__ == '__main__':
     Q_internal = []
     Q_internal_inverted = []
     Q_coupling = []
-    Temperature = [13, 100, 200, 300, 400, 500, 600, 700, 750, 820, 850, 900, 950, 1000, 1050] # mK
+    Temperature = [13, 100, 200, 300, 400, 500, 600, 700, 750] # mK
     H = 1
 
-    for i in Temperature: 
-        if i == 900:
-            file = f"{H}peak_{i}mK_3000pt.npz"
-        if i == 950 or i == 1000:
-            file = f"{H}peak_{i}mK_2000pt.npz" 
-        if i == 1050: 
-            file = f"{H}peak_{i}mK_1000pt.npz"
-        else:
-            file = f"{H}peak_{i}mK.npz"
+    for i in Temperature:
+        print(i) 
+        #if i == 900:
+        #    file = f"{H}peak_{i}mK_3000pt.npz"
+        #if i == 950 or i == 1000:
+        #    file = f"{H}peak_{i}mK_2000pt.npz" 
+        #if i == 1050: 
+        #    file = f"{H}peak_{i}mK_1000pt.npz"
+        #else:
+        file = f"{H}peak_{i}mK.npz"
         
         file_da_analizzare = f"C:/Users/oper/labQT/Lab2025/2D Qubit/QTLab2526/2DQuBit/Resonance_mkid/1st_peak_resonance/" + file  # Assicurati che il nome sia esatto
         chiave_dati = "0"                      # Di solito è '0'
@@ -332,72 +388,16 @@ if __name__ == '__main__':
             print(f"Errore durante l'esecuzione: {e}")
         
         file = None  # Reset per sicurezza
-    
-    a = True
-    save = False
-    if a:   
 
-        fig = plt.figure(figsize=(14, 12))
-        
-        # Griglia 3x2: 
-        # Riga 0: S21 (occupa entrambe le colonne)
-        # Riga 1: fr e Q_loaded
-        # Riga 2: Q_coupling e 1/Q_internal
-        gs = GridSpec(3, 2, figure=fig, hspace=0.4, wspace=0.3)
 
-        # --- 1. S21 vs Frequenza (Il più grande) ---
-        ax0 = fig.add_subplot(gs[0, :]) 
-        for i in range(len(list_freqs)):
-            ax0.plot(list_freqs[i]/1e9, np.abs(list_S21[i]), 
-                    label=f'{Temperature[i]} mK', 
-                    color=plt.cm.viridis(i/len(list_freqs)) if len(list_freqs) > 1 else 'blue')
-        ax0.set_yscale('log')
-        ax0.set_title('Spettri $S_{21}$ a diverse temperature', fontsize=14, fontweight='bold')
-        ax0.set_xlabel('Frequenza [GHz]')
-        ax0.set_ylabel('|S21|')
-        # Legenda su più colonne per non coprire i dati
-        ax0.legend(ncol=min(4, len(list_freqs)), fontsize='small', loc='lower left')
-        ax0.grid(True, which='both', linestyle='--', alpha=0.5)
+inv_Qi_values = 1.0 / np.array(Q_internal)
+errore_stimato_inv_Qi = inv_Qi_values * 0.05 
 
-        # --- 2. Frequenza di risonanza vs Temperatura ---
-        ax1 = fig.add_subplot(gs[1, 0])
-        ax1.plot(Temperature, list_fresonance, color='blue', marker='o', ls='-', ms=5)
-        ax1.set_title('Frequenza di risonanza $f_r$')
-        ax1.set_xlabel('T [mK]')
-        ax1.set_ylabel('$f_r$ [GHz]')
-        ax1.grid(True)
-
-        # --- 3. Q Loaded vs Temperatura ---
-        ax2 = fig.add_subplot(gs[1, 1])
-        ax2.plot(Temperature, Q_loaded, color='red', marker='o', ls='-', ms=5)
-        ax2.set_title('Quality Factor Loaded ($Q_L$)')
-        ax2.set_xlabel('T [mK]')
-        ax2.set_ylabel('$Q_L$')
-        ax2.grid(True)
-
-        # --- 4. Q Coupling vs Temperatura ---
-        ax3 = fig.add_subplot(gs[2, 0])
-        ax3.plot(Temperature, Q_coupling, color='purple', marker='o', ls='-', ms=5)
-        ax3.set_title('Quality Factor Accoppiamento ($Q_c$)')
-        ax3.set_xlabel('T [mK]')
-        ax3.set_ylabel('$Q_c$')
-        ax3.grid(True)
-
-        # --- 5. 1/Qi (Perdite) vs Temperatura ---
-        ax4 = fig.add_subplot(gs[2, 1])
-        # Calcolo esplicito dell'inverso per sicurezza
-        inv_Qi = 1.0 / np.array(Q_internal)
-        ax4.plot(Temperature, inv_Qi, color='brown', marker='s', ls='-', ms=5)
-        ax4.set_title('Perdite Interne ($1/Q_i$)')
-        ax4.set_xlabel('T [mK]')
-        ax4.set_ylabel('$1/Q_i$')
-        # Spesso 1/Qi si vede meglio in scala logaritmica se varia molto
-        # ax4.set_yscale('log') 
-        ax4.grid(True)
-
-        # Ottimizzazione finale degli spazi
-        plt.tight_layout()
-        
-        if save:
-            plt.savefig("riepilogo_temperatura.png", dpi=300)
-        plt.show()
+risultati_gap = calcola_gap_superconduttivo(
+    Temperature=Temperature, 
+    Q_internal=Q_internal, 
+    err_inv_Qi=errore_stimato_inv_Qi, # Passiamo gli errori
+    f_risonanza=list_fresonance,      # Serve per calcolare omega0
+    T_limit=260,                      # Temperatura limite
+    fit_type='kondo'                  # 'kondo' o 'bcs'
+)
