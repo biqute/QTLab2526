@@ -11,7 +11,7 @@ def model(Lk, A, Lg):
 # ── Main ──────────────────────────────────────────────────────
 def main():
     # File CSV da CLI o default
-    csv_file = sys.argv[1] if len(sys.argv) > 1 else "Lk_tot.csv"
+    csv_file = sys.argv[1] if len(sys.argv) > 1 else "Lk_old/Lk_tot.csv"
     print(f"\nLoading: {csv_file}")
 
     # ── Lettura robusta CSV ────────────────────────────────────

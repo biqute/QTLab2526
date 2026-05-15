@@ -8,10 +8,29 @@ from picosdk.ps5000a import ps5000a as ps
 from picosdk.functions import assert_pico_ok, adc2mV, mV2adc
 
 # ============================================================
-# 1) Caricamento DLL e Parametri
+# 1) Caricamento DLL
 # ============================================================
-dll_path = os.path.abspath(os.path.dirname(__file__))
-os.add_dll_directory(dll_path)
+import os
+import sys
+
+# Trova la cartella dove si trova lo script attuale (3DQubit/test)
+script_dir = os.path.abspath(os.path.dirname(__file__))
+
+# Sale di un livello e punta alla cartella delle librerie (3DQubit/lib)
+lib_path = os.path.abspath(os.path.join(script_dir, "..", "lib"))
+
+if os.path.exists(lib_path):
+    # Aggiunge il percorso a Windows e a Python (per versioni >= 3.8)
+    os.environ['PATH'] = lib_path + os.path.pathsep + os.environ['PATH']
+    if sys.version_info >= (3, 8):
+        os.add_dll_directory(lib_path)
+    print("DLL loaded from custom library path:", lib_path)
+else:
+    print(f"ATTENZIONE: La cartella {lib_path} non esiste!")
+    # Fallback sulla cartella dello script se non trova 'lib'
+    if sys.version_info >= (3, 8):
+        os.add_dll_directory(script_dir)
+    print("DLL fallback path:", script_dir)
 
 # --- PARAMETRI OTTIMIZZATI PER CENTRAMENTO ---
 FREQUENCY_HZ     = 500.0        # Periodo totale = 2000 us (evita ripetizioni nel grafico)
@@ -43,7 +62,7 @@ def main():
         min_val, max_val = ctypes.c_int16(), ctypes.c_int16()
         ps.ps5000aSigGenArbitraryMinMaxValues(chandle, ctypes.byref(min_val), ctypes.byref(max_val), None, None)
 
-        f_real = 15e3  # Portante a 15 kHz [cite: 27]
+        f_real = 15e3  # Portante a 15 kHz 
         N_OSCILLAZIONI = f_real / FREQUENCY_HZ
 
         signal_float = generate_square_modulated_sinusoid(WAVEFORM_SAMPLES, N_OSCILLAZIONI, LIMIT_GAUSS)
@@ -98,7 +117,7 @@ def main():
         time_axis = np.linspace(0, 800, totalSamples) # Centrato sullo zero del trigger
         
         data_to_save = np.column_stack((time_axis, data_mV))
-        filename_txt = "../data/square_env_data_new.txt"
+        filename_txt = "../signalGen/square_env_data.txt"
         np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Time(us) Voltage(mV)", delimiter='\t')
         print(f"Dati salvati in: {filename_txt}")
 
@@ -108,10 +127,16 @@ def main():
         plt.xlabel("Time (µs)")
         plt.ylabel("Voltage (mV)")
         plt.grid(True)
+        # 1. Generiamo i tick da 200 a 600 con passo 50
+        # Nota: mettiamo 601 perché l'estremo destro in range() è escluso
+        ticks_personalizzati = list(range(200, 401, 20))
+
+        # 2. Applichiamo i tick all'asse x
+        plt.xticks(ticks_personalizzati)       
         
-        nome_grafico = "square_envelope_new.pdf"
-        plt.savefig(f"../data0_plots/{nome_grafico}")
-        print(f"Grafico salvato in: data0_plots/{nome_grafico}")
+        nome_grafico = "square_env_plot.pdf"
+        plt.savefig(f"../signalGen/{nome_grafico}")
+        print(f"Grafico salvato in: ../signalGen/{nome_grafico}")
         plt.show()
         
         

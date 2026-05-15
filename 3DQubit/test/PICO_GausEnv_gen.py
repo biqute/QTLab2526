@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from picosdk.ps5000a import ps5000a as ps
 from picosdk.functions import assert_pico_ok, adc2mV, mV2adc
 
+
+
 def generate_gaussian_sinusoid(samples, n_cycles, sigma=1.0):
     """
     Genera un'onda sinusoidale modulata da una gaussiana.
@@ -35,9 +37,27 @@ def generate_gaussian_sinusoid(samples, n_cycles, sigma=1.0):
 # ============================================================
 # 1) Caricamento DLL
 # ============================================================
-dll_path = os.path.abspath(os.path.dirname(__file__))
-os.add_dll_directory(dll_path)
-print("DLL loaded from:", dll_path)
+import os
+import sys
+
+# Trova la cartella dove si trova lo script attuale (3DQubit/test)
+script_dir = os.path.abspath(os.path.dirname(__file__))
+
+# Sale di un livello e punta alla cartella delle librerie (3DQubit/lib)
+lib_path = os.path.abspath(os.path.join(script_dir, "..", "lib"))
+
+if os.path.exists(lib_path):
+    # Aggiunge il percorso a Windows e a Python (per versioni >= 3.8)
+    os.environ['PATH'] = lib_path + os.path.pathsep + os.environ['PATH']
+    if sys.version_info >= (3, 8):
+        os.add_dll_directory(lib_path)
+    print("DLL loaded from custom library path:", lib_path)
+else:
+    print(f"ATTENZIONE: La cartella {lib_path} non esiste!")
+    # Fallback sulla cartella dello script se non trova 'lib'
+    if sys.version_info >= (3, 8):
+        os.add_dll_directory(script_dir)
+    print("DLL fallback path:", script_dir)
 
 # ================== PARAMETRI AWG ===========================
 FREQUENCY_HZ      = 1500.0       #  Hz 
@@ -46,7 +66,6 @@ AMPLITUDE_VPP_V   = 1        # Volt picco-picco
 # Offset per avere segnale tra 0V (High) e -1.39V (Low)
 OFFSET_V          = 0
 WAVEFORM_SAMPLES  = 30000         # punti tabella AWG
-
 
 
 # ============================================================
@@ -228,7 +247,7 @@ def main():
         # --- SALVATAGGIO DATI SU FILE TXT ---
         # Creiamo una matrice con due colonne: Tempo e Tensione
         data_to_save = np.column_stack((time_axis/1000, data_mV))
-        filename_txt = "../data/gaus_env_data_new.txt"
+        filename_txt = "../signalGen/gaus_env_data.txt"
         np.savetxt(filename_txt, data_to_save, fmt='%.6f', header="Time(us) Voltage(mV)", delimiter='\t')
         print(f"Dati salvati in: {filename_txt}")
         plt.figure(figsize=(10, 6))
@@ -238,8 +257,8 @@ def main():
         plt.title(f"PICO signal generation - {f_real} Hz")
         plt.grid(True)
         
-        nome_grafico = "gauss_envelope_new.pdf"
-        plt.savefig(f"../data0_plots/{nome_grafico}")
+        nome_grafico = "gaus_env_plot.pdf"
+        plt.savefig(f"../signalGen/{nome_grafico}")
         print(f"Grafico salvato in: data0_plots/{nome_grafico}")
         
         plt.show()
