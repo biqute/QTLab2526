@@ -32,8 +32,8 @@ def estrai_dataset(file_path, lk_target):
 def lorentziana_inv(x, y0, A, x0, gamma):
     return y0 - A * (gamma**2 / ((x - x0)**2 + gamma**2))
 
-file_csv = 'Lk_all_1st_res.csv'
-valori_lk = [str(float(i)) for i in range(0, 22, 2)]
+file_csv = 'L_geom_simul.csv'
+valori_lk = [0]
 print(valori_lk)
 f_res = []
 risonanze = []
@@ -43,7 +43,7 @@ n_sets = len(valori_lk)
 for i, lk in enumerate(valori_lk):
     df = estrai_dataset(file_csv, lk)
     x = df['FREQUENCY (GHz)'].values
-    y = df[' DB[S21]-2D_sonnet_new'].values
+    y = df[' DB[S21]-2D_3rd_resonator'].values
     
     x0_guess = x[np.argmin(y)]  # Il minimo grezzo della curva
     y0_guess = np.max(y)        # Il valore massimo (lontano dalla risonanza)
@@ -55,15 +55,19 @@ for i, lk in enumerate(valori_lk):
     # Esegui il fit non linearef
 
     try:
-        par, _ = curve_fit(lorentziana_inv, x, y, p0=p0)
-        
+        par, pcov = curve_fit(lorentziana_inv, x, y, p0=p0)
+
+        par_err = np.sqrt(np.diag(pcov))
+
         f_risonanza = par[2] # x0 è il terzo parametro
-        f_res.append({'Lk': float(lk), 'f_res_GHz': f_risonanza})
+        err_risonanza = par_err[2]
+
+        f_res.append({'Lk': float(lk), 'f_res_GHz': f_risonanza, 'err_f_res': err_risonanza})
         risonanze.append(f_risonanza)
         # Plot dei dati originali e della curva fittata
         #plt.plot(x, y, label=f'Dati Lk={lk}', linestyle='--', alpha=0.4)
         plt.plot(x, lorentziana_inv(x, *par), 
-                 label=f'Lk={lk} (Fr={f_risonanza:.4f} GHz)', color=colore)
+                 label=f'Lk={lk} (Fr={f_risonanza:.4f} ± {err_risonanza:.4f} GHz)', color=colore)
                  
     except Exception as e:
         print(f"Fit fallito per Lk={lk}: {e}")
@@ -71,37 +75,40 @@ for i, lk in enumerate(valori_lk):
 # Personalizza e mostra il grafico
 plt.xlabel('Frequency (GHz)')
 plt.ylabel('S21 (dB)')
-plt.title('Frequency response for different Lk values (1st RESONATOR)')
+plt.title('Frequency response with geometric inductance only (1st RESONATOR)')
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.tight_layout()
 plt.grid()
-#plt.show()
-
-def function(x,a, Lg):
-    return a/np.sqrt(x+Lg)
-
-Lk_values = [entry['Lk'] for entry in f_res]
-f_res_values = [entry['f_res_GHz'] for entry in f_res]
-
-a_guess = 1
-Lg_guess = 0.1
-p1 = [a_guess, Lg_guess]
-par, _ = curve_fit(function, np.array(Lk_values), np.array(f_res_values), p1)
-
-plt.figure(figsize=(8, 5))
-plt.plot(Lk_values, f_res_values, marker='o', linestyle='', label='Data')
-plt.xlabel('Lk (nH)')
-virtual_Lk =np.linspace(0,20,100)
-plt.plot(virtual_Lk, function(np.array(virtual_Lk), *par), label='Fit')
-plt.ylabel('Resonance frequency (GHz)')
-plt.title('Resonance frequency vs Lk (1st RESONATOR)')
-plt.grid()
-plt.legend()
 plt.show()
 
-print(f"Parametri del fit: a={par[0]:.4f}, Lg={par[1]:.4f} nH")
+f_res_values = np.array([entry['f_res_GHz'] for entry in f_res])
+f_res_errors = np.array([entry['err_f_res'] for entry in f_res])
 
-def find_Lk(x,a,Lg):
-    return (a**2 / x**2) - Lg
+def calcola_alpha_diretto(f_real, err_f_real, f0, err_f0):
 
-print(f"Valore di Lk per f_res=7.5 GHz: {find_Lk(7.5, *par):.4f} nH")
+    # 1. Calcolo del valore nominale di alpha
+    alpha = 1 - (f_real / f0)**2
+    
+    # 2. Derivate parziali
+    dAlpha_df_reale = -2 * f_real / (f0**2)
+    dAlpha_df0 = 2 * (f_real**2) / (f0**3)
+    
+    # 3. Propagazione degli errori (somma in quadratura)
+    var_alpha = (dAlpha_df_reale * err_f_real)**2 + (dAlpha_df0 * err_f0)**2
+    err_alpha = np.sqrt(var_alpha)
+    
+    return alpha, err_alpha
+
+f_real_misurata = 7.992940    
+err_f_real = 2.536749e-11
+
+f0_simulata = f_res_values[0]       
+err_f0 = f_res_errors[0]              
+
+alpha_val, alpha_err = calcola_alpha_diretto(f_real_misurata, err_f_real, f0_simulata, err_f0)
+
+print("--- METODO DIRETTO (f_real vs f0) ---")
+print(f"Frequenza reale    : {f_real_misurata:.4f} ± {err_f_real:.4f} GHz")
+print(f"Frequenza sim (f0) : {f0_simulata:.4f} ± {err_f0:.4f} GHz")
+print(f"Frazione di Lk (α) : {alpha_val:.5f} ± {alpha_err:.5f}")
+print(f"Alpha espresso in %: {alpha_val*100:.2f}% ± {alpha_err*100:.2f}%")
