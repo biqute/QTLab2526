@@ -2,9 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.special import i0, k0
-from iminuit import Minuit
-from iminuit.cost import LeastSquares
-from iminuit.util import describe
 
 ########## IMPOSTAZIONI GRAFICHE (Aesthetic Improvements) #####
 plt.rcParams.update({
@@ -87,12 +84,18 @@ inv_Q0_fit = m.values["inv_Qi_0"]
 Delta_fit = m.values["Delta_eV"]
 Delta_err = m.errors["Delta_eV"]
 
-print(m)
+#print(m)
 
 T_c = Delta_fit/(1.764 * k_B)
 
 print(f"Critical temperature T_c = {T_c:.4f} K")
 print(f"Superconducting Gap = {Delta_fit*1e3:.4f}  meV")
+
+#Residuals calculation
+res = revQ - model(temp, inv_Q0_fit, Delta_fit)
+chi2 = np.sum((res / revQ_err) ** 2)
+dof = len(temp) - 2  # Numero di dati meno numero di parametri
+print(f"Chi-squared: {chi2:.2f}, Degrees of freedom: {dof}, Reduced Chi-squared: {chi2/dof:.2f}")
 
 # Prepara i dati per il plot del fit
 x_fit = np.linspace(np.min(temp), np.max(temp), 100)
@@ -102,25 +105,39 @@ lw_style = 2     # Spessore standard
 alpha_style = 0.7   # Leggera trasparenza per chiarezza visiva
 zorder_style = 1
 
-plt.figure(figsize=(8, 6))
-plt.errorbar(temp, revQ, yerr=revQ_err*20, fmt='o', label="Data (erros bars x20)", 
+# --- CREAZIONE DEI SUBPLOT ---
+# gridspec_kw imposta il rapporto di altezza tra il grafico principale (3) e i residui (1)
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), sharex=True, gridspec_kw={'height_ratios': [3, 1]})
+
+# --- GRAFICO PRINCIPALE (ax1) ---
+ax1.errorbar(temp, revQ, yerr=revQ_err*10, fmt='o', label="Data (error bars x10)", 
              color='navy', alpha=0.85, ms=5, capsize=3, elinewidth=1.5)
 
-# Inseriamo il valore del Delta nella label del Fit
-plt.plot(x_fit, f_fit, 
+ax1.plot(x_fit, f_fit, 
          label=f"Fit: $\Delta$ = {Delta_fit*1e3:.4f} ± {Delta_err*1e3:.4f} meV", 
          color='darkorange', alpha=0.9, lw=2.4)
 
-# In alternativa, puoi stamparlo come testo fisso nel grafico:
-# plt.text(0.05, 0.95, f"$\Delta$ = {Delta_fit*1e3:.3f} meV", 
-#          transform=plt.gca().transAxes, verticalalignment='top', 
-#          bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
+ax1.set_ylabel(r"$1/Q_i$")
+ax1.grid(True, linestyle='--', alpha=0.7)
+ax1.legend()
 
-plt.xlabel(r"Temperature (mK)")
-plt.ylabel(r"$1/Q_i$")
-#plt.title("Fit of Superconducting Gap")
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.legend()
-plt.savefig("SCgap_fit.png", dpi=300)
-plt.savefig("SCgap_fit.pdf")
+# --- GRAFICO DEI RESIDUI (ax2) ---
+# Plottiamo i residui mantenendo gli stessi errori
+ax2.errorbar(temp, res/revQ_err, yerr=revQ_err*10, fmt='o', 
+             color='navy', alpha=0.85, ms=5, capsize=3, elinewidth=1.5)
+
+# Linea di riferimento a 0 per i residui
+ax2.axhline(0, color='darkorange', linestyle='--', lw=2, alpha=0.9)
+ax2.axhline(1, color='gray', linestyle='--', lw=1, alpha=0.5) 
+ax2.axhline(-1, color='gray', linestyle='--', lw=1, alpha=0.5)
+
+ax2.set_xlabel(r"Temperature (mK)")
+ax2.set_ylabel("Norm Residuals")
+ax2.grid(True, linestyle='--', alpha=0.7)
+
+# --- OTTIMIZZAZIONE DEGLI SPAZI ---
+plt.subplots_adjust(hspace=0.05) # Riduce lo spazio verticale tra i due grafici
+
+plt.savefig("SCgap_fit.png", dpi=300, bbox_inches='tight')
+plt.savefig("SCgap_fit.pdf", bbox_inches='tight')
 plt.show()

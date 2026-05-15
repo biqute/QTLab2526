@@ -18,7 +18,6 @@ time = data[:, 0]  # Frequenze
 A_data = data[:, 1]     # Parte reale di S21
 B_data = data[:, 2]     # Parte immaginaria di S21
 
-
 plt.plot(time*1e-6, A_data, label='Channel A', color='blue')
 plt.plot(time*1e-6, B_data, label='Channel B', color='darkorange')
 plt.xlabel('Time (ms)', fontsize=12)
