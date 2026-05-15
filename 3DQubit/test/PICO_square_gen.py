@@ -95,11 +95,18 @@ def main():
         timebase = 80 
         
         # Vogliamo che il trigger (inizio impulso) sia a 200us
-        # Se l'impulso dura 400us, il suo centro sarà a 200 + 200 = 400us
-        preTriggerSamples = 200   # 200 us prima del trigger
-        postTriggerSamples = 600  # 600 us dopo il trigger
+        preTriggerSamples = 200   # 200 us prima del trigger (circa)
+        postTriggerSamples = 600  # 600 us dopo il trigger (circa)
         totalSamples = preTriggerSamples + postTriggerSamples
         
+        # 1. Chiedi al PicoScope il VERO intervallo di tempo (dt) per timebase=80
+        timeIntervalns = ctypes.c_float()
+        returnedMaxSamples = ctypes.c_int32()
+        ps.ps5000aGetTimebase2(chandle, timebase, totalSamples, ctypes.byref(timeIntervalns), ctypes.byref(returnedMaxSamples), 0)
+        
+        # 2. Calcola il dt in microsecondi
+        dt_us = timeIntervalns.value / 1000.0
+
         status["runBlock"] = ps.ps5000aRunBlock(
             chandle, preTriggerSamples, postTriggerSamples, 
             timebase, None, 0, None, None
@@ -114,7 +121,10 @@ def main():
 
         # --- Plot ---
         data_mV = adc2mV(buffer, chRange, maxADC)
-        time_axis = np.linspace(0, 800, totalSamples) # Centrato sullo zero del trigger
+        
+        # 3. Costruisci l'asse dei tempi usando il dt reale
+        # Se vuoi che il tempo t=0 corrisponda all'evento di trigger:
+        time_axis = (np.arange(totalSamples) - preTriggerSamples) * dt_us
         
         data_to_save = np.column_stack((time_axis, data_mV))
         filename_txt = "../signalGen/square_env_data.txt"
