@@ -32,7 +32,6 @@ n_misura = "2"
 data_file = "data_10mK_" + n_misura
 save_as = "fit" + n_misura
 
-
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
 data = np.loadtxt("10mK_resonances/data_10mK/"+data_file + ".txt", delimiter="\t")
 frequencies = data[:, 0]/1e9  # Frequenze in GHz

@@ -13,102 +13,112 @@ The fitted parameters are printed to the console,
 and the resulting plot is saved as a PDF.
 '''
 
-########## SCRIPT 4 LATEX #####
 plt.rcParams.update({
     "text.usetex": True,
-    "font.family": "Helvetica"
+    "font.family": "Helvetica",
+    "axes.labelsize": 16,        # Dimensione label assi x e y
+    "axes.titlesize": 18,        # Dimensione titolo
+    "xtick.labelsize": 14,       # Dimensione tick x
+    "ytick.labelsize": 14,       # Dimensione tick y
+    "legend.fontsize": 14,       # Dimensione legenda
+    "lines.linewidth": 2         # Spessore delle linee di default
 })
 
-def lorentzian_power_tilt(f, A, f0, gamma, y0, m):
-    """Lorentziana in potenza + pendenza lineare."""
-    return y0 + m*(f - f0) + A / (1 + 4*(f - f0)**2 / gamma**2)
+def skewed_lorentz(f, f0, Q, A, B, y0, m):
+    """
+    Modello per un dip di risonanza asimmetrico.
+    f: Frequenza (in GHz)
+    f0: Frequenza di risonanza centrale
+    Q: Fattore di qualità
+    A: Profondità del dip (componente Lorentziana simmetrica)
+    B: Fattore di asimmetria (componente dispersiva)
+    y0: Livello di background (offset)
+    m: Pendenza del background (slope)
+    """
+    x = f - f0
+    bkg = y0 + m*x
+    signal = (A + B*x)/(1+4*Q**2*(x/f0)**2)
+
+    return bkg + signal
+
 
 # === Lettura dati ===
-data_file = "cavity_7.29GHz"  
+data_file = "cavity_13_642GHz_corretta_2cavi"  #  (senza estensione)
 save_as = "Fit_"+data_file
 
 # Assumi che il file contenga: freq, real, imag
 data = np.loadtxt("../data/"+data_file + ".txt", delimiter="\t")
-
 # Separa le colonne
-f = data[:, 0]              
+f = data[:, 0]/1e9  # Converti a GHz              
 real = data[:, 1]
 imag = data[:, 2]
+x_min = f.min()+0.05
+x_max = f.max()-0.05
+mask = (f > x_min) & (f < x_max)
+f = f[mask]
+real = real[mask]
+imag = imag[mask]
+
 phase = np.unwrap(np.atan2(imag, real))
 
 # Calcola modulo o potenza
 # Se il tuo segnale è in dB, puoi fare:
 # y = 20 * np.log10(np.sqrt(real**2 + imag**2))
 # Se invece vuoi lavorare in potenza lineare:
-y = np.sqrt(real**2 + imag**2)
+y = (real**2 + imag**2)
 
-# === Stime iniziali ===
-f0_guess = f[np.argmax(y)]          # picco massimo (o np.argmin se è una "dip")
-gamma_guess = (f.max() - f.min()) / 10
-A_guess = y.max() - y.min()
-y0_guess = np.median(np.r_[y[:max(10, len(y)//10)], y[-max(10, len(y)//10):]])
-m_guess  = (y[-1] - y[0]) / (f[-1] - f[0])
+''' FIT LORENTZ ASIMMETRICA '''
 
-p0 = [A_guess, f0_guess, gamma_guess, y0_guess, m_guess]
+"""
+    Modello per un dip di risonanza asimmetrico.
+    f: Frequenza (in GHz)
+    f0: Frequenza di risonanza centrale
+    Q: Fattore di qualità
+    A: Profondità del dip (componente Lorentziana simmetrica)
+    B: Fattore di asimmetria (componente dispersiva)
+    y0: Livello di background (offset)
+    m: Pendenza del background (slope)
+    """
 
-# === Fit ===
-popt, pcov = curve_fit(lorentzian_power_tilt, f, y, p0=p0)
-A_fit, f0_fit, gamma_fit, y0_fit, m_fit = popt
+p0 = [f[np.argmax(y)], # f0 guess
+      1e3, # Q guess
+      y.max() - y.min(), # A guess
+      0, # B guess (nessuna asimmetria iniziale)
+      np.mean(y[:10]), # y0 guess
+      0.01] # m guess
 
-print(f"f0 (centro) = {f0_fit:.6g}")
-print(f"Gamma (FWHM) = {gamma_fit:.6g}")
+lower_bounds = [f.min(), 0, 0, -np.inf, 0, -1]
+upper_bounds = [f.max(), 1e5, np.inf, np.inf, 1, 1]
 
-# === Plot ===
+popt, pcov = curve_fit(skewed_lorentz, f, y, p0=p0, bounds=(lower_bounds, upper_bounds))
+print("f0 = {:.3f} GHz".format(popt[0]))
+print("Q = {:.0f}".format(popt[1]))
+print("A = {:.6g} GHz".format(popt[2]))
+print("B = {:.6g}".format(popt[3]))
+print("y0 = {:.6g}".format(popt[4]))
+print("m = {:.6g}".format(popt[5]))
 f_fit = np.linspace(f.min(), f.max(), 2000)
-y_fit = lorentzian_power_tilt(f_fit, *popt)
+y_fit = skewed_lorentz(f_fit, *popt)
 
-fig = plt.figure(figsize=(10, 6), constrained_layout=True) # --Layout: big left (IQ), right (mag, phase)
-
-gs = GridSpec(
-    2, 2, figure=fig,
-    width_ratios=[2.7, 1.3],  # big left vs small right
-    height_ratios=[1, 1],
-    wspace=0.01,               # gap between left and right
-    hspace=0.05,               # vertical spacing between small plots
-    left=1.2,                 # left margin
-    right=1.5,                 # right margin — increase for more border space
-    bottom=0.1, top=0.92       # vertical margins
-)
-
-ax_iq    = fig.add_subplot(gs[:, 0])  # spans both rows on the left
-ax_mag   = fig.add_subplot(gs[0, 1])  # top-right
-ax_phase = fig.add_subplot(gs[1, 1])  # bottom-right
-
-# ---- IQ plot ----
-ax_iq.plot(real, imag, marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
-ax_iq.set_aspect('equal', 'box')
-ax_iq.axhline(0, color='gray', linewidth=0.8)   # real axis (horizontal)
-ax_iq.axvline(0, color='gray', linewidth=0.8)   # imaginary axis (vertical)
-ax_iq.set_xlabel(r"$\Re\{S_{21}\}$")          
-ax_iq.set_ylabel(r"$\Im\{S_{21}\}$")
-#ax_iq.plot([1], [0], "ro", ms = 8, label = "P(1,0)") 
-ax_iq.legend(loc='best')
-ax_iq.set_title(r"I-Q Plot")
-
+f0_val = popt[0]
+Q_val = popt[1]
 #----Signal plot-----
-ax_mag.plot(f/1e9, y, '.', label="Dati (|S21|)", markersize=2)
-ax_mag.plot(f_fit/1e9, y_fit, '-', label="Fit Lorentz + tilt")
-ax_mag.set_xlabel(r"$f\,[GHz]$")
-ax_mag.set_ylabel(r"$|S_{21}|$")
-ax_mag.grid(True, alpha=0.3)
-ax_mag.set_title("Magnitude")
+plt.plot(f, y, '.', label="Data", color = 'navy', alpha = 0.85)
+plt.plot(f_fit, y_fit, '-', label='Fit', color = 'darkorange', alpha = 0.9, lw = 2.4)
+plt.xlabel(r"Frequency (GHz)")
+plt.ylabel(r"$|S_{21}|^2$")
+plt.grid(True, alpha=0.3)
+#plt.legend(loc="best", fontsize=14)
+#plt.title("Magnitude")
+testo = f"$f_0 = {f0_val:.3f}$ GHz\n$Q = {Q_val:.0f}$"
 
-#----Phase plot-------
-ax_phase.plot(f/1e9, phase, '-', lw=1)
-ax_phase.set_xlabel(r"$f\,[GHz]$")
-ax_phase.set_ylabel(r"$\phi [rad]$")
-ax_phase.grid(True, alpha=0.3)
-ax_phase.set_title("Phase")
-ax_phase.legend(loc ="best")
-            
+# Posiziona il testo (ad es. coordinate relative: x=0.05, y=0.05 è in basso a sinistra)
+plt.annotate(testo, xy=(0.05, 0.9), xycoords='axes fraction',
+             fontsize=16, verticalalignment='top',
+             bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="gray", alpha=0.9))
 save_as += ".pdf"
-fig.savefig(f"../data0_plots/{save_as}", bbox_inches="tight")
-print(f"Grafico salvato in ../data0_plots/{save_as}")
+plt.savefig(f"../cavity_Tamb/{save_as}", bbox_inches="tight")
+print(f"Grafico salvato in ../cavity_Tamb/{save_as}")
 
 plt.show()
 
