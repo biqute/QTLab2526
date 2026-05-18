@@ -3,19 +3,22 @@
 # TO DO LIST
 
 ## Cavity modes
-1. Rifare misure con cavità bella!!
-2. Confronto con simulazione
-
-## Down Conversion
-1. Abbiamo perso i dati, vanno ripresi generando due segnali con frequenze vicine e poi leggendo l'ouput del mixer con picoscope.
-2. Fare analisi dati con FFT per verificare che le frequenze tornino. 
+1. Confronto con simulazione
 
 ## IQ mixer calibration
-Fare fit con ellisse dei dati  `attenuazione.txt `
+1. Fare fit con ellisse dei dati  `attenuazione.txt ` (AleM)
+
+## Down Conversion
+1. Rifare analisi dati con IQ mixer calibration attiva (AleV)
 
 ## Attenuazione
 1. Analisi dati per cavo --> fatto
 2. Analisi dati per attenuatore manuale
+
+## Relazione
+1. Rivedere e correggere lingua nel capitolo MKID (AleV)
+2. Completare bene la parte sull'introduzione teorica (Gaia e Giulius)
+3. Finire descrizione sui resonators (Gaia)
 
 
 
