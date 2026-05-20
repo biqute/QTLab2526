@@ -14,7 +14,7 @@ f_central = 7.4146e9
 f_span = 10e6
 n_points = 8001
 n_means = 1
-power = -27
+power = -30
 ifband = 1000
 
 n_misura = str(power)
@@ -22,7 +22,7 @@ data_file = "Data/"+"power_"+n_misura
 output_file = "Plots/plot" +  n_misura + "dBm"
 
 Sij = "S21"
-set = 1 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
+set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
