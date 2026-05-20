@@ -13,9 +13,9 @@ f_max = 7.420e9
 f_central = 7.4146e9
 f_span = 10e6
 n_points = 8001
-n_means = 5
+n_means = 2
 power = -39
-ifband = 1e3
+ifband = 100
 
 n_misura = str(power)
 data_file = "Data/"+"power_"+n_misura 
