@@ -14,15 +14,15 @@ f_central = 7.4146e9
 f_span = 10e6
 n_points = 8001
 n_means = 2
-power = -39
+power = -36
 ifband = 100
 
 n_misura = str(power)
 data_file = "Data/"+"power_"+n_misura 
-output_file = "Plots/plot" +  n_misura + "dBm"
+output_file = "Plots/plot_" +  n_misura + "dBm"
 
 Sij = "S21"
-set = 1 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
+set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -71,7 +71,7 @@ try:
     )
 
     # --- Plot 1: Ampiezza ---
-    ax1.scatter(freq, powe, color='blue')
+    ax1.plot(freq, powe, color='blue')
     ax1.set_title(f"Ampiezza {Sij}")
     ax1.set_xlabel("Frequenza (Hz)")
     ax1.set_ylabel("Ampiezza (dBm)")
