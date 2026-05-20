@@ -113,7 +113,7 @@ ax1.set_xlabel(r"Time ($\mu s$)")
 #ax1.set_ylabel(r"Amplitude")
 ax1.grid(True, which='major', linestyle='--', alpha=0.6)
 ax1.legend(loc="upper right")
-
+ax1.set_yscale('log')  # Usa scala lineare per l'asse y
 fig1.tight_layout()
 fig1.savefig("../signalGen/time_domain_PICO.pdf")
 
