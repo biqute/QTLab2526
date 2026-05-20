@@ -8,18 +8,18 @@ import pyvisa
     
 ip = '193.206.156.3'
 
-f_min = 7.36e9
-f_max = 7.54e9
+f_min = 7.403e9
+f_max = 7.420e9
 f_central = 7.4146e9
-f_span = 5e6
-n_points = 4001
-n_means = 5
-power = 0
-ifband = 1e3
+f_span = 10e6
+n_points = 8001
+n_means = 2
+power = -12
+ifband = 1000
 
-n_misura = "0dBm"
-data_file = "Data/"+"" + n_misura
-output_file = "Plots/" +  n_misura
+n_misura = str(power)
+data_file = "Data/"+"power_"+n_misura 
+output_file = "Plots/plot" +  n_misura + "dBm"
 
 Sij = "S21"
 set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
@@ -34,8 +34,8 @@ try:
     vna.get_IDN()
     if(set==1):
         #2. Configurazione della Misura
-        vna.set_freq_span(f_central, f_span)
-        #vna.set_freq_limits(f_min,f_max)
+        #vna.set_freq_span(f_central, f_span)
+        vna.set_freq_limits(f_min,f_max)
         vna.set_sweep_points(n_points)
         vna.set_n_means(n_means)
         vna.set_ifband(ifband)
@@ -71,14 +71,14 @@ try:
     )
 
     # --- Plot 1: Ampiezza ---
-    ax1.plot(freq, powe, color='blue')
+    ax1.scatter(freq, powe, color='blue')
     ax1.set_title(f"Ampiezza {Sij}")
     ax1.set_xlabel("Frequenza (Hz)")
     ax1.set_ylabel("Ampiezza (dBm)")
     ax1.grid(True)
 
     # --- Plot 2: Fase ---
-    ax2.plot(freq, phi, color='red')
+    ax2.scatter(freq, phi, color='red')
     ax2.set_title(f"Fase {Sij}")
     ax2.set_xlabel("Frequenza (Hz)")
     ax2.set_ylabel("Fase (rad)")
@@ -87,6 +87,8 @@ try:
     # Mostra la finestra con entrambi i grafici
     plt.suptitle(f"Misura VNA ({Sij})") # Titolo generale
     plt.tight_layout() # Ottimizza gli spazi
+    plt.savefig(output_file+".png", bbox_inches="tight")
+    plt.savefig(output_file+".pdf", bbox_inches="tight")
     plt.show()
 
 except pyvisa.errors.VisaIOError:
