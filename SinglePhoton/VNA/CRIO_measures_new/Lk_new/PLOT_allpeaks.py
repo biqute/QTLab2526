@@ -91,16 +91,16 @@ def plot_and_fit_peaks(file_path):
         
         # Mean vertical line
         plt.axvline(x=mean_lk, color='black', linestyle='--', linewidth=3.5, zorder=11,
-                    label=f'Mean $L_k = {mean_lk:.2f}$')
+                    label=f'Mean $L_k = {mean_lk:.2f}$ pH/sq')
 
         # MEAN LK TEXT INSIDE THE PLOT
-        plt.text(mean_lk + 0.05, 8.8, f'Mean $L_k$ = {mean_lk:.2f} $\pm$ {std_lk:.2f}', 
+        plt.text(mean_lk + 0.05, 8.8, f' $L_k$ = {mean_lk:.2f} $\pm$ {std_lk:.2f} pH/sq', 
                  color='black', fontweight='bold', fontsize=18, zorder=12,
                  bbox=dict(facecolor='white', alpha=0.8, edgecolor='black', boxstyle='round,pad=0.3'))
 
     # --- Final Formatting ---
     plt.title(r'$L_k$ Extrapolation', fontsize=22, pad=25)
-    plt.xlabel(r'$L_k$', fontsize=20)
+    plt.xlabel(r'$L_k$ (pH/sq)', fontsize=20)
     plt.ylabel(r'$f_0$ (GHz)', fontsize=20)
     
     plt.xlim(X_MIN, X_MAX)
@@ -113,6 +113,12 @@ def plot_and_fit_peaks(file_path):
     plt.xticks(fontsize=16)
     plt.yticks(fontsize=16)
     plt.tight_layout()
+
+    # --- Save as PDF with transparency ---
+    plt.gca().set_facecolor('none')
+    plt.gcf().patch.set_alpha(0)
+    plt.savefig('Lk_new/Lk_Extrapolation.pdf', format='pdf', transparent=True, bbox_inches='tight')
+    
     plt.show()
 
 if __name__ == "__main__":
