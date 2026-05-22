@@ -14,7 +14,7 @@ f_central = 7.4146e9
 f_span = 10e6
 n_points = 8001
 n_means = 2
-power = -36
+power = -30
 ifband = 100
 
 n_misura = str(power)
