@@ -1,71 +1,70 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import glob
 import os
-import re
+import matplotlib.pyplot as plt
+import sys
+sys.path.append("/")
 
-files = sorted(glob.glob("Data/*.txt"))
+potenze = np.arange(-45, 6, 3)
+num_potenze = len(potenze)
 
-powers = []
-S21_list = []
-freq_axis = None
 
-for file in files:
+num_punti_freq = 8001 
 
-    # --- extract power from filename ---
-    name = os.path.basename(file)
-    match = re.search(r"(-?\d+)", name)
-    if match:
-        P = float(match.group(1))
-    else:
+# all 0 grid
+signal_grid = np.zeros((num_potenze, num_punti_freq))
+phase_grid  = np.zeros((num_potenze, num_punti_freq))
+freq_grid   = np.zeros(num_punti_freq)
+
+for i, p in enumerate(potenze):
+    data_file = f"power_{p}"
+    file_path = f"Data/{data_file}.txt"
+    
+    if not os.path.exists(file_path):
+        print(f"Salto {file_path}: non trovato. Quella riga resterà a zero.")
         continue
+        
+    data = np.loadtxt(file_path, delimiter="\t")
+    
+    #salvataggio asse frequenze
+    if i == 0:
+        freq_grid[:] = data[:, 0] / 1e9
+        
+    real_S21 = data[:, 1]
+    imag_S21 = data[:, 2]
+    frequencies = data[:, 0]/1e9
+    print(f"File {data_file}: {len(frequencies)} punti")
 
-    data = np.loadtxt(file)
+    S21_complex = real_S21 + 1j * imag_S21
+    
+    #costruisco griglia
+    signal_grid[i, :] = 20 * np.log10(np.abs(S21_complex))
+    phase_grid[i, :]  = np.unwrap(np.angle(S21_complex))
 
-    freq = data[:, 0]
-    re_s21 = data[:, 1]
-    im_s21 = data[:, 2]
 
-    s21 = re_s21 + 1j * im_s21
+#Plot
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-    # store
-    if freq_axis is None:
-        freq_axis = freq
 
-    powers.append(P)
-    S21_list.append(s21)
+mappa_ampiezza = ax1.pcolormesh(freq_grid, potenze, signal_grid, cmap='magma', shading='auto')
 
-# --- convert to arrays ---
-powers = np.array(powers)
-S21_list = np.array(S21_list)
 
-# sort by power
-idx = np.argsort(powers)
-powers = powers[idx]
-S21_list = S21_list[idx, :]
+ax1.set_xlabel('Frequency(GHz)', fontsize=12)
+ax1.set_ylabel('Power (dBm)', fontsize=12)
+cbar1 = fig.colorbar(mappa_ampiezza, ax=ax1)
+cbar1.set_label('$|S_{21}|$ (dB)', fontsize=12)
 
-# --- choose what to plot ---
-S21_mag_db = np.abs(S21_list)
 
-# meshgrid
-FREQ, PWR = np.meshgrid(freq_axis / 1e9, powers)
+mappa_fase = ax2.pcolormesh(freq_grid, potenze, phase_grid, cmap='magma', shading='auto')
 
-# --- plot ---
-plt.figure(figsize=(9,6))
+ax2.set_xlabel('Frequency (GHz)', fontsize=12)
+ax2.set_ylabel('Power (dBm)', fontsize=12)
+cbar2 = fig.colorbar(mappa_fase, ax=ax2)
+cbar2.set_label('Arg($S_{21}$) (Rad)', fontsize=12)
 
-pcm = plt.pcolormesh(
-    FREQ,
-    PWR,
-    S21_mag_db,
-    shading="auto"
-)
+fig.suptitle('Qubit Punchout', fontsize=18, fontweight='bold')
 
-plt.xlabel("Frequency (GHz)")
-plt.ylabel("Power (dBm)")
-plt.title("Punchout Map")
+fig.savefig(f"Plots/punchout.pdf", bbox_inches="tight")
 
-cbar = plt.colorbar(pcm)
-cbar.set_label("|S21|")
 
 plt.tight_layout()
 plt.show()
