@@ -1,0 +1,22 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+
+data = np.load('sevenpeaks.npz', allow_pickle=True)
+        
+struttura = data['0']
+freqs = struttura['freq']
+mag = struttura['signal']
+phase = struttura['phase']
+phase_unwrapped = np.unwrap(phase)
+
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+ax1.plot(freqs / 1e9, mag, markersize=3)
+ax1.set_title('Total frequency spectrum')
+ax1.set_xlabel('Frequency (GHz)')
+ax1.set_ylabel('|S21|')
+ax1.grid(True, linestyle='--', alpha=0.7)
+
+plt.tight_layout()
+plt.show()
