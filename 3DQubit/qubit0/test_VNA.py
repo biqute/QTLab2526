@@ -1,7 +1,7 @@
 import sys
-sys.path.append("../classes")
+sys.path.append("../../classes")
+
 from VNA import VNA
-from data import Data
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvisa
@@ -10,19 +10,19 @@ ip = '193.206.156.3'
 
 f_min = 7.403e9
 f_max = 7.420e9
-f_central = 7.4146e9
-f_span = 10e6
-n_points = 8001
-n_means = 1
-power = 3 # in dBm
+f_central = 7.579e9
+f_span = 3e6
+n_points = 4001
+n_means = 5
+power = 0 # in dBm
 ifband = 1000
 
 n_misura = str(power)
-data_file = "Data/"+"power_"+n_misura 
-output_file = "Plots/plot_" +  n_misura + "dBm"
+data_file = "Data/"+"ZOOMpower_"+n_misura 
+output_file = "Plots/ZOOMplot_" +  n_misura + "dBm"
 
 Sij = "S21"
-set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
+set = 1 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -34,8 +34,8 @@ try:
     vna.get_IDN()
     if(set==1):
         #2. Configurazione della Misura
-        #vna.set_freq_span(f_central, f_span)
-        vna.set_freq_limits(f_min,f_max)
+        vna.set_freq_span(f_central, f_span)
+        #vna.set_freq_limits(f_min,f_max)
         vna.set_sweep_points(n_points)
         vna.set_n_means(n_means)
         vna.set_ifband(ifband)

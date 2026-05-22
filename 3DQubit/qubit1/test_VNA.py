@@ -1,0 +1,98 @@
+import sys
+sys.path.append("../classes")
+from VNA import VNA
+from data import Data
+import matplotlib.pyplot as plt
+import numpy as np
+import pyvisa
+    
+ip = '193.206.156.3'
+
+f_min = 7.403e9
+f_max = 7.420e9
+f_central = 7.5793e9
+f_span = 3e6
+n_points = 4001
+n_means = 5
+power = 0 # in dBm
+ifband = 1000
+
+n_misura = str(power)
+data_file = "Data/"+"RANGEpower_"+n_misura 
+output_file = "Plots/RANGEplot_" +  n_misura + "dBm"
+
+Sij = "S21"
+set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
+
+try:
+    print(f"Connecting to VNA with ip =  {ip}...")
+    vna = VNA(ip)
+    print("Connection completed.")
+
+    # 1. Identificazione
+    print("VNA ID:")
+    vna.get_IDN()
+    if(set==1):
+        #2. Configurazione della Misura
+        vna.set_freq_span(f_central, f_span)
+        #vna.set_freq_limits(f_min,f_max)
+        vna.set_sweep_points(n_points)
+        vna.set_n_means(n_means)
+        vna.set_ifband(ifband)
+        vna.set_power(power)
+        vna.perform_single_sweep()
+    
+    phi = vna.get_phase()
+    freq = vna.get_freq()
+    powe = vna.get_dbm()
+    I, Q = vna.get_S_parameters()
+    #data = Data()
+    #data.plot(freq, powe)
+    #data.plot(freq, phi)
+
+    #data = Data(freq, I, Q)
+    #data.save_txt(file_to_save=data_file
+    #              #, commento="freq, I e Q"
+    #              )
+    
+    import numpy as np
+
+    # Raggruppa le variabili in colonne
+    dati_completi = np.column_stack((freq, I, Q))
+
+    # Salva direttamente nel file txt
+    np.savetxt(data_file+".txt", dati_completi, delimiter="\t", comments="")
+    print(f"\nDati salvati in {data_file}.txt")
+    # Creating window (fig) with 2 axes (ax1, ax2) 
+    fig, (ax1, ax2) = plt.subplots(
+        nrows=1,        # 1 riga
+        ncols=2,        # 2 colonne
+        figsize=(14, 6) # Dimensioni della finestra
+    )
+
+    # --- Plot 1: Ampiezza ---
+    ax1.plot(freq, powe, color='blue')
+    ax1.set_title(f"Ampiezza {Sij}")
+    ax1.set_xlabel("Frequenza (Hz)")
+    ax1.set_ylabel("Ampiezza (dBm)")
+    ax1.grid(True)
+
+    # --- Plot 2: Fase ---
+    ax2.scatter(freq, phi, color='red')
+    ax2.set_title(f"Fase {Sij}")
+    ax2.set_xlabel("Frequenza (Hz)")
+    ax2.set_ylabel("Fase (rad)")
+    ax2.grid(True)
+
+    # Mostra la finestra con entrambi i grafici
+    plt.suptitle(f"Misura VNA ({Sij})") # Titolo generale
+    plt.tight_layout() # Ottimizza gli spazi
+    plt.savefig(output_file+".png", bbox_inches="tight")
+    plt.savefig(output_file+".pdf", bbox_inches="tight")
+    plt.show()
+
+except pyvisa.errors.VisaIOError:
+    print(f"\nERRORE: Impossibile connettersi al VNA ({ip}).")
+    print("Controlla l'indirizzo IP, la connessione di rete e che il VNA sia acceso.")
+except Exception as e:
+        print(f"\nSi è verificato un errore: {e}")
