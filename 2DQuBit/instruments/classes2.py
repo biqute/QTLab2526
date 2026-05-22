@@ -241,6 +241,14 @@ class VNA():
         
         return self._VNA.query("*OPC?")
     
+    def set_ifband(self, ifband):
+        self._VNA.write(f'BWID {ifband}')
+        self._VNA.write('*OPC')
+    
+    def set_n_means(self, n_means):
+        self._VNA.write(f"SENS:AVER:COUN {n_means}")
+        self._VNA.write('*OPC')
+                         
     def one_sweep(self):
         self._VNA.write("INIT:IMM")
         
@@ -262,7 +270,7 @@ class VNA():
 
         return real, imag
     
-
+            
     def save_vna_data(self, filename, freqs, real, imag):
 
         # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
@@ -315,6 +323,33 @@ class VNA():
         
         print(f"File salvato con successo NEL NUOVO FORMATO STRUTTURATO: {filename} ({len(freqs)} punti)")
 
+    def save_vna_data3(self, filename, freqs, real, imag):
+
+        # 1. Combiniamo Reale e Immaginario nel vettore complesso S21
+        S21_complex = real + 1j * imag
+        
+        # 2. Estraiamo Ampiezza (signal) e Fase in radianti (phase)
+        signal = np.abs(S21_complex)
+        phase = np.angle(S21_complex)
+        
+        # 3. Creiamo l'array strutturato (Structured Array)
+        dt = np.dtype([('freq', '<f8'), 
+                    ('signal', '<f8'), 
+                    ('phase', '<f8'), 
+                    ('error_signal', '<f8'), 
+                    ('error_phase', '<f8')])
+        
+        structured_data = np.zeros(len(freqs), dtype=dt)
+        
+        # Riempiamo l'array strutturato
+        structured_data['freq'] = freqs
+        structured_data['signal'] = signal
+        structured_data['phase'] = phase
+        
+        # 4. Salviamo l'array strutturato in un file .npz usando la chiave '0'
+        np.savez(filename, **{'0': structured_data}) 
+        
+        print(f"File salvato con successo NEL NUOVO FORMATO STRUTTURATO: {filename} ({len(freqs)} punti)")
 # - - - - - - - - - - - - - - - - - OSCILLOSCOPE - - - - - - - - - - - - - 
 
 class TDS() :
