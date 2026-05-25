@@ -532,7 +532,7 @@ def acquire_IQ(dict_par):
 
 # SIMULATORE DI VNA PER TESTARE IL CODICE DI ACQUISIZIONE E ANALISI DEI DATI SENZA AVERE IL VNA A DISPOSIZIONE
 class MockVNA:
-    def __init__(self, f_center=4.58, span=0.01, num_points=2000):
+    def __init__(self, f_center=8.64, span=0.01, num_points=2000):
         # Imposta le frequenze che il VNA scansionerà (in GHz)
         self.freqs = np.linspace(f_center - span/2, f_center + span/2, num_points)
         

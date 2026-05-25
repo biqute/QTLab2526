@@ -2,8 +2,11 @@ from classes2 import VNA, MockVNA
 import numpy as np
 import matplotlib.pyplot as plt
 
-my_vna = VNA(ip_address ='193.206.156.3') 
-my_vna.get_IDN()
+#my_vna = VNA(ip_address ='193.206.156.3') 
+#my_vna.get_IDN()
+
+my_vna = MockVNA(f_center=5.1) # simulate a VNA with a resonance at 5.1 GHz
+freqs = my_vna.get_frequencies()
 
 nome_file = "PROVA.npz"
 f_center = 8.6435e9
@@ -66,13 +69,8 @@ plt.show()
 
 
 
-'''
+
 #freqs = data['freq']
 #mag = data['signal']
 #phase = data['phase']
 
-
-
-my_vna = MockVNA(f_center=5.1) # simulate a VNA with a resonance at 5.1 GHz
-freqs = my_vna.get_frequencies()
-'''
