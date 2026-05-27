@@ -23,7 +23,7 @@ plt.rcParams.update({
 # --- COSTANTI FISICHE ---
 k_B = 8.617333262145e-5  # Costante di Boltzmann (eV/K)
 h = 4.135667696e-15      # Costante di Planck (eV s)
-alpha = 0.7354
+alpha = 0.7384707381565307
 f_0 = 7.49e9
 
 def model(T_mK, inv_Qi_0, Delta_eV):

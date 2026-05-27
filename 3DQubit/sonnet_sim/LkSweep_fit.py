@@ -215,5 +215,4 @@ with open(txt_output_fr, "w") as file_txt:
         file_txt.write(f"{lk_n}\t{fr_n}\t{f_err_n}\n")
 print(f"Frequenze di risonanza salvate in '{txt_output_fr}'")
 
-
 plt.show()

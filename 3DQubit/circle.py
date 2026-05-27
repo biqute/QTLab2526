@@ -30,10 +30,10 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 
 n_misura = "2"
 data_file = "data_10mK_" + n_misura
-save_as = "fit" + n_misura
+save_as = "fit_0dBm" + n_misura
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-data = np.loadtxt("10mK_resonances/data_10mK/"+data_file + ".txt", delimiter="\t")
+data = np.loadtxt("qubit1/Data/ZOOMpower_0.txt")
 frequencies = data[:, 0]/1e9  # Frequenze in GHz
 
 real_S21 = data[:, 1]     # Parte reale di S21
@@ -237,9 +237,9 @@ ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
 save_as += ".pdf"
-fig.savefig(f"10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
-print(f"Grafico salvato in ../10mK_resonances/plots_10mK/{save_as}")
-
+fig.savefig(f"qubit1/Plots/{save_as}", bbox_inches="tight")
+print(f"Grafico salvato in qubit0/Plots/{save_as}")
+    
 '''
 # =============================================================================
 # --- Plot Separati ---

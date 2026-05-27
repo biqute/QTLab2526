@@ -7,7 +7,6 @@ sys.path.append("/")
 potenze = np.arange(-45, 6, 3)
 num_potenze = len(potenze)
 
-
 num_punti_freq = 8001 
 
 # all 0 grid
@@ -44,9 +43,7 @@ for i, p in enumerate(potenze):
 #Plot
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-
 mappa_ampiezza = ax1.pcolormesh(freq_grid, potenze, signal_grid, cmap='magma', shading='auto')
-
 
 ax1.set_xlabel('Frequency(GHz)', fontsize=12)
 ax1.set_ylabel('Power (dBm)', fontsize=12)

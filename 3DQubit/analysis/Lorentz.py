@@ -43,29 +43,30 @@ def skewed_lorentz(f, f0, Q, A, B, y0, m):
 
 
 # === Lettura dati ===
-data_file = "cavity_13_642GHz_corretta_2cavi"  #  (senza estensione)
-save_as = "Fit_"+data_file
+data_file = "../qubit0/Data/ZOOMpower_0.txt" 
+save_as = "../qubit0/Plots/LorentzFit_0dBm"
 
 # Assumi che il file contenga: freq, real, imag
-data = np.loadtxt("../data/"+data_file + ".txt", delimiter="\t")
+data = np.loadtxt(data_file, delimiter="\t")
 # Separa le colonne
 f = data[:, 0]/1e9  # Converti a GHz              
 real = data[:, 1]
 imag = data[:, 2]
+'''
 x_min = f.min()+0.05
 x_max = f.max()-0.05
 mask = (f > x_min) & (f < x_max)
 f = f[mask]
 real = real[mask]
 imag = imag[mask]
-
+'''
 phase = np.unwrap(np.atan2(imag, real))
 
 # Calcola modulo o potenza
 # Se il tuo segnale è in dB, puoi fare:
 # y = 20 * np.log10(np.sqrt(real**2 + imag**2))
 # Se invece vuoi lavorare in potenza lineare:
-y = (real**2 + imag**2)
+y = real**2 + imag**2
 
 ''' FIT LORENTZ ASIMMETRICA '''
 
@@ -117,8 +118,8 @@ plt.annotate(testo, xy=(0.05, 0.9), xycoords='axes fraction',
              fontsize=16, verticalalignment='top',
              bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="gray", alpha=0.9))
 save_as += ".pdf"
-plt.savefig(f"../cavity_Tamb/{save_as}", bbox_inches="tight")
-print(f"Grafico salvato in ../cavity_Tamb/{save_as}")
+plt.savefig(save_as, bbox_inches="tight")
+print(f"Grafico salvato in {save_as}")
 
 plt.show()
 
