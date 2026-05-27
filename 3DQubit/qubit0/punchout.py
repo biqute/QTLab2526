@@ -61,7 +61,7 @@ cbar2.set_label('Arg($S_{21}$) (Rad)', fontsize=12)
 fig.suptitle('Qubit Punchout', fontsize=18, fontweight='bold')
 
 fig.savefig(f"Plots/punchout.pdf", bbox_inches="tight")
-
+fig.savefig(f"Plots/punchout.png", bbox_inches="tight")
 
 plt.tight_layout()
 plt.show()
