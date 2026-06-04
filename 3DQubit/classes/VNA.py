@@ -156,7 +156,20 @@ class VNA():
     def cont_on(self):
         self.__VNA.write("INIT:CONT ON")
         
+    def set_single_sweep_mode(self):
+        """Imposta il VNA in modalità Sweep Singolo / Hold permanente."""
+        # INIT:CONT OFF dice al VNA di NON far ripartire lo sweep da solo
+        self.__VNA.write("INIT:CONT OFF")
+        
     def start_sweep(self):
+        """Forza l'inizio di un singolo ciclo di sweep (comprese le medie)."""
+        # Cancella eventuali errori precedenti nel buffer del VNA
+        self.__VNA.write("*CLS")
+        # Avvia lo sweep singolo immediato
         self.__VNA.write("INIT:IMM")
+        
+    def hold_vna(self):
+        """Inibisce il VNA da qualsiasi attività finché non ricomincia il ciclo."""
+        self.__VNA.write("ABOR")
 
     
