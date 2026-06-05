@@ -241,6 +241,11 @@ class VNA():
         
         return self._VNA.query("*OPC?")
     
+    def get_sweep_time (self):
+        a = self._VNA.query('SWE:TIME?')
+        return a
+    
+
     def one_sweep(self):
         self._VNA.write("INIT:IMM")
         
@@ -428,8 +433,6 @@ class LO():
     def __init__(self, name):
         self._LO = serial.Serial(name)  # open serial port
         self._LO.flushInput() # Clear the input buffer to ensure there are no pending commands
-        
-
         if not self._LO.is_open: raise Exception("Connection failed.")
 
 

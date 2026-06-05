@@ -73,6 +73,10 @@ class VNA():
 
         if self.wait_for_opc():
             print(f"Larghezza di banda IF impostata correttamente a {ifband} Hz.")
+    
+    def get_sweep_time(self):
+        sweep_time_str = self.__VNA.query("SWE:TIME?")
+        return float(sweep_time_str)
 
     def set_sweep_time(self, time):
         self.__VNA.write(f'SWE:TIME {time}')
@@ -129,7 +133,7 @@ class VNA():
         freq_str = self.__VNA.query("FREQ:DATA?")
         return list(map(float, freq_str.split(",")))
     
-    def perform_single_sweep(self, timeout=300):
+    def perform_single_sweep(self, timeout=1):
         """
         Disabilita lo sweep continuo, avvia uno sweep singolo 
         e attende il completamento di tutte le medie.
@@ -144,5 +148,28 @@ class VNA():
         self.__VNA.write("INIT:IMM")
         
         return self.wait_for_opc(timeout=timeout)
+    
+    def check_cont(self):
+        cont_status = self.__VNA.query("INIT:CONT?")
+        return cont_status.strip() == '1'  # Restituisce True se lo sweep continuo è attivo, altrimenti False
+    
+    def cont_on(self):
+        self.__VNA.write("INIT:CONT ON")
+        
+    def set_single_sweep_mode(self):
+        """Imposta il VNA in modalità Sweep Singolo / Hold permanente."""
+        # INIT:CONT OFF dice al VNA di NON far ripartire lo sweep da solo
+        self.__VNA.write("INIT:CONT OFF")
+        
+    def start_sweep(self):
+        """Forza l'inizio di un singolo ciclo di sweep (comprese le medie)."""
+        # Cancella eventuali errori precedenti nel buffer del VNA
+        self.__VNA.write("*CLS")
+        # Avvia lo sweep singolo immediato
+        self.__VNA.write("INIT:IMM")
+        
+    def hold_vna(self):
+        """Inibisce il VNA da qualsiasi attività finché non ricomincia il ciclo."""
+        self.__VNA.write("ABOR")
 
     
