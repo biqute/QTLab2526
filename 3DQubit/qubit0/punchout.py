@@ -1,8 +1,20 @@
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import sys
 sys.path.append("/")
+
+plt.rcParams.update({
+    "text.usetex": True,
+    "font.family": "Helvetica",
+    "axes.labelsize": 16,        # Dimensione label assi x e y
+    "axes.titlesize": 18,        # Dimensione titolo
+    "xtick.labelsize": 12,       # Dimensione tick x
+    "ytick.labelsize": 12,       # Dimensione tick y
+    "legend.fontsize": 14,       # Dimensione legenda
+    "lines.linewidth": 2         # Spessore delle linee di default
+})
 
 potenze = np.arange(-45, 6, 3)
 num_potenze = len(potenze)
@@ -39,29 +51,41 @@ for i, p in enumerate(potenze):
     signal_grid[i, :] = 20 * np.log10(np.abs(S21_complex))
     phase_grid[i, :]  = np.unwrap(np.angle(S21_complex))
 
+# --- SINGLE PLOT ---
+mappa_ampiezza = plt.pcolormesh(freq_grid, potenze, signal_grid, cmap='magma', shading='auto')
+plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:.3f}'))
+plt.xlabel('Frequency (GHz)')  
+plt.ylabel('VNA Power (dBm)')
+cbar1 = plt.colorbar(mappa_ampiezza)
+cbar1.set_label('$|S_{21}|$ (dBm)')
+plt.savefig(f"Plots/punchout_amp.pdf", bbox_inches="tight")
+plt.savefig(f"Plots/punchout_amp.png", bbox_inches="tight")
+print("File salvato in: ", f"Plots/punchout_amp.pdf")
 
-#Plot
+'''
+# --- DOUBLE PLOT --- 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
 mappa_ampiezza = ax1.pcolormesh(freq_grid, potenze, signal_grid, cmap='magma', shading='auto')
 
-ax1.set_xlabel('Frequency(GHz)', fontsize=12)
-ax1.set_ylabel('Power (dBm)', fontsize=12)
+ax1.set_xlabel('Frequency(GHz)')
+ax1.set_ylabel('Power (dBm)')
 cbar1 = fig.colorbar(mappa_ampiezza, ax=ax1)
-cbar1.set_label('$|S_{21}|$ (dB)', fontsize=12)
+cbar1.set_label('$|S_{21}|$ (dBm)')
 
 
 mappa_fase = ax2.pcolormesh(freq_grid, potenze, phase_grid, cmap='magma', shading='auto')
 
-ax2.set_xlabel('Frequency (GHz)', fontsize=12)
-ax2.set_ylabel('Power (dBm)', fontsize=12)
+ax2.set_xlabel('Frequency (GHz)')
+ax2.set_ylabel('Power (dBm)')
 cbar2 = fig.colorbar(mappa_fase, ax=ax2)
-cbar2.set_label('Arg($S_{21}$) (Rad)', fontsize=12)
+cbar2.set_label('Arg($S_{21}$) (Rad)')
 
-fig.suptitle('Qubit Punchout', fontsize=18, fontweight='bold')
+#fig.suptitle('Qubit Punchout', fontsize=18, fontweight='bold')
 
 fig.savefig(f"Plots/punchout.pdf", bbox_inches="tight")
 fig.savefig(f"Plots/punchout.png", bbox_inches="tight")
+'''
 
 plt.tight_layout()
 plt.show()

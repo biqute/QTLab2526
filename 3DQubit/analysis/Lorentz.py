@@ -1,7 +1,8 @@
-from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec 
+from matplotlib.gridspec import GridSpec
+from iminuit import Minuit
+from iminuit.cost import LeastSquares
 
 '''
 Lorentzian fit with power and linear tilt for cavity resonance data. 
@@ -37,89 +38,96 @@ def skewed_lorentz(f, f0, Q, A, B, y0, m):
     """
     x = f - f0
     bkg = y0 + m*x
-    signal = (A + B*x)/(1+4*Q**2*(x/f0)**2)
+    signal = (A + B*x)/(1 + 4*Q**2*(x/f0)**2)
 
     return bkg + signal
 
 
 # === Lettura dati ===
-data_file = "../qubit0/Data/ZOOMpower_0.txt" 
-save_as = "../qubit0/Plots/LorentzFit_0dBm"
+data_file = "../data/cavity_7.29GHz_corretta_2cavi.txt" 
+save_as = "../cavity_Tamb/Tamb_plots/cavity_0_fit"
 
 # Assumi che il file contenga: freq, real, imag
 data = np.loadtxt(data_file, delimiter="\t")
+
 # Separa le colonne
-f = data[:, 0]/1e9  # Converti a GHz              
+f = data[:, 0] / 1e9  # Converti a GHz              
 real = data[:, 1]
 imag = data[:, 2]
-'''
-x_min = f.min()+0.05
-x_max = f.max()-0.05
-mask = (f > x_min) & (f < x_max)
-f = f[mask]
-real = real[mask]
-imag = imag[mask]
-'''
+
 phase = np.unwrap(np.atan2(imag, real))
 
-# Calcola modulo o potenza
-# Se il tuo segnale è in dB, puoi fare:
-# y = 20 * np.log10(np.sqrt(real**2 + imag**2))
-# Se invece vuoi lavorare in potenza lineare:
+# Calcola potenza (lineare)
 y = real**2 + imag**2
 
-''' FIT LORENTZ ASIMMETRICA '''
 
-"""
-    Modello per un dip di risonanza asimmetrico.
-    f: Frequenza (in GHz)
-    f0: Frequenza di risonanza centrale
-    Q: Fattore di qualità
-    A: Profondità del dip (componente Lorentziana simmetrica)
-    B: Fattore di asimmetria (componente dispersiva)
-    y0: Livello di background (offset)
-    m: Pendenza del background (slope)
-    """
+''' FIT LORENTZ ASIMMETRICA CON IMINUIT '''
 
-p0 = [f[np.argmax(y)], # f0 guess
-      1e3, # Q guess
-      y.max() - y.min(), # A guess
-      0, # B guess (nessuna asimmetria iniziale)
-      np.mean(y[:10]), # y0 guess
-      0.01] # m guess
+# Costruiamo la funzione di costo LeastSquares. 
+# Dato che non abbiamo un array di errori esplicito (sigma), passiamo 1.0 (peso uniforme).
+cost_func = LeastSquares(f, y, 1.0, skewed_lorentz)
 
-lower_bounds = [f.min(), 0, 0, -np.inf, 0, -1]
-upper_bounds = [f.max(), 1e5, np.inf, np.inf, 1, 1]
+# Definiamo i valori iniziali (guess)
+f0_guess = f[np.argmax(y)]
+Q_guess  = 1e3
+A_guess  = y.max() - y.min()
+B_guess  = 0.0
+y0_guess = np.mean(y[:10])
+m_guess  = 0.01
 
-popt, pcov = curve_fit(skewed_lorentz, f, y, p0=p0, bounds=(lower_bounds, upper_bounds))
-print("f0 = {:.3f} GHz".format(popt[0]))
-print("Q = {:.0f}".format(popt[1]))
-print("A = {:.6g} GHz".format(popt[2]))
-print("B = {:.6g}".format(popt[3]))
-print("y0 = {:.6g}".format(popt[4]))
-print("m = {:.6g}".format(popt[5]))
+# Inizializziamo l'oggetto Minuit con la funzione di costo e i valori iniziali
+m = Minuit(cost_func, f0=f0_guess, Q=Q_guess, A=A_guess, B=B_guess, y0=y0_guess, m=m_guess)
+
+# Impostiamo i limiti per ogni parametro (in iminuit `None` significa senza limite)
+m.limits["f0"] = (f.min(), f.max())
+m.limits["Q"]  = (0, 1e5)
+m.limits["A"]  = (0, None)
+m.limits["B"]  = (None, None)
+m.limits["y0"] = (0, 1)
+m.limits["m"]  = (-1, 1)
+
+# === ESECUZIONE DEL FIT ===
+m.migrad()  # Ottimizzazione dei parametri
+m.hesse()   # Stima degli errori sui parametri
+
+# Stampiamo il resoconto del fit per comodità (formattazione testuale integrata in iminuit)
+print(m)
+
+# Recuperiamo i parametri ottimizzati
+popt = m.values
+f0_val = popt["f0"]
+Q_val = popt["Q"]
+
+print("\n--- Risultati del Fit ---")
+print("f0 = {:.3f} GHz".format(f0_val))
+print("Q  = {:.0f}".format(Q_val))
+print("A  = {:.6g}".format(popt["A"]))
+print("B  = {:.6g}".format(popt["B"]))
+print("y0 = {:.6g}".format(popt["y0"]))
+print("m  = {:.6g}".format(popt["m"]))
+
+# Creiamo le curve per il plot del fit usando i parametri ottimizzati
 f_fit = np.linspace(f.min(), f.max(), 2000)
 y_fit = skewed_lorentz(f_fit, *popt)
 
-f0_val = popt[0]
-Q_val = popt[1]
-#----Signal plot-----
-plt.plot(f, y, '.', label="Data", color = 'navy', alpha = 0.85)
-plt.plot(f_fit, y_fit, '-', label='Fit', color = 'darkorange', alpha = 0.9, lw = 2.4)
+
+# === PLOT DEL SEGNALE ===
+plt.plot(f, y, '.', label="Data", color='navy', alpha=0.85)
+plt.plot(f_fit, y_fit, '-', label='Fit', color='darkorange', alpha=0.9, lw=2.4)
+
 plt.xlabel(r"Frequency (GHz)")
 plt.ylabel(r"$|S_{21}|^2$")
 plt.grid(True, alpha=0.3)
-#plt.legend(loc="best", fontsize=14)
-#plt.title("Magnitude")
+
 testo = f"$f_0 = {f0_val:.3f}$ GHz\n$Q = {Q_val:.0f}$"
 
-# Posiziona il testo (ad es. coordinate relative: x=0.05, y=0.05 è in basso a sinistra)
+# Posiziona il box di testo
 plt.annotate(testo, xy=(0.05, 0.9), xycoords='axes fraction',
              fontsize=16, verticalalignment='top',
              bbox=dict(boxstyle="round,pad=0.4", fc="white", ec="gray", alpha=0.9))
+
 save_as += ".pdf"
 plt.savefig(save_as, bbox_inches="tight")
 print(f"Grafico salvato in {save_as}")
 
 plt.show()
-

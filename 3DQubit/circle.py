@@ -2,6 +2,7 @@ import numpy as np
 from scipy import optimize
 from scipy.optimize import curve_fit
 from scipy.optimize import least_squares
+from scipy.signal import savgol_filter
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from circle_fit import CircleFitter
@@ -33,11 +34,12 @@ data_file = "data_10mK_" + n_misura
 save_as = "fit_0dBm" + n_misura
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-data = np.loadtxt("qubit1/Data/ZOOMpower_0.txt")
+data = np.loadtxt("qubit0/Data/ZOOMpower_0.txt")
 frequencies = data[:, 0]/1e9  # Frequenze in GHz
 
 real_S21 = data[:, 1]     # Parte reale di S21
 imag_S21 = data[:, 2]     # Parte immaginaria di S21
+
 
 signal = np.abs(real_S21 + 1j * imag_S21)
 phase = np.unwrap(np.angle(real_S21 + 1j * imag_S21))
@@ -237,7 +239,7 @@ ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
 save_as += ".pdf"
-fig.savefig(f"qubit1/Plots/{save_as}", bbox_inches="tight")
+fig.savefig(f"qubit0/Plots/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in qubit0/Plots/{save_as}")
     
 '''
