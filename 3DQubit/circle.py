@@ -31,14 +31,12 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 
 n_misura = "2"
 data_file = "data_10mK_" + n_misura
-save_as = "fit_-9dBm"
+save_as = "fit_3dBm"
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-<<<<<<< HEAD
-data = np.loadtxt("qubit1/Data/power_-9.txt")
-=======
-data = np.loadtxt("qubit0/Data/ZOOMpower_0.txt")
->>>>>>> c481fd60265f25a32a48c41051025358445402a6
+
+data = np.loadtxt("qubit1/Data/power_3.txt")
+
 frequencies = data[:, 0]/1e9  # Frequenze in GHz
 
 real_S21 = data[:, 1]     # Parte reale di S21
@@ -51,7 +49,7 @@ phase = np.unwrap(np.angle(real_S21 + 1j * imag_S21))
 idx_res = np.argmin(signal)
 f_res = frequencies[idx_res]
 
-window = 0.1# GHz
+window = 0.001# GHz
 
 mask = np.abs(frequencies - f_res) < window
 
@@ -255,7 +253,7 @@ ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
 save_as += ".pdf"
-fig.savefig(f"qubit0/Plots/{save_as}", bbox_inches="tight")
+fig.savefig(f"qubit1/Plots/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in qubit0/Plots/{save_as}")
     
 '''
