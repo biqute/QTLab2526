@@ -4,58 +4,36 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append("/")
 
-potenze = np.arange(-45, 6, 3)
-print("Potenze da analizzare:", potenze)
+potenze = np.arange(-48, 3, 3)
 num_potenze = len(potenze)
-num_punti_freq = 5000
-percorso_cartella = "data_1peak"
+num_punti_freq = 4000
+percorso_cartella = r"C:\Users\kid\labQT\Lab2025"
 
 signal_grid = np.zeros((num_potenze, num_punti_freq))
 phase_grid  = np.zeros((num_potenze, num_punti_freq))
-name = "data_power_-3dBm_2_new.npz"
 freq_grid   = np.zeros(num_punti_freq)
-prova = np.load(name, allow_pickle=True)
-fig = plt.figure(figsize=(10, 6))
-plt.plot(prova['0']['freq'] / 1e9, prova['0']['signal'], '.', markersize=2)
-plt.xlabel('Frequency (GHz)', fontsize=12)
-plt.ylabel('|S21|', fontsize=12)
-plt.title('Magnitude of S21', fontsize=14)
-
 
 for i, p in enumerate(potenze):
-    nome_file = f"data_power_{p}dBm_2_new.npz"
+    nome_file = f"data_power_{p}dBm.npz"
+    data_file = os.path.join(percorso_cartella, nome_file)
     # 1. Carica il file .npz compresso
-    data_npz = np.load(nome_file, allow_pickle=True)
-    data = dict(data_npz)  # Converti in dizionario se necessario
+    data = np.load(data_file, allow_pickle=True)
     
     # 2. Accedi all'array strutturato
     struttura = data['0']
-    new_struttura = {'freq': np.ones(5000), 'signal': np.ones(5000), 'phase': np.ones(5000)}
-    print(struttura['freq'])  # Verifica il tipo di dato dell'array 'freq'
-    f_in = 7.577e9
-    f_fin = 7.583e9
-    if struttura['freq'][0] > f_in:
-        correzione = np.linspace(f_in, struttura['freq'][0], num=1000)
-        new_struttura['freq'] = np.concatenate((correzione, struttura['freq']))
-        new_struttura['signal'] = np.concatenate((np.full(1000, struttura['signal'][0]), struttura['signal']))
-        new_struttura['phase'] = np.concatenate((np.full(1000, struttura['phase'][0]), struttura['phase']))
-    if struttura['freq'][-1] < f_fin:
-        correzione = np.linspace(struttura['freq'][-1], f_fin, num=1000)
-        new_struttura['freq'] = np.concatenate((struttura['freq'], correzione))
-        new_struttura['signal'] = np.concatenate((struttura['signal'], np.full(1000, struttura['signal'][-1])))
-        new_struttura['phase'] = np.concatenate((struttura['phase'], np.full(1000, struttura['phase'][-1])))
     
     # 3. Salvataggio asse frequenze (solo alla prima iterazione)
     if i == 0:
-        freq_grid[:] = new_struttura['freq'] / 1e9
+        freq_grid[:] = struttura['freq'] / 1e9
         
-    print(f"File {nome_file}: {len(new_struttura['freq'])} punti")
-    signal_grid[i, :] = 20 * np.log10(new_struttura['signal'])
+    print(f"File {data_file}: {len(struttura['freq'])} punti")
 
+    signal_grid[i, :] = 20 * np.log10(struttura['signal'])
     
-    phase_grid[i, :]  = np.unwrap(new_struttura['phase'])
-    #phase_grid[i, :]  = new_struttura['phase']
-
+    
+    phase_grid[i, :]  = np.unwrap(struttura['phase'])
+    #phase_grid[i, :]  = struttura['phase']
+    
 # Calcoliamo la differenza di fase tra ogni gradino di potenza
 # usando la prima colonna (indice 0), cioè una frequenza lontana dal Qubit
 fase_background = phase_grid[:, 0]

@@ -22,11 +22,9 @@ freq = data[:, 0]/1e9  # Frequenze in GHz
 I = data[:, 1]   
 Q = data[:, 2]     
 signal = 20*np.log10(np.sqrt(I**2 + Q**2))  
-signal_filtered = savgol_filter(signal, 1000, 4)  # Filtro Savitzky-Golay, l'ultimo numero è 
-                                            #il grado del polinomio usato per il fit locale (4 in questo caso)
 
 
-plt.plot(freq, signal_filtered, label='Signal', color='navy', alpha=0.85)
+plt.plot(freq, signal, label='Signal', color='navy', alpha=0.85)
 plt.xlabel('Frequency (GHz)')
 plt.ylabel('Transmission (dBm)')
 #plt.title(f'{filename} data', fontsize=14)
