@@ -19,7 +19,7 @@ plt.rcParams.update({
 potenze = np.arange(-45, 3, 3)
 num_potenze = len(potenze)
 
-num_punti_freq = 8001 
+num_punti_freq = 2001 
 
 # all 0 grid
 signal_grid = np.zeros((num_potenze, num_punti_freq))
@@ -57,7 +57,7 @@ plt.gca().xaxis.set_major_formatter(ticker.StrMethodFormatter('{x:.3f}'))
 plt.xlabel('Frequency (GHz)')  
 plt.ylabel('VNA Power (dBm)')
 cbar1 = plt.colorbar(mappa_ampiezza)
-cbar1.set_label('$|S_{21}|$ (dBm)')
+cbar1.set_label('$|S_{21}|$ (dB)')
 plt.savefig(f"Plots/punchout_amp.pdf", bbox_inches="tight")
 plt.savefig(f"Plots/punchout_amp.png", bbox_inches="tight")
 print("File salvato in: ", f"Plots/punchout_amp.pdf")

@@ -23,7 +23,7 @@ data_file = "../T_dep/"+"2_MKID_resonance_" + n_misura
 output_file = "../T_dep/"+"2_MKID_plot_" +  n_misura
 
 Sij = "S21"
-set = 1 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
+set = 0 # 0: solo acquisizione, 1: acquisizione + configurazione VNA
 
 try:
     print(f"Connecting to VNA with ip =  {ip}...")
@@ -60,7 +60,7 @@ try:
 
     # Raggruppa le variabili in colonne
     dati_completi = np.column_stack((freq, I, Q))
-
+    data_file = "../qubit0/Data/ZOOM_-33dBm"
     # Salva direttamente nel file txt
     np.savetxt(data_file+".txt", dati_completi, delimiter="\t", comments="")
     print(f"\nDati salvati in {data_file}.txt")
@@ -75,7 +75,7 @@ try:
     ax1.plot(freq, powe, color='blue')
     ax1.set_title(f"Ampiezza {Sij}")
     ax1.set_xlabel("Frequenza (Hz)")
-    ax1.set_ylabel("Ampiezza (dBm)")
+    ax1.set_ylabel("Ampiezza (dB)")
     ax1.grid(True)
 
     # --- Plot 2: Fase ---

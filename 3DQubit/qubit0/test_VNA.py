@@ -11,14 +11,14 @@ ip = '193.206.156.3'
 f_min = 7.403e9
 f_max = 7.420e9
 
-f_central = 7.4078e9
+f_central = 7.41467e9
 f_span = 3e6
 
 n_points = 4001
 n_means = 1
 ifband = 1000
 
-power = -40 # in dBm
+power = -0 # in dBm
 
 n_misura = str(power)
 data_file = "Data/"+"ZOOMpower_"+n_misura 
