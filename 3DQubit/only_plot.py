@@ -12,7 +12,7 @@ plt.rcParams.update({
     "lines.linewidth": 2         # Spessore delle linee di default
 })
 
-filename = "qubit0/Data/ZOOMpower_-39.txt"
+filename = "qubit1/Data/RANGEpower_0.txt"
 
 data = np.loadtxt(f'{filename}', skiprows=2)
 
@@ -26,10 +26,10 @@ signal = 20*np.log10(np.sqrt(I**2 + Q**2))
 
 plt.plot(freq, signal, label='Signal', color='navy', alpha=0.85)
 plt.xlabel('Frequency (GHz)')
-plt.ylabel('Transmission (dBm)')
+plt.ylabel('Transmission (dB)')
 #plt.title(f'{filename} data', fontsize=14)
 plt.grid(True, alpha=0.3)
 plt.tight_layout()
 
-#plt.savefig(f"qubit0/Plots/ZOOM_-39.pdf", dpi=300)
+plt.savefig(f"qubit1/Plots/FULLrange.pdf", dpi=300)
 plt.show()
