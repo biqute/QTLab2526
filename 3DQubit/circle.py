@@ -30,10 +30,10 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 
 n_misura = "2"
 data_file = "data_10mK_" + n_misura
-save_as = "fit_0dBm" + n_misura
+save_as = "fit_-9dBm"
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
-data = np.loadtxt("qubit1/Data/ZOOMpower_0.txt")
+data = np.loadtxt("qubit1/Data/power_-9.txt")
 frequencies = data[:, 0]/1e9  # Frequenze in GHz
 
 real_S21 = data[:, 1]     # Parte reale di S21
@@ -42,6 +42,18 @@ imag_S21 = data[:, 2]     # Parte immaginaria di S21
 signal = np.abs(real_S21 + 1j * imag_S21)
 phase = np.unwrap(np.angle(real_S21 + 1j * imag_S21))
 
+idx_res = np.argmin(signal)
+f_res = frequencies[idx_res]
+
+window = 0.1# GHz
+
+mask = np.abs(frequencies - f_res) < window
+
+frequencies = frequencies[mask]
+signal = signal[mask]
+phase= phase[mask]
+real_S21 = real_S21[mask]
+imag_S21 = imag_S21[mask]
 
 ####################################
 
@@ -52,7 +64,7 @@ S21 = signal * np.exp(1j * phase)
 
 TAU = fitter._guess_delay(frequencies, S21)
 
-#print("initial TAU guess:", TAU)
+print("initial TAU guess:", TAU)
 
 S21_calibrated = fitter._remove_cable_delay(frequencies, S21, TAU)
 
@@ -60,7 +72,7 @@ S21_calibrated = fitter._remove_cable_delay(frequencies, S21, TAU)
 
 tau_true = fitter._fit_delay(frequencies, S21_calibrated)
 
-#print("true tau:", tau_true)
+print("true tau:", tau_true)
 
 S21_calibrated = fitter._remove_cable_delay(frequencies, S21_calibrated, tau_true)
 
