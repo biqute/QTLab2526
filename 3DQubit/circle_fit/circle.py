@@ -29,13 +29,13 @@ def S21_notch(f, Ql, abs_Qc, phase_Qc, f0, a, alpha, tau):
 ################ MAIN ########################
 # ---------------- Load data ----------------
 
-n_misura = "2"
+n_misura = "0"
 data_file = "data_10mK_" + n_misura
-save_as = "fit_3dBm"
+save_as = "res_0_pres"
 
 # Assumi che il file ../data/misura_S21.txt contenga: freq, real, imag
 
-data = np.loadtxt("qubit1/Data/power_3.txt")
+data = np.loadtxt("10mK_resonances/data_10mK/data_10mK_0.txt")
 
 frequencies = data[:, 0]/1e9  # Frequenze in GHz
 
@@ -49,7 +49,7 @@ phase = np.unwrap(np.angle(real_S21 + 1j * imag_S21))
 idx_res = np.argmin(signal)
 f_res = frequencies[idx_res]
 
-window = 0.001# GHz
+window = 10 #GHz
 
 mask = np.abs(frequencies - f_res) < window
 
@@ -252,20 +252,20 @@ ax_phase.grid(True, alpha=0.3)
 ax_phase.set_title("Phase")
 ax_phase.legend(loc ="best")
 
-save_as += ".pdf"
-fig.savefig(f"qubit1/Plots/{save_as}", bbox_inches="tight")
+save_as += ".png"
+fig.savefig(f"10mK_resonances/plots_10mK/{save_as}", bbox_inches="tight")
 print(f"Grafico salvato in qubit0/Plots/{save_as}")
     
-'''
+
 # =============================================================================
 # --- Plot Separati ---
 # =============================================================================
 
 # Otteniamo il nome base senza l'estensione .pdf appena aggiunta
-base_save_name = save_as.replace(".pdf", "")
+base_save_name = save_as.replace(".png", "")
 save_path_dir = "10mK_resonances/plots_10mK"
 
-# 1. IQ Plot Separato
+#1. IQ Plot Separato
 fig_iq = plt.figure(figsize=(6, 6))
 ax_iq_sep = fig_iq.add_subplot(111)
 ax_iq_sep.plot(S.real, S.imag, marker='o', linestyle='', markeredgecolor='blue', markerfacecolor='white', ms=8, label='Data')
@@ -283,7 +283,7 @@ ax_iq_sep.set_title(r"I-Q Plot")
 name_iq = f"{base_save_name}_IQ.pdf"
 fig_iq.savefig(f"{save_path_dir}/{name_iq}", bbox_inches="tight")
 print(f"Grafico IQ salvato in {save_path_dir}/{name_iq}")
-
+'''
 # 2. Magnitude Plot Separato
 fig_mag = plt.figure(figsize=(7, 5))
 ax_mag_sep = fig_mag.add_subplot(111)
